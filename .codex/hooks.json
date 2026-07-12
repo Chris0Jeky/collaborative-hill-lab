@@ -1,0 +1,19 @@
+{
+  "_comment": "Collaborative Hill Lab T1 — Codex deny floor only. Points at the SHARED GLOBAL dispatcher (~/.claude/hooks/dispatch.py, floor v1.3.0), the same one Claude uses, so there is no vendored repo copy to drift. The dispatcher resolves the project dir from this hook payload's cwd; absent it, it falls back to T1 defaults (identical floor, since this repo carries no overlay flags). Floor-only by tier: no session/post/stop machinery at T1. Codex loads these hooks only after the repo is trusted and reviewed via /hooks.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "^Bash$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$HOME/.claude/hooks/dispatch.py\" --event pre",
+            "commandWindows": "python \"$env:USERPROFILE\\.claude\\hooks\\dispatch.py\" --event pre",
+            "timeout": 5,
+            "statusMessage": "Checking irreversible-command floor"
+          }
+        ]
+      }
+    ]
+  }
+}
