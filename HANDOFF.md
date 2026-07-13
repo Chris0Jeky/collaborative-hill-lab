@@ -3,6 +3,13 @@
 Written by the founding engineer session (Claude Fable 5). Everything below was verified by
 running it; anything not verified is labelled.
 
+**Picking up in a fresh session:** read this file, then `docs/FOUNDATION_REVIEW.md`, then
+`AGENTS.md` §5 (invariants). Verify the repo with the command block below (~5 min; the
+venv at `.venv/` already exists — only run `make setup` if it is missing). The git history
+is 10 clean local commits ending at `closeout:` — **nothing has been pushed**; pushing is
+the owner's call. All 16 founding tasks completed; there is no half-finished work in the
+tree (working tree clean at handoff).
+
 ## What exists and is verified working
 
 - **Kernel** (`src/collaborative_hill/engine/`): canonical hashing (floats forbidden),
@@ -27,10 +34,11 @@ running it; anything not verified is labelled.
     scripted fixture runs; mechanism certificate (dilemma certified by enumeration in all
     4 institutions; intervention integrity certified); two skins hash-verified
     mechanism-identical; measured cost worksheet without prices.
-- **Tests**: 115 unit/property + 9 metamorphic + integration suite (see test results in
-  the final session report / rerun with `make test`). Zero xfails — no known source
-  defects at handoff.
-- **Acceptance A–K**: `scripts/acceptance.py` — 11/11 pass.
+- **Tests**: `make test` = **125 passed** (91 unit + 24 property + 9 metamorphic + 10
+  integration; ~7 s). Zero xfails — no known source defects at handoff. `make check`
+  additionally runs ruff (clean) and `mypy --strict` (clean, 39 files).
+- **Acceptance A–K**: `scripts/acceptance.py` — 11/11 pass (final run from a clean
+  generated state at commit `9ad1212`).
 - **Docs**: ADR-0001…0007 (accepted), FOUNDATION_REVIEW, research suite under
   `docs/research/` (charter, legacy audit, related work, novelty matrix, methodology,
   SAP, claims+limitations, threat model, prereg template, replication report).
@@ -47,8 +55,10 @@ running it; anything not verified is labelled.
 ## Known failures / caveats (none hidden)
 
 - No CI exists (T1 sandbox — promote to T2 before adding; see `.claude/tier.json`).
-- Study 001 committed artifacts under `artifacts/` are regenerable, not canon; hashes
-  changed when EC went to engine v2 — regenerate with `make study-001-smoke`.
+- `artifacts/` is gitignored and regenerable, never canon. The trees on disk at handoff
+  (`DRAFT-5dcde1a9b6c9` = study 000, `DRAFT-a3bffdfcf171` = study 001) were produced by
+  the final clean-state pass under EC engine v2; `make study-000` / `make study-001-smoke`
+  reproduce them (deterministic).
 - `git status` CRLF warnings on Windows are cosmetic; event files are written with
   explicit `\n` so ledger bytes are platform-stable.
 - Legacy repo clone lives in the session scratchpad (temp) — re-clone
