@@ -1,6 +1,6 @@
 # Replication report — Study 000 (legacy reproduction and audit)
 
-Study hash: `5ac52d9270e72998a2e421edcd0d2fac26c649a45f3d3e64480fb528592c909e` | conditions: 11 | replicates/condition: 30 | rounds: 50 | seed: 20260713
+Study hash: `5dcde1a9b6c98c576ca71bc03ea65dcc96175b6d8803c4db89e6c56ac8a15e9f` | conditions: 11 | replicates/condition: 30 | rounds: 50 | seed: 20260713
 
 Derived from sealed event ledgers only. Predictions were stated in the study
 README before execution. Legacy artifacts were NOT used as targets: the legacy

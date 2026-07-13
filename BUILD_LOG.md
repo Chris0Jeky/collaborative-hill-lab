@@ -49,6 +49,19 @@ that were actually executed/verified are listed.
 - Test suites (unit/property/metamorphic/integration) written by three supervised agents +
   reconciled; final pytest results in HANDOFF.md.
 
+## Final verification (end of founding session)
+
+From a clean generated state, in sequence, all exit 0:
+`make clean-generated` → `make doctor` (10/10) → `make check` (ruff + mypy --strict +
+unit/property) → `make test` (**125 passed**: 91 unit + 24 property + 9 metamorphic +
+10 integration — 1 metamorphic file contributes 4 parametrizations) → `make validate` →
+`make study-000` (330 episodes; REPLICATION_REPORT regenerated, **11/11 REPRODUCED**,
+5 exact) → `make study-001-smoke` (certificate: C1 dilemma everywhere TRUE, C3 violations
+0) → `make replay-smoke` (both studies chain-verified) → `make report` →
+`scripts/acceptance.py` (**11/11 A–K pass**). Adversarial pass found and fixed: EC
+verify/challenge duplication exploits (engine v2), engine-version-in-hash gap,
+`_find_repo_root` wrong-repo provenance, ornamental interfaces duplication (deleted).
+
 ## Process notes
 
 - One mid-flight commit accidentally included agent work-in-progress test files
