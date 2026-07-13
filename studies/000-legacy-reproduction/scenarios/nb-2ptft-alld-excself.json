@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "scenario_id": "000-nb-2ptft-alld-excself",
+  "description": "Legacy reproduction condition nb-2ptft-alld-excself",
+  "world": {
+    "kind": "nipd",
+    "mode": "neighbourhood",
+    "params": {
+      "T": 5,
+      "R": 3,
+      "P": 1,
+      "S": 0
+    },
+    "rounds": 50
+  },
+  "information": {
+    "evidence": []
+  },
+  "interaction": {
+    "structure": "neighbourhood",
+    "scheduling": "simultaneous",
+    "graph": "complete",
+    "communication": "none"
+  },
+  "institution": {
+    "accountability": "aggregate",
+    "evidence_topology": "private"
+  },
+  "cognition": {
+    "agents": [
+      {
+        "agent_id": "a1",
+        "policy": {
+          "name": "ptft",
+          "params": {
+            "denominator": "exclude_self"
+          }
+        }
+      },
+      {
+        "agent_id": "a2",
+        "policy": {
+          "name": "ptft",
+          "params": {
+            "denominator": "exclude_self"
+          }
+        }
+      },
+      {
+        "agent_id": "a3",
+        "policy": {
+          "name": "alld",
+          "params": {}
+        }
+      }
+    ]
+  }
+}

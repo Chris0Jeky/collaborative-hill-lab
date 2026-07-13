@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "scenario_id": "000-nb-2tftthresh-alld",
+  "description": "Legacy reproduction condition nb-2tftthresh-alld",
+  "world": {
+    "kind": "nipd",
+    "mode": "neighbourhood",
+    "params": {
+      "T": 5,
+      "R": 3,
+      "P": 1,
+      "S": 0
+    },
+    "rounds": 50
+  },
+  "information": {
+    "evidence": []
+  },
+  "interaction": {
+    "structure": "neighbourhood",
+    "scheduling": "simultaneous",
+    "graph": "complete",
+    "communication": "none"
+  },
+  "institution": {
+    "accountability": "aggregate",
+    "evidence_topology": "private"
+  },
+  "cognition": {
+    "agents": [
+      {
+        "agent_id": "a1",
+        "policy": {
+          "name": "tft_threshold",
+          "params": {
+            "threshold_num": 1,
+            "threshold_den": 2
+          }
+        }
+      },
+      {
+        "agent_id": "a2",
+        "policy": {
+          "name": "tft_threshold",
+          "params": {
+            "threshold_num": 1,
+            "threshold_den": 2
+          }
+        }
+      },
+      {
+        "agent_id": "a3",
+        "policy": {
+          "name": "alld",
+          "params": {}
+        }
+      }
+    ]
+  }
+}

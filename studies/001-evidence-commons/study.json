@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "study_id": "001-evidence-commons",
+  "title": "Evidence Commons: accountability x evidence topology (DRAFT, human approval required)",
+  "seed": 20260713,
+  "replicates": 3,
+  "checkpoint_every": 4,
+  "invalid_action_policy": "abstain",
+  "conditions": [
+    {
+      "condition_id": "agg-priv",
+      "scenario": "scenarios/agg-priv.json",
+      "skin": "skins/official-briefing.json"
+    },
+    {
+      "condition_id": "agg-ledger",
+      "scenario": "scenarios/agg-ledger.json",
+      "skin": "skins/official-briefing.json"
+    },
+    {
+      "condition_id": "attr-priv",
+      "scenario": "scenarios/attr-priv.json",
+      "skin": "skins/official-briefing.json"
+    },
+    {
+      "condition_id": "attr-ledger",
+      "scenario": "scenarios/attr-ledger.json",
+      "skin": "skins/official-briefing.json"
+    },
+    {
+      "condition_id": "attr-priv-misinfo",
+      "scenario": "scenarios/attr-priv-misinfo.json",
+      "skin": "skins/official-briefing.json"
+    }
+  ]
+}

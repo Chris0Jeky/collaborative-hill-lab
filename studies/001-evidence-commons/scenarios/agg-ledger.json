@@ -1,0 +1,227 @@
+{
+  "schema_version": 1,
+  "scenario_id": "001-agg-ledger",
+  "description": "Evidence Commons condition agg-ledger",
+  "world": {
+    "kind": "evidence_commons",
+    "slots": {
+      "s1": [
+        "s1_true",
+        "s1_false"
+      ],
+      "s2": [
+        "s2_true",
+        "s2_false"
+      ],
+      "s3": [
+        "s3_true",
+        "s3_false"
+      ],
+      "s4": [
+        "s4_true",
+        "s4_false"
+      ]
+    },
+    "true_propositions": {
+      "s1": "s1_true",
+      "s2": "s2_true",
+      "s3": "s3_true",
+      "s4": "s4_true"
+    },
+    "params": {
+      "rounds": 12,
+      "inspect_budget": 6,
+      "verify_budget": 3,
+      "cost_inspect": 1,
+      "cost_share": 1,
+      "cost_propose": 1,
+      "cost_verify": 2,
+      "cost_challenge": 1,
+      "benefit_correct_slot": 12,
+      "penalty_wrong_slot": 12,
+      "credit_propose_accepted_correct": 3,
+      "credit_propose_accepted_wrong": -3,
+      "credit_verify_accepted_correct": 2,
+      "credit_verify_accepted_wrong": -2
+    }
+  },
+  "information": {
+    "evidence": [
+      {
+        "evidence_id": "e01",
+        "source_id": "src_ministry",
+        "version": 1,
+        "slot_id": "s1",
+        "proposition_id": "s1_true",
+        "stance": "supports",
+        "freshness": "fresh",
+        "truth_aligned": true,
+        "adversarial": false,
+        "initial_holders": [
+          "a1"
+        ]
+      },
+      {
+        "evidence_id": "e02",
+        "source_id": "src_registry",
+        "version": 1,
+        "slot_id": "s2",
+        "proposition_id": "s2_true",
+        "stance": "supports",
+        "freshness": "fresh",
+        "truth_aligned": true,
+        "adversarial": false,
+        "initial_holders": [
+          "a2"
+        ]
+      },
+      {
+        "evidence_id": "e03",
+        "source_id": "src_survey",
+        "version": 1,
+        "slot_id": "s3",
+        "proposition_id": "s3_true",
+        "stance": "supports",
+        "freshness": "fresh",
+        "truth_aligned": true,
+        "adversarial": false,
+        "initial_holders": [
+          "a1"
+        ]
+      },
+      {
+        "evidence_id": "e04",
+        "source_id": "src_archive",
+        "version": 1,
+        "slot_id": "s1",
+        "proposition_id": "s1_true",
+        "stance": "supports",
+        "freshness": "stale",
+        "truth_aligned": true,
+        "adversarial": false,
+        "initial_holders": [
+          "a2"
+        ]
+      },
+      {
+        "evidence_id": "e05",
+        "source_id": "src_blog",
+        "version": 1,
+        "slot_id": "s2",
+        "proposition_id": "s2_false",
+        "stance": "supports",
+        "freshness": "fresh",
+        "truth_aligned": false,
+        "adversarial": false,
+        "initial_holders": [
+          "a3"
+        ]
+      },
+      {
+        "evidence_id": "e06",
+        "source_id": "src_ministry2",
+        "version": 1,
+        "slot_id": "s2",
+        "proposition_id": "s2_false",
+        "stance": "contradicts",
+        "freshness": "fresh",
+        "truth_aligned": true,
+        "adversarial": false,
+        "initial_holders": [
+          "a2"
+        ]
+      },
+      {
+        "evidence_id": "e07",
+        "source_id": "src_wire",
+        "version": 1,
+        "slot_id": "s4",
+        "proposition_id": "s4_true",
+        "stance": "supports",
+        "freshness": "fresh",
+        "truth_aligned": true,
+        "adversarial": false,
+        "initial_holders": [
+          "a2"
+        ]
+      },
+      {
+        "evidence_id": "e08",
+        "source_id": "src_forward",
+        "version": 1,
+        "slot_id": "s4",
+        "proposition_id": "s4_false",
+        "stance": "supports",
+        "freshness": "stale",
+        "truth_aligned": false,
+        "adversarial": true,
+        "initial_holders": [
+          "a1"
+        ]
+      },
+      {
+        "evidence_id": "e09",
+        "source_id": "src_survey2",
+        "version": 1,
+        "slot_id": "s3",
+        "proposition_id": "s3_true",
+        "stance": "supports",
+        "freshness": "fresh",
+        "truth_aligned": true,
+        "adversarial": false,
+        "initial_holders": [
+          "a3"
+        ]
+      },
+      {
+        "evidence_id": "e10",
+        "source_id": "src_watchdog",
+        "version": 1,
+        "slot_id": "s4",
+        "proposition_id": "s4_false",
+        "stance": "contradicts",
+        "freshness": "fresh",
+        "truth_aligned": true,
+        "adversarial": false,
+        "initial_holders": [
+          "a3"
+        ]
+      }
+    ]
+  },
+  "interaction": {
+    "structure": "commons",
+    "scheduling": "simultaneous",
+    "graph": "complete",
+    "communication": "none"
+  },
+  "institution": {
+    "accountability": "aggregate",
+    "evidence_topology": "shared_ledger"
+  },
+  "cognition": {
+    "agents": [
+      {
+        "agent_id": "a1",
+        "policy": {
+          "name": "ec_contributor",
+          "params": {}
+        }
+      },
+      {
+        "agent_id": "a2",
+        "policy": {
+          "name": "ec_contributor",
+          "params": {}
+        }
+      },
+      {
+        "agent_id": "a3",
+        "policy": {
+          "name": "ec_freerider",
+          "params": {}
+        }
+      }
+    ]
+  }
+}

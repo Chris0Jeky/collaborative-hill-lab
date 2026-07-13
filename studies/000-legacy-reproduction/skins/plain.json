@@ -1,0 +1,12 @@
+{
+  "skin_id": "plain-nipd",
+  "version": 1,
+  "title": "N-person Prisoner's Dilemma",
+  "preamble": "A repeated N-person social dilemma. Mechanism-transparent skin.",
+  "agent_names": {},
+  "action_wording": {},
+  "slot_titles": {},
+  "proposition_texts": {},
+  "source_names": {},
+  "evidence_content": {}
+}

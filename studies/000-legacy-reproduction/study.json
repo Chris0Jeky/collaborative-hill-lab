@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "study_id": "000-legacy-reproduction",
+  "title": "Legacy reproduction and audit: Tragic Valley vs Collaborative Hill with deconfounded TFT variants",
+  "seed": 20260713,
+  "replicates": 30,
+  "checkpoint_every": 10,
+  "invalid_action_policy": "fail",
+  "conditions": [
+    {
+      "condition_id": "pw-3tft",
+      "scenario": "scenarios/pw-3tft.json",
+      "skin": "skins/plain.json"
+    },
+    {
+      "condition_id": "pw-2tft-alld",
+      "scenario": "scenarios/pw-2tft-alld.json",
+      "skin": "skins/plain.json"
+    },
+    {
+      "condition_id": "pw-2tftlinked-alld",
+      "scenario": "scenarios/pw-2tftlinked-alld.json",
+      "skin": "skins/plain.json"
+    },
+    {
+      "condition_id": "nb-3ptft-incself",
+      "scenario": "scenarios/nb-3ptft-incself.json",
+      "skin": "skins/plain.json"
+    },
+    {
+      "condition_id": "nb-2ptft-alld-incself",
+      "scenario": "scenarios/nb-2ptft-alld-incself.json",
+      "skin": "skins/plain.json"
+    },
+    {
+      "condition_id": "nb-2ptft-alld-excself",
+      "scenario": "scenarios/nb-2ptft-alld-excself.json",
+      "skin": "skins/plain.json"
+    },
+    {
+      "condition_id": "nb-2tftthresh-alld",
+      "scenario": "scenarios/nb-2tftthresh-alld.json",
+      "skin": "skins/plain.json"
+    },
+    {
+      "condition_id": "pw-2tfte-alld",
+      "scenario": "scenarios/pw-2tfte-alld.json",
+      "skin": "skins/plain.json"
+    },
+    {
+      "condition_id": "nb-2ptfte-alld-incself",
+      "scenario": "scenarios/nb-2ptfte-alld-incself.json",
+      "skin": "skins/plain.json"
+    },
+    {
+      "condition_id": "pw-2tfte-allc",
+      "scenario": "scenarios/pw-2tfte-allc.json",
+      "skin": "skins/plain.json"
+    },
+    {
+      "condition_id": "nb-2ptfte-allc-incself",
+      "scenario": "scenarios/nb-2ptfte-allc-incself.json",
+      "skin": "skins/plain.json"
+    }
+  ]
+}
