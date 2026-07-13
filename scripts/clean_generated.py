@@ -1,7 +1,6 @@
 """Remove generated artifacts (make clean-generated). Studies and source are never touched."""
 
 import shutil
-import sys
 from pathlib import Path
 
 REPO = Path(__file__).parent.parent

@@ -31,15 +31,15 @@ STUDY_DIR = Path(__file__).parent
 REPO = STUDY_DIR.parent.parent
 sys.path.insert(0, str(REPO / "src"))
 
+from generate_study import build_scenario  # noqa: E402
+
 from collaborative_hill.engine.runner import RunConfig, run_episode  # noqa: E402
 from collaborative_hill.engine.store import RunPaths  # noqa: E402
 from collaborative_hill.experiments.scenario import (  # noqa: E402
     NarrativeSkin,
-    ScenarioSpec,
     compile_scenario,
 )
 from collaborative_hill.experiments.study import build_policies  # noqa: E402
-from generate_study import CONDITIONS, build_scenario  # noqa: E402
 
 AGENTS = ("a1", "a2", "a3")
 STRATS = ("contributor", "freerider")

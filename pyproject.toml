@@ -53,10 +53,18 @@ ignore = [
     "PLR0913", # many-args: engine entry points legitimately take several
     "PLR2004", # magic values: payoff tables and test oracles are literal by design
     "SIM108",  # ternary preference: explicit branches read better in mechanism code
+    "PLC0415", # lazy imports are deliberate: CLI startup, cycle seams, script bootstraps
 ]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["PLR0915", "PLC1901"]
+"src/collaborative_hill/cli.py" = ["B008"]          # typer.Option defaults are the idiom
+"src/collaborative_hill/domain/world/*" = ["PLR0911", "PLR0912", "PLR0915"]  # rule dispatch
+"src/collaborative_hill/experiments/scenario.py" = ["PLR0911", "PLR0912"]
+"src/collaborative_hill/engine/runner.py" = ["PLR0912", "PLR0915"]  # the episode loop
+"src/collaborative_hill/agents/scripted/*" = ["PLR0911"]            # policy registries
+"scripts/*" = ["E402"]                              # sys.path bootstrap before imports
+"studies/*" = ["E402", "PLR0915", "PLR0912"]
 
 [tool.mypy]
 python_version = "3.12"

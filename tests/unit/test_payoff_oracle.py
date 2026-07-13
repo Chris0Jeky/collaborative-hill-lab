@@ -7,14 +7,14 @@ the code under test. N=3, T=5, R=3, P=1, S=0.
 from fractions import Fraction
 
 import pytest
+from _fixtures import neighbourhood_actions, nipd, step
 
+from collaborative_hill.domain.actions import PairwiseVoteAction
 from collaborative_hill.domain.world.nipd import (
     NIPDParams,
     neighbourhood_payoff,
     pairwise_game,
 )
-
-from _fixtures import neighbourhood_actions, nipd, step, uniform_pairwise
 
 PARAMS = NIPDParams()  # T=5, R=3, P=1, S=0
 
@@ -48,7 +48,6 @@ def _pairwise_from_letters(letters):
     moves = {}
     for a in ("a1", "a2", "a3"):
         moves[a] = {o: letters[a] for o in ("a1", "a2", "a3") if o != a}
-    from collaborative_hill.domain.actions import PairwiseVoteAction
     return {a: PairwiseVoteAction(moves=m) for a, m in moves.items()}
 
 

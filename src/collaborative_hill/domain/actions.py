@@ -11,7 +11,7 @@ space* — agents reference propositions and evidence by id. Natural language
 belongs to narrative skins only, so no scientific scoring ever parses prose.
 """
 
-from typing import Annotated, Literal, Union
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -111,19 +111,10 @@ class AbstainAction(_ActionBase):
 
 
 Action = Annotated[
-    Union[
-        CooperateAction,
-        DefectAction,
-        PairwiseVoteAction,
-        InspectEvidenceAction,
-        ShareEvidenceAction,
-        ProposeClaimAction,
-        ChallengeClaimAction,
-        VerifyClaimAction,
-        ApproveClaimAction,
-        WithholdAction,
-        AbstainAction,
-    ],
+    CooperateAction | DefectAction | PairwiseVoteAction
+    | InspectEvidenceAction | ShareEvidenceAction
+    | ProposeClaimAction | ChallengeClaimAction | VerifyClaimAction | ApproveClaimAction
+    | WithholdAction | AbstainAction,
     Field(discriminator="type"),
 ]
 

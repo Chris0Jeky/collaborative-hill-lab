@@ -16,7 +16,8 @@ setup:
 	$(PY) -m pip freeze --exclude-editable > requirements-lock.txt
 
 check:
-	$(PY) -m ruff check src tests studies
+	$(PY) -m ruff check src tests studies scripts
+	$(PY) -m mypy
 	$(PY) -m pytest tests/unit tests/property -q
 
 test:

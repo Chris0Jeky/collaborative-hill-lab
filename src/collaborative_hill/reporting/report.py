@@ -81,7 +81,8 @@ def run_report(run_dir: Path) -> Path:
         f" frozen: {manifest.get('study_frozen')})",
         f"- condition: `{manifest['condition_id']}` | replicate {manifest['replicate']}",
         f"- scenario `{_short(manifest['scenario_hash'])}` | mechanism"
-        f" `{_short(manifest['mechanism_hash'])}` | narrative `{_short(manifest['narrative_hash'])}`",
+        f" `{_short(manifest['mechanism_hash'])}` | narrative"
+        f" `{_short(manifest['narrative_hash'])}`",
         f"- code commit `{_short(manifest.get('code_commit'))}`"
         f" (dirty: {manifest.get('worktree_dirty')})",
         f"- policies: {manifest['policies']}",

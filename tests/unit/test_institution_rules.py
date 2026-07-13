@@ -1,15 +1,16 @@
 """Institution plane: aggregate anonymizes actors and pools credit; attributable
 exposes identities and assigns credit individually. Same task, same totals."""
 
+from _fixtures import ec_hand_example, run_episode_tmp
+
 from collaborative_hill.domain.actions import (
+    ActionProposal,
     ProposeClaimAction,
     VerifyClaimAction,
     WithholdAction,
 )
 from collaborative_hill.domain.institutions import InstitutionConfig
 from collaborative_hill.engine.events import EventType
-
-from _fixtures import AGENTS, ec_hand_example, run_episode_tmp
 
 ATTR = InstitutionConfig(accountability="attributable")
 AGG = InstitutionConfig(accountability="aggregate")
@@ -24,7 +25,6 @@ class _Scripted:
         self.policy_id = policy_id
 
     def propose(self, observation, rng):
-        from collaborative_hill.domain.actions import ActionProposal
         t = int(observation["round"])
         action = self._by_round.get(t, WithholdAction())
         return ActionProposal(action=action)

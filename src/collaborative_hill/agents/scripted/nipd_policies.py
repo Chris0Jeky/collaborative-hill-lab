@@ -52,7 +52,7 @@ class AllCPolicy:
         del rng
         if self.mode == "pairwise":
             return ActionProposal(
-                action=PairwiseVoteAction(moves={o: "C" for o in observation["opponents"]})
+                action=PairwiseVoteAction(moves=dict.fromkeys(observation["opponents"], "C"))
             )
         return _neighbourhood_action("C")
 
@@ -66,7 +66,7 @@ class AllDPolicy:
         del rng
         if self.mode == "pairwise":
             return ActionProposal(
-                action=PairwiseVoteAction(moves={o: "D" for o in observation["opponents"]})
+                action=PairwiseVoteAction(moves=dict.fromkeys(observation["opponents"], "D"))
             )
         return _neighbourhood_action("D")
 
@@ -122,7 +122,7 @@ class LinkedTFTPolicy:
             intended = "D" if "D" in against_me.values() else "C"
         move = _explore(intended, self.epsilon, rng)
         return ActionProposal(
-            action=PairwiseVoteAction(moves={o: move for o in observation["opponents"]})
+            action=PairwiseVoteAction(moves=dict.fromkeys(observation["opponents"], move))
         )
 
 

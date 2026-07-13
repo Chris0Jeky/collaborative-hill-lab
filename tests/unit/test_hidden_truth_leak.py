@@ -9,10 +9,10 @@ exactly the keys of EvidenceSpec.observable_facts() — nothing more.
 
 import json
 
+from _fixtures import ec_provenance_run
+
 from collaborative_hill.domain.evidence import EvidenceSpec
 from collaborative_hill.engine.events import EventType
-
-from _fixtures import ec_provenance_run
 
 # Environment-only field names that must never leak into agent-facing artifacts.
 TRUTH_FIELD_NAMES = ("truth_aligned", "true_propositions")
@@ -61,7 +61,7 @@ def test_inspected_facts_expose_only_observable_fact_keys(tmp_path):
 
 def test_observable_facts_key_set_is_exactly_the_documented_projection():
     # Guard against silent widening of the projection.
-    assert OBSERVABLE_FACT_KEYS == {
+    assert {
         "evidence_id", "source_id", "version", "slot_id",
         "proposition_id", "stance", "freshness",
-    }
+    } == OBSERVABLE_FACT_KEYS

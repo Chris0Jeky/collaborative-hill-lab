@@ -3,13 +3,15 @@ retries the policy abstains with reason ``invalid_llm_output``; a schema-valid
 but mechanism-illegal action becomes ActionRejected plus the configured
 fallback. Retry counts are exactly honoured."""
 
+import random
+
+from _fixtures import AGENTS, ec_hand_example, run_episode_tmp
+
 from collaborative_hill.agents.llm import FakeProvider, LLMPolicy
 from collaborative_hill.domain.actions import AbstainAction
 from collaborative_hill.domain.institutions import InstitutionConfig
 from collaborative_hill.engine.events import EventType
 from collaborative_hill.experiments.scenario import NarrativeSkin
-
-from _fixtures import AGENTS, ec_hand_example, run_episode_tmp
 
 SKIN = NarrativeSkin(skin_id="plain")
 
@@ -17,7 +19,6 @@ SKIN = NarrativeSkin(skin_id="plain")
 def _propose_once(script, *, max_retries=1):
     provider = FakeProvider(script)
     policy = LLMPolicy("a1", provider, SKIN, max_retries=max_retries)
-    import random
     proposal = policy.propose({"round": 0, "mechanism": "evidence_commons",
                                "self_id": "a1", "slots": {}, "evidence": [], "claims": [],
                                "my_budgets": {"inspect": 6, "verify": 3},

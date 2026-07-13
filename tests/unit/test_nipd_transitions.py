@@ -3,13 +3,15 @@ shape per mode, terminal boundary."""
 
 from _fixtures import AGENTS, neighbourhood_actions, nipd, step, uniform_pairwise
 
+from collaborative_hill.domain.actions import PairwiseVoteAction
+
 
 def test_round_increments_each_resolve():
     mech = nipd("neighbourhood", rounds=5)
     state = mech.initial_state()
     assert state["round"] == 0
     for expected_next in (1, 2, 3):
-        state, _ = step(mech, state, neighbourhood_actions({a: "C" for a in AGENTS}))
+        state, _ = step(mech, state, neighbourhood_actions(dict.fromkeys(AGENTS, "C")))
         assert state["round"] == expected_next
 
 
@@ -19,8 +21,8 @@ def test_cumulative_scores_accumulate_exactly_neighbourhood_all_c():
     assert state["scores"] == {"a1": "0", "a2": "0", "a3": "0"}
     running = ["3", "6", "9"]  # +3 each round (U_C(2)=3)
     for expected in running:
-        state, _ = step(mech, state, neighbourhood_actions({a: "C" for a in AGENTS}))
-        assert state["scores"] == {a: expected for a in AGENTS}
+        state, _ = step(mech, state, neighbourhood_actions(dict.fromkeys(AGENTS, "C")))
+        assert state["scores"] == dict.fromkeys(AGENTS, expected)
 
 
 def test_cumulative_scores_exact_fractions_two_c_one_d():
@@ -42,7 +44,7 @@ def test_cumulative_scores_accumulate_pairwise_all_c():
     state = mech.initial_state()
     for expected in ("6", "12", "18"):
         state, _ = step(mech, state, uniform_pairwise("C"))
-        assert state["scores"] == {a: expected for a in AGENTS}
+        assert state["scores"] == dict.fromkeys(AGENTS, expected)
 
 
 def test_last_moves_shape_neighbourhood():
@@ -74,7 +76,6 @@ def test_last_moves_shape_pairwise():
 
 
 def _pv(moves):
-    from collaborative_hill.domain.actions import PairwiseVoteAction
     return PairwiseVoteAction(moves=moves)
 
 
@@ -92,7 +93,7 @@ def test_full_episode_reaches_terminal_after_rounds_resolves():
     state = mech.initial_state()
     n = 0
     while not mech.is_terminal(state):
-        state, _ = step(mech, state, neighbourhood_actions({a: "C" for a in AGENTS}))
+        state, _ = step(mech, state, neighbourhood_actions(dict.fromkeys(AGENTS, "C")))
         n += 1
     assert n == 3
     assert state["round"] == 3

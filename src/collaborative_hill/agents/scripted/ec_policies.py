@@ -63,8 +63,9 @@ class ECContributorPolicy:
             unshared = [e for e in fresh_support if not e["public"]]
             if unshared:
                 eid = sorted(e["evidence_id"] for e in unshared)[0]
-                return ActionProposal(action=ShareEvidenceAction(evidence_id=eid),
-                                      justification="sharing supporting evidence so it can be verified")
+                return ActionProposal(
+                    action=ShareEvidenceAction(evidence_id=eid),
+                    justification="sharing supporting evidence so it can be verified")
         my_slots = _slots_with_my_claim(observation)
         already = _claimed_propositions(observation)
         for e in sorted(fresh_support, key=lambda x: x["evidence_id"]):

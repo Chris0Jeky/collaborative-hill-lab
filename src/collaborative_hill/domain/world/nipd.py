@@ -99,7 +99,7 @@ class NIPDMechanism:
         return {
             "round": 0,
             "last_moves": None,
-            "scores": {a: "0" for a in self._agent_ids},
+            "scores": dict.fromkeys(self._agent_ids, "0"),
         }
 
     def is_terminal(self, state: dict[str, Any]) -> bool:
@@ -132,15 +132,14 @@ class NIPDMechanism:
             else:
                 obs["moves_against_me"] = {o: last[o][agent_id] for o in others}
                 obs["my_last_moves"] = {o: last[agent_id][o] for o in others}
+        elif last is None:
+            obs["others_cooperated_last_round"] = None
+            obs["my_last_move"] = None
         else:
-            if last is None:
-                obs["others_cooperated_last_round"] = None
-                obs["my_last_move"] = None
-            else:
-                obs["others_cooperated_last_round"] = sum(
-                    1 for a in self._agent_ids if a != agent_id and last[a] == "C"
-                )
-                obs["my_last_move"] = last[agent_id]
+            obs["others_cooperated_last_round"] = sum(
+                1 for a in self._agent_ids if a != agent_id and last[a] == "C"
+            )
+            obs["my_last_move"] = last[agent_id]
         return obs
 
     # -- legality -------------------------------------------------------------
@@ -158,7 +157,8 @@ class NIPDMechanism:
             if got != expected:
                 missing = sorted(expected - got)
                 extra = sorted(got - expected)
-                return f"pairwise vote must cover exactly opponents; missing={missing} extra={extra}"
+                return ("pairwise vote must cover exactly opponents; "
+                        f"missing={missing} extra={extra}")
             return None
         return f"pairwise mode accepts pairwise_vote, got {action.type}"
 

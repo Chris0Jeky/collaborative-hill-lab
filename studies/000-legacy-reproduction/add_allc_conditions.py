@@ -56,7 +56,7 @@ def main() -> None:
                 condition_id=cid, scenario=f"scenarios/{cid}.json", skin="skins/plain.json"
             ))
     if added:
-        study = study.model_copy(update={"conditions": tuple([*study.conditions, *added])})
+        study = study.model_copy(update={"conditions": (*study.conditions, *added)})
         (STUDY_DIR / "study.json").write_text(study.model_dump_json(indent=2), encoding="utf-8")
     print(f"conditions now: {len(study.conditions)} (added {len(added)})")
 

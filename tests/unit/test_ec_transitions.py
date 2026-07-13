@@ -2,6 +2,8 @@
 verification/challenge adjudication, acceptance rule, and hand-computed
 final_rewards arithmetic (exact Fractions)."""
 
+from _fixtures import AGENTS, ec_hand_example, make_evidence, step
+
 from collaborative_hill.domain.actions import (
     ChallengeClaimAction,
     InspectEvidenceAction,
@@ -15,8 +17,6 @@ from collaborative_hill.domain.world.evidence_commons import (
     ECWorldSpec,
     EvidenceCommonsMechanism,
 )
-
-from _fixtures import AGENTS, ec_hand_example, make_evidence, step
 
 ATTR = InstitutionConfig(accountability="attributable")
 AGG = InstitutionConfig(accountability="aggregate")

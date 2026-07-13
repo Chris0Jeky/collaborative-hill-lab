@@ -21,9 +21,9 @@ from typing import Any
 
 from pydantic import ValidationError
 
-from collaborative_hill.domain.actions import ActionProposal
 from collaborative_hill.agents.llm.providers import CompletionProvider
 from collaborative_hill.agents.llm.rendering import prompt_template_hash, render_prompt
+from collaborative_hill.domain.actions import ActionProposal
 from collaborative_hill.engine.hashing import sha256_hex
 from collaborative_hill.experiments.scenario import NarrativeSkin
 
@@ -37,7 +37,8 @@ class LLMPolicy:
         self.max_retries = max_retries
         self.sampling = sampling or {}
         self.prompt_template_hash = prompt_template_hash(skin)
-        self.policy_id = f"llm[{provider.model_id},skin={skin.skin_id},tpl={self.prompt_template_hash[:12]}]@1"
+        self.policy_id = (f"llm[{provider.model_id},skin={skin.skin_id},"
+                          f"tpl={self.prompt_template_hash[:12]}]@1")
         # Unhashed audit trail; the study runner writes it to llm_transcript.jsonl.
         self.transcript: list[dict[str, Any]] = []
 
@@ -73,7 +74,8 @@ class LLMPolicy:
 
         return ActionProposal(
             action=AbstainAction(reason="invalid_llm_output"),
-            justification=f"output invalid after {self.max_retries + 1} attempts: {last_error[:200]}",
+            justification=(f"output invalid after {self.max_retries + 1} attempts: "
+                           f"{last_error[:200]}"),
         )
 
     @staticmethod

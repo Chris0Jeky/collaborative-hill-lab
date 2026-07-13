@@ -1,10 +1,10 @@
 """provenance_graph built from a real EC ledger must agree, edge for edge, with
 the ClaimProposed/Verified/Challenged events and the RunCompleted briefing."""
 
+from _fixtures import ec_provenance_run
+
 from collaborative_hill.domain.claims import provenance_graph
 from collaborative_hill.engine.events import EventType
-
-from _fixtures import ec_provenance_run
 
 
 def _graph_and_events(tmp_path):

@@ -1,6 +1,8 @@
 """validate_action: the typed capability gate. Every illegal action returns a
 machine-readable reason; legal ones return None."""
 
+from _fixtures import AGENTS, ec_hand_example, make_evidence, nipd, step
+
 from collaborative_hill.domain.actions import (
     ChallengeClaimAction,
     CooperateAction,
@@ -9,14 +11,13 @@ from collaborative_hill.domain.actions import (
     ProposeClaimAction,
     ShareEvidenceAction,
     VerifyClaimAction,
+    WithholdAction,
 )
 from collaborative_hill.domain.institutions import InstitutionConfig
 from collaborative_hill.domain.world.evidence_commons import (
     ECWorldSpec,
     EvidenceCommonsMechanism,
 )
-
-from _fixtures import AGENTS, ec_hand_example, make_evidence, nipd, step
 
 ATTR = InstitutionConfig(accountability="attributable")
 
@@ -124,5 +125,4 @@ def test_wrong_action_type_per_mode_rejected():
 
 
 def _wh():
-    from collaborative_hill.domain.actions import WithholdAction
     return WithholdAction()

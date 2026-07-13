@@ -108,7 +108,7 @@ def main() -> int:
             "sd_of_means": statistics.stdev(means) if len(set(means)) > 1 else 0.0,
             "mean_final_window": sum(finals) / len(finals),
             "final_ci": (lo, hi),
-            "identical_summaries": len(set(round(x, 12) for x in finals)) == 1,
+            "identical_summaries": len({round(x, 12) for x in finals}) == 1,
             "distinct_final_hashes": len(chains),
         }
 
@@ -143,7 +143,8 @@ def main() -> int:
         ci = s["final_ci"]
         lines.append(
             f"| {cond} | {s['replicates']} | {s['mean_of_means']:.4f}±{s['sd_of_means']:.4f} "
-            f"| {s['mean_final_window']:.4f} [{ci[0]:.4f}, {ci[1]:.4f}] | {prediction} | {verdict} |"
+            f"| {s['mean_final_window']:.4f} [{ci[0]:.4f}, {ci[1]:.4f}] "
+            f"| {prediction} | {verdict} |"
         )
 
     lines += [
@@ -207,7 +208,7 @@ def main() -> int:
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text("\n".join(lines), encoding="utf-8")
     print(f"wrote {out}")
-    print(json.dumps({c: v for c, v in verdicts.items()}, indent=2))
+    print(json.dumps(dict(verdicts.items()), indent=2))
     return 0
 
 

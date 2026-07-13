@@ -11,10 +11,10 @@ engine, and prove our schema-safe cooperation_metrics reads the same ledger
 correctly.
 """
 
+from _fixtures import nipd_pairwise_2tft_alld_run
+
 from collaborative_hill.engine.events import EventType
 from collaborative_hill.metrics.cooperation import cooperation_metrics
-
-from _fixtures import nipd_pairwise_2tft_alld_run
 
 
 def _legacy_cooperation_by_round(round_records):

@@ -1,13 +1,13 @@
 """A provider outage seals the run as RunFailed with a typed reason naming the
 agent — and the ledger chain still verifies end to end."""
 
+from _fixtures import AGENTS, ec_hand_example, run_episode_tmp
+
 from collaborative_hill.agents.llm import FakeProvider, LLMPolicy
 from collaborative_hill.domain.institutions import InstitutionConfig
 from collaborative_hill.engine.events import EventType
 from collaborative_hill.engine.store import FileEventStore
 from collaborative_hill.experiments.scenario import NarrativeSkin
-
-from _fixtures import AGENTS, ec_hand_example, run_episode_tmp
 
 SKIN = NarrativeSkin(skin_id="plain")
 GOOD = '{"action":{"type":"abstain"}}'

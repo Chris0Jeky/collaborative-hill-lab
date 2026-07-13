@@ -1,18 +1,15 @@
 """Observation topology: EC private vs shared_ledger visibility, and NIPD
 neighbourhood (counts only) vs pairwise (moves against me only)."""
 
+from _fixtures import ec_hand_example, neighbourhood_actions, nipd, step
+
 from collaborative_hill.domain.actions import (
     InspectEvidenceAction,
+    PairwiseVoteAction,
     ShareEvidenceAction,
     WithholdAction,
 )
 from collaborative_hill.domain.institutions import InstitutionConfig
-from collaborative_hill.domain.world.evidence_commons import (
-    ECWorldSpec,
-    EvidenceCommonsMechanism,
-)
-
-from _fixtures import AGENTS, ec_hand_example, make_evidence, neighbourhood_actions, nipd, step
 
 
 def _evidence_ids(obs):
@@ -94,7 +91,6 @@ def test_neighbourhood_observation_is_count_not_identity():
 def test_pairwise_observation_only_moves_against_observer():
     mech = nipd("pairwise", rounds=5)
     state = mech.initial_state()
-    from collaborative_hill.domain.actions import PairwiseVoteAction
     actions = {
         "a1": PairwiseVoteAction(moves={"a2": "C", "a3": "C"}),
         "a2": PairwiseVoteAction(moves={"a1": "D", "a3": "C"}),

@@ -151,8 +151,8 @@ class EvidenceCommonsMechanism:
                 a: {"inspect": self.params.inspect_budget, "verify": self.params.verify_budget}
                 for a in self.spec.agent_ids
             },
-            "effort": {a: 0 for a in self.spec.agent_ids},
-            "credits": {a: 0 for a in self.spec.agent_ids},
+            "effort": dict.fromkeys(self.spec.agent_ids, 0),
+            "credits": dict.fromkeys(self.spec.agent_ids, 0),
             "visible_to": visible,
             "inspected": {a: [] for a in self.spec.agent_ids},
             "claims": {},
@@ -424,7 +424,7 @@ class EvidenceCommonsMechanism:
         """Deterministic acceptance: per slot, highest net_support >= 1 wins;
         ties break to the earliest claim. Includes truth + provenance audit
         fields — this output feeds scoring and the sealed RunCompleted event."""
-        briefing = []
+        briefing: list[dict[str, Any]] = []
         for slot in sorted(self.spec.slots):
             candidates = [
                 c for c in state["claims"].values()
@@ -464,7 +464,7 @@ class EvidenceCommonsMechanism:
         briefing = self.final_briefing(state)
         n = len(self.spec.agent_ids)
         quality = 0
-        credits = {a: 0 for a in self.spec.agent_ids}
+        credits = dict.fromkeys(self.spec.agent_ids, 0)
         for entry in briefing:
             if entry["claim_id"] is None:
                 continue

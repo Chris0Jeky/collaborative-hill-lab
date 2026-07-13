@@ -301,6 +301,19 @@ def _scorer_versions() -> dict[str, str]:
 
 
 def _find_repo_root(start: Path) -> Path:
+    """Root of the CODE repository (provenance target), not the study's location.
+
+    Derived from the installed package path (src layout), so manifests record
+    the commit of the code that ran — even when a study/artifacts directory
+    lives in a temp dir or inside some unrelated git repository. Falls back to
+    walking up from ``start`` only if the package location has no .git (e.g. a
+    non-editable install), and finally to ``start`` itself.
+    """
+    import collaborative_hill
+
+    package_root = Path(collaborative_hill.__file__).resolve().parents[2]
+    if (package_root / ".git").exists():
+        return package_root
     p = Path(start).resolve()
     for candidate in [p, *p.parents]:
         if (candidate / ".git").exists():
