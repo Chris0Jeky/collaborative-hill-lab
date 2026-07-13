@@ -1,0 +1,69 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "collaborative-hill"
+version = "0.1.0"
+description = "Collaborative Hill Lab: a reproducible laboratory for whether LLM agents can build shared truth under mixed incentives."
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+authors = [{ name = "Cristian Tcaci" }]
+dependencies = [
+    "pydantic>=2.13",
+    "typer>=0.15",
+]
+
+[project.optional-dependencies]
+analysis = [
+    "duckdb>=1.1",
+    "pyarrow>=18",
+    "matplotlib>=3.9",
+]
+dev = [
+    "pytest>=8.3",
+    "hypothesis>=6.115",
+    "ruff>=0.8",
+    "mypy>=1.13",
+]
+
+[project.scripts]
+chl = "collaborative_hill.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+markers = [
+    "integration: end-to-end tests that run whole studies",
+    "metamorphic: invariance/relation tests",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM", "RET", "PL"]
+ignore = [
+    "PLR0913", # many-args: engine entry points legitimately take several
+    "PLR2004", # magic values: payoff tables and test oracles are literal by design
+    "SIM108",  # ternary preference: explicit branches read better in mechanism code
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["PLR0915", "PLC1901"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+mypy_path = "src"
+packages = ["collaborative_hill"]
+# Analysis-layer imports (duckdb/pyarrow/matplotlib) are optional extras.
+[[tool.mypy.overrides]]
+module = ["duckdb.*", "pyarrow.*", "matplotlib.*"]
+ignore_missing_imports = true

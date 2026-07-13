@@ -1,0 +1,2 @@
+[console_scripts]
+chl = collaborative_hill.cli:app
