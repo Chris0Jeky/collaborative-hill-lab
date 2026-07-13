@@ -13,14 +13,19 @@ import pytest
 from collaborative_hill.engine.replay import replay_run
 from collaborative_hill.experiments.study import run_study
 
-from ._helpers import default_ec_evidence, ec_spec, find_run_dirs, nipd_spec, plain_skin
+from ._helpers import (
+    default_ec_evidence,
+    ec_spec,
+    find_run_dirs,
+    nipd_spec,
+    plain_skin,
+    write_study,
+)
 
 pytestmark = pytest.mark.metamorphic
 
 
 def test_scripted_and_stochastic_runs_replay_exactly(tmp_path):
-    from ._helpers import write_study
-
     study_dir = tmp_path / "study"
     artifacts = tmp_path / "artifacts"
 

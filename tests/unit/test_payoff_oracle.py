@@ -24,7 +24,7 @@ PARAMS = NIPDParams()  # T=5, R=3, P=1, S=0
 PAIRWISE_ORACLE = {
     "all_C": {"a1": "6", "a2": "6", "a3": "6"},
     "two_C_one_D": {"a1": "3", "a2": "3", "a3": "10"},   # C->R+S=3, D->T+T=10
-    "one_C_two_D": {"a1": "0", "a2": "6", "a3": "3"},    # C->S+S=0, D->T+P=6
+    "one_C_two_D": {"a1": "0", "a2": "6", "a3": "6"},    # C->S+S=0, D->T+P=6
     "all_D": {"a1": "2", "a2": "2", "a3": "2"},          # P+P=2
 }
 

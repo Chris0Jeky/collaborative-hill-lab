@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Collaborative Hill Lab"
+abstract: >-
+  A reproducible laboratory for whether LLM agents can build shared truth
+  under mixed incentives. Extends Tcaci & Huyck's N-person Iterated
+  Prisoner's Dilemma work (pairwise vs neighbourhood interaction structures)
+  to LLM-agent populations over evidence, provenance, and institutions.
+authors:
+  - family-names: Tcaci
+    given-names: Cristian
+type: software
+version: 0.1.0
+date-released: "2026-07-13"
+repository-code: "https://github.com/Chris0Jeky/collaborative-hill-lab"
+keywords:
+  - multi-agent systems
+  - large language models
+  - cooperation
+  - social dilemmas
+  - N-person prisoner's dilemma
+  - epistemic commons
+  - reproducibility
+license: MIT

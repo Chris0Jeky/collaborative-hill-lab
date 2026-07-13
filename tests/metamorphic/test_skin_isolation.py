@@ -9,7 +9,7 @@ chains — proof that the skin never leaks into the sealed ledger.
 
 import pytest
 
-from collaborative_hill.experiments.scenario import compile_scenario
+from collaborative_hill.experiments.scenario import NarrativeSkin, compile_scenario
 
 from ._helpers import default_ec_evidence, ec_spec, execute, plain_skin, rich_ec_skin
 
@@ -40,7 +40,7 @@ def test_skin_does_not_leak_into_the_ledger(tmp_path):
 
     # Identical RunConfig; start_meta omitted so no narrative_hash enters the
     # hashed RunStarted payload. Scripted EC policy ids do not depend on the skin.
-    common = dict(seed_root=("skin", 0), study_id="study", run_id="run")
+    common = {"seed_root": ("skin", 0), "study_id": "study", "run_id": "run"}
     _, plain_events, _ = execute(plain, tmp_path / "plain", **common)
     _, rich_events, _ = execute(rich, tmp_path / "rich", **common)
 
@@ -54,8 +54,6 @@ def test_skin_does_not_leak_into_the_ledger(tmp_path):
 
 
 def test_skin_referencing_unknown_ids_is_rejected():
-    from collaborative_hill.experiments.scenario import NarrativeSkin
-
     spec = ec_spec(default_ec_evidence(), scenario_id="skin-bad")
 
     with pytest.raises(ValueError, match="unknown agent"):
