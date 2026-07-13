@@ -15,6 +15,12 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
+.hypothesis/
+*.egg-info/
+
+# Generated run artifacts (transparent local outputs; committed only via studies' sealed examples)
+artifacts/*
+!artifacts/.gitkeep
 
 # Node (if a web/UI surface is added later)
 node_modules/
