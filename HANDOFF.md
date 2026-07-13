@@ -1,0 +1,109 @@
+# HANDOFF — exact current state (2026-07-13, end of founding session)
+
+Written by the founding engineer session (Claude Fable 5). Everything below was verified by
+running it; anything not verified is labelled.
+
+## What exists and is verified working
+
+- **Kernel** (`src/collaborative_hill/engine/`): canonical hashing (floats forbidden),
+  stateless hierarchical seeds, hash-linked JSONL event ledger, checkpoints, runner,
+  replay verification, copy-on-write branching. `mypy --strict`: clean (39 files).
+  `ruff`: clean.
+- **Mechanisms**: N-IPD (engine v1; pairwise per-opponent + neighbourhood linear PGG,
+  exact fractions) and Evidence Commons (engine v2; one-verification/one-challenge per
+  (agent, claim) — v2 closed a support-inflation/challenge-spam exploit found in the
+  adversarial pass; engine versions are inside the mechanism hash).
+- **Agents**: deconfounded TFT family (tft_pairwise, tft_linked, ptft include/exclude-self,
+  tft_threshold, allc, alld, random), EC personas (contributor, freerider, verifier,
+  misinformer), replay policy, LLM adapter (strict typed parsing, bounded retries, safe
+  abstention, unhashed transcript sidecar) + deterministic FakeProvider. No real provider
+  exists (deliberate — human-gated cost decision).
+- **Studies**:
+  - 000 legacy reproduction: 11 conditions × 30 replicates run; report generated
+    (`docs/research/REPLICATION_REPORT.md`): 5 exact + 6 qualitative reproductions.
+    Deconfound result: linked-TFT collapses inside pairwise; threshold-TFT sustains inside
+    neighbourhood — structure alone does not carry the legacy effect.
+  - 001 Evidence Commons: DRAFT (NOT frozen — deliberately); 2×2 + misinformer arm;
+    scripted fixture runs; mechanism certificate (dilemma certified by enumeration in all
+    4 institutions; intervention integrity certified); two skins hash-verified
+    mechanism-identical; measured cost worksheet without prices.
+- **Tests**: 115 unit/property + 9 metamorphic + integration suite (see test results in
+  the final session report / rerun with `make test`). Zero xfails — no known source
+  defects at handoff.
+- **Acceptance A–K**: `scripts/acceptance.py` — 11/11 pass.
+- **Docs**: ADR-0001…0007 (accepted), FOUNDATION_REVIEW, research suite under
+  `docs/research/` (charter, legacy audit, related work, novelty matrix, methodology,
+  SAP, claims+limitations, threat model, prereg template, replication report).
+
+## Commands to verify this repository (all previously run successfully)
+
+    make doctor && make check && make test
+    make validate
+    make study-000            # ~330 episodes, regenerates REPLICATION_REPORT.md
+    make study-001-smoke
+    make replay-smoke
+    .venv/Scripts/python.exe scripts/acceptance.py
+
+## Known failures / caveats (none hidden)
+
+- No CI exists (T1 sandbox — promote to T2 before adding; see `.claude/tier.json`).
+- Study 001 committed artifacts under `artifacts/` are regenerable, not canon; hashes
+  changed when EC went to engine v2 — regenerate with `make study-001-smoke`.
+- `git status` CRLF warnings on Windows are cosmetic; event files are written with
+  explicit `\n` so ledger bytes are platform-stable.
+- Legacy repo clone lives in the session scratchpad (temp) — re-clone
+  `Chris0Jeky/N-person-prisoners-dilemma-simulation` @ `f7f1cceb` if needed again.
+- The `.claude/settings.local.json` bypassPermissions file is owner-managed (gitignored).
+
+## Open scientific questions
+
+1. Which framing of the deconfound is right for publication: "structure AND strategy
+   jointly required" vs "the legacy claim needs narrowing"? (Study 000 report has data.)
+2. pTFT denominator (include/exclude-self) and TFT-E exploration granularity are
+   underspecified in the legacy draft — which convention should the lineage canonize?
+3. Evidence Commons v0 verification cannot be lied about (engine-adjudicated). When
+   deception lands (NEXT.md E3), what is the honest-verifier baseline to compare against?
+4. Do the ECParams placeholder weights create the *intended* effect sizes for LLM
+   populations, or are they too coarse? (Pilot question.)
+
+## Open engineering questions
+
+1. Real provider adapter: which SDK, how to pin model versions, where token counts come
+   from (NEXT.md E1).
+2. Condition-order randomisation for LLM runs is designed (METHODOLOGY.md) but not
+   implemented in run_study (no-op for deterministic scripted runs; needed before pilot).
+3. Message-passing (`communication: "messages"`) is schema-only — no mechanism consumes
+   messages yet.
+4. Study-hash artifact directories use `DRAFT-<hash12>` for unfrozen studies — revisit
+   naming when the first frozen study lands.
+
+## HUMAN-OWNED decisions (do not decide these silently — locked)
+
+1. Study 001 final hypotheses and wording.
+2. Primary outcomes (proposal: briefing quality + contribution rate).
+3. Utility weights (ECParams defaults are placeholders that provably yield a dilemma).
+4. Full study sample size (after pilot) and minimum effect of interest.
+5. Model providers/versions; single- vs mixed-model populations.
+6. Acceptable cost ceiling + stopping rules.
+7. Whether Study 001 is publication-ready; venue.
+8. Whether any legacy result counts as "replicated" (see REPLICATION_REPORT verdicts).
+9. Novelty claims (NOVELTY_MATRIX has the honest assessment + open verification items).
+10. Whether/when to make the repository public and to push (nothing was pushed).
+
+## Next five tasks (detail in NEXT.md)
+
+1. Human: fill + freeze Study 001 preregistration (R1 ⛔).
+2. Real provider adapter with honest token capture (E1).
+3. 5-episode/cell pilot + variance/cost report (R2).
+4. Deterministic analysis pipeline for the 2×2 (E2).
+5. Deception-capable verification design (E3).
+
+## Read-first for the next model
+
+1. `CLAUDE.md` (locked decisions, never-do list) — 2 minutes.
+2. `docs/FOUNDATION_REVIEW.md` (why everything is the way it is) — 5 minutes.
+3. `AGENTS.md` §5 invariants + §7 how-to-add — 5 minutes.
+4. `src/collaborative_hill/engine/runner.py` (the lifecycle, top docstring).
+5. `studies/000-legacy-reproduction/README.md` + `docs/research/REPLICATION_REPORT.md`
+   (what the science says so far).
+6. `docs/research/LEGACY_AUDIT.md` before ever trusting a legacy number.

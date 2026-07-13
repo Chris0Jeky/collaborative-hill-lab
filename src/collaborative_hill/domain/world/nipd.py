@@ -35,6 +35,9 @@ from collaborative_hill.domain.actions import (
 from collaborative_hill.engine.events import EventType
 from collaborative_hill.engine.hashing import frac_str
 
+# Part of the hashed mechanism view; bump on any semantics change (ADR-0004).
+NIPD_ENGINE_VERSION = 1
+
 
 class NIPDParams(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")

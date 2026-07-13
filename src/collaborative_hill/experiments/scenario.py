@@ -170,9 +170,17 @@ class ResolvedScenario(BaseModel):
 
 def mechanism_view(spec: ScenarioSpec) -> dict[str, Any]:
     """The exact projection covered by mechanism_hash: the game, not the players'
-    minds and not the prose. Agent roster (ids) is structural; policies are not."""
+    minds and not the prose. Agent roster (ids) is structural; policies are not.
+    ``engine_version`` binds the hash to the resolution SEMANTICS, so a
+    behaviour-changing engine fix can never silently keep old hashes."""
+    from collaborative_hill.domain.world.evidence_commons import EC_ENGINE_VERSION
+    from collaborative_hill.domain.world.nipd import NIPD_ENGINE_VERSION
+
+    engine_version = (NIPD_ENGINE_VERSION if isinstance(spec.world, NIPDWorld)
+                      else EC_ENGINE_VERSION)
     return {
         "domain": "chl.mechanism.v1",
+        "engine_version": engine_version,
         "world": spec.world.model_dump(mode="json"),
         "information": spec.information.model_dump(mode="json"),
         "interaction": spec.interaction.model_dump(mode="json"),

@@ -1,8 +1,10 @@
-"""Small structural interfaces for the kernel. Protocols, not framework inheritance.
+"""Structural interfaces for the kernel's two seams. Protocols, not inheritance.
 
 An LLM is never authoritative for anything defined here: payoffs, world truth,
 evidence validity, permissions, and metrics are all computed by deterministic
-typed code (locked operating principle; see docs/adr/0001).
+typed code (locked principle; ADR-0001). Metrics are deliberately NOT a
+protocol — they are versioned pure functions over sealed events
+(`metrics/__init__.py::METRIC_VERSIONS`), and the runner never imports them.
 """
 
 import random
@@ -20,9 +22,9 @@ class MechanismEngine(Protocol):
     streams handed in by the runner — a mechanism never creates its own.
     """
 
-    def initial_state(self) -> dict[str, Any]: ...
-
     def agent_ids(self) -> list[str]: ...
+
+    def initial_state(self) -> dict[str, Any]: ...
 
     def is_terminal(self, state: dict[str, Any]) -> bool: ...
 
@@ -51,20 +53,10 @@ class MechanismEngine(Protocol):
 
 @runtime_checkable
 class AgentPolicy(Protocol):
-    """Proposes typed actions from observations. May be scripted, replayed, or LLM-backed."""
+    """Proposes typed actions from observations. Scripted, replayed, or LLM-backed."""
 
     policy_id: str
 
     def propose(
         self, observation: dict[str, Any], rng: random.Random
     ) -> ActionProposal: ...
-
-
-@runtime_checkable
-class Metric(Protocol):
-    """Derives scientific values from a sealed ledger. Never influences a live run."""
-
-    name: str
-    version: str
-
-    def compute(self, events: list[Any]) -> dict[str, Any]: ...

@@ -61,6 +61,12 @@ from collaborative_hill.domain.institutions import InstitutionConfig
 from collaborative_hill.engine.events import EventType
 from collaborative_hill.engine.hashing import frac_str
 
+# Bump whenever resolution/legality/scoring SEMANTICS change: the version is
+# part of the hashed mechanism view, so sealed runs never silently mix engine
+# behaviours. v2: one verification and one challenge per (agent, claim) —
+# closes the support-inflation / challenge-spam exploits found in review.
+EC_ENGINE_VERSION = 2
+
 
 class ECParams(BaseModel):
     """Integer credit-unit parameters. Defaults provably yield a social dilemma
@@ -272,10 +278,15 @@ class EvidenceCommonsMechanism:
                 return f"unknown claim {action.claim_id}"
             if claim["proposer"] == agent_id:
                 return "self-verification is not allowed"
+            if any(v["agent"] == agent_id for v in claim["verifications"]):
+                return "already verified this claim (one verification per agent per claim)"
             return None
         if isinstance(action, ChallengeClaimAction):
-            if action.claim_id not in state["claims"]:
+            claim = state["claims"].get(action.claim_id)
+            if claim is None:
                 return f"unknown claim {action.claim_id}"
+            if any(c["agent"] == agent_id for c in claim["challenges"]):
+                return "already challenged this claim (one challenge per agent per claim)"
             for eid in action.evidence_ids:
                 if eid not in self._by_id:
                     return f"cited evidence {eid} does not exist"

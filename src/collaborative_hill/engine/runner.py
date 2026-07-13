@@ -22,7 +22,7 @@ Per round (all deterministic given policies' recorded outputs; ADR-0001):
 Wall-clock time and other environment facts go only into unhashed event meta.
 """
 
-from typing import Any, Protocol
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
@@ -34,6 +34,7 @@ from collaborative_hill.engine.events import (
     make_event,
 )
 from collaborative_hill.engine.hashing import GENESIS_HASH, content_hash
+from collaborative_hill.engine.interfaces import MechanismEngine
 from collaborative_hill.engine.seeds import rng_for
 from collaborative_hill.engine.store import FileCheckpointStore, FileEventStore, RunPaths
 
@@ -77,16 +78,6 @@ class _Emitter:
         return event
 
 
-class MechanismLike(Protocol):
-    def agent_ids(self) -> list[str]: ...
-    def initial_state(self) -> dict[str, Any]: ...
-    def is_terminal(self, state: dict[str, Any]) -> bool: ...
-    def observe(self, state: dict[str, Any], agent_id: str) -> dict[str, Any]: ...
-    def validate_action(self, state: dict[str, Any], agent_id: str, action: Any) -> str | None: ...
-    def resolve(self, state: dict[str, Any], actions: dict[str, Any], rng: Any
-                ) -> tuple[dict[str, Any], list[dict[str, Any]]]: ...
-
-
 def seal_summary(mechanism: Any, state: dict[str, Any]) -> dict[str, Any]:
     """Mechanism-specific sealed summary (final rewards / scores)."""
     if hasattr(mechanism, "final_rewards"):
@@ -109,7 +100,7 @@ class RunResult(BaseModel):
 
 def run_episode(
     *,
-    mechanism: MechanismLike,
+    mechanism: MechanismEngine,
     policies: dict[str, Any],
     config: RunConfig,
     paths: RunPaths,
