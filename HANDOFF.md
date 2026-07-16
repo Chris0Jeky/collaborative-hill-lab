@@ -1,14 +1,29 @@
-# HANDOFF — exact current state (2026-07-13, end of founding session)
+# HANDOFF — exact current state (updated 2026-07-17)
 
-Written by the founding engineer session (Claude Fable 5). Everything below was verified by
-running it; anything not verified is labelled.
+Written by the founding engineer session (Claude Fable 5) and updated by the Codex runtime
+refresh. Everything below was verified by running it; anything not verified is labelled.
 
 **Picking up in a fresh session:** read this file, then `docs/FOUNDATION_REVIEW.md`, then
 `AGENTS.md` §5 (invariants). Verify the repo with the command block below (~5 min; the
-venv at `.venv/` already exists — only run `make setup` if it is missing). The git history
-is 10 clean local commits ending at `closeout:` — **nothing has been pushed**; pushing is
-the owner's call. All 16 founding tasks completed; there is no half-finished work in the
-tree (working tree clean at handoff).
+venv at `.venv/` already exists — only run `make setup` if it is missing). The foundation
+history is on `origin/main` through `65a387f`; the 2026-07-17 Codex refresh is on
+`chore/codex-runtime-refresh`, starting with `7954abb`. All 16 founding tasks completed;
+there is no half-finished product work in the tree.
+
+## Codex runtime refresh (2026-07-17)
+
+- `.codex/hooks.json` now invokes the installed floor v1.4.1 with `--runtime codex`; a
+  simulated force-push was denied and a benign `git status` was allowed.
+- `.codex/config.toml` explicitly enables hooks and disables multi-agent fan-out at T1.
+  Approval and sandbox defaults remain user-owned and are not committed.
+- `AGENTS.md`, `CLAUDE.md`, and `.claude/tier.json` now agree on the live floor, M0 state,
+  exact-head verification rule, and Codex trust boundary.
+- Human-action file: none (`.claude/tier.json` declares `human_todo=null`). One runtime UI
+  action remains: in the next Codex session, review and trust the changed hook hash via
+  `/hooks`; until then the project hook may be skipped.
+- Verified on this branch: `make check`, `make test` (125 passed), and `make validate`.
+  NOT verified in this refresh: the long generated-study/report/replay/acceptance sequence;
+  its last clean-state evidence remains the founding-session record below.
 
 ## What exists and is verified working
 
@@ -64,6 +79,8 @@ tree (working tree clean at handoff).
 - Legacy repo clone lives in the session scratchpad (temp) — re-clone
   `Chris0Jeky/N-person-prisoners-dilemma-simulation` @ `f7f1cceb` if needed again.
 - The `.claude/settings.local.json` bypassPermissions file is owner-managed (gitignored).
+- Codex project hooks are hash-trusted. After `.codex/hooks.json` changes, use `/hooks` to
+  review and trust the new definition before assuming the deny floor is active.
 
 ## Open scientific questions
 
@@ -98,7 +115,8 @@ tree (working tree clean at handoff).
 7. Whether Study 001 is publication-ready; venue.
 8. Whether any legacy result counts as "replicated" (see REPLICATION_REPORT verdicts).
 9. Novelty claims (NOVELTY_MATRIX has the honest assessment + open verification items).
-10. Whether/when to make the repository public and to push (nothing was pushed).
+10. The repository is now public and the foundation is on `origin/main`; any future
+    publication, release, or paid-run decision remains human-owned.
 
 ## Next five tasks (detail in NEXT.md)
 

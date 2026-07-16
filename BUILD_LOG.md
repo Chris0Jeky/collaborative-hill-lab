@@ -67,3 +67,22 @@ verify/challenge duplication exploits (engine v2), engine-version-in-hash gap,
 - One mid-flight commit accidentally included agent work-in-progress test files
   (harmless at T1; final state supersedes it).
 - All work local; nothing pushed (task constraint), no remote/legacy-repo modification.
+
+## Codex runtime refresh — 2026-07-17
+
+- Guard preflight: confirmed authoritative estate row, T1 tier, clean `main` at
+  `65a387ff13ea81e5c67ca290f32eff3a007e61c3`, one clean worktree, and
+  `main...origin/main` with no divergence.
+- Fetched the current Codex manual and checked the supported trusted-project surfaces:
+  `AGENTS.md`, `.codex/config.toml`, and `.codex/hooks.json`.
+- Compared the repo's Claude/Codex contracts, the live dispatcher, the current
+  `agent-harness` template, and the handoff. Found and fixed floor-version drift, missing
+  `--runtime codex`, missing project feature defaults, stale no-code metadata, and a
+  PowerShell-hostile `&&` handoff instruction.
+- Focused verification: parsed both JSON files and `.codex/config.toml`; a synthetic
+  `git status --short` hook payload exited 0; a synthetic `git push --force origin main`
+  payload returned `permissionDecision=deny` under floor v1.4.1 Codex semantics.
+- Repository verification: `make check` passed (ruff, mypy strict, unit/property tests),
+  `make test` passed (125 tests), and `make validate` passed for studies 000 and 001.
+- Not run in this refresh: `make study-000`, `make study-001-smoke`, `make replay-smoke`,
+  `make report`, or `scripts/acceptance.py`; no product/science code changed.
