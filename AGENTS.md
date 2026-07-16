@@ -9,11 +9,14 @@ now carries the architecture map, invariants, and commands it promised.
 
 Codex does not read `~/.claude/settings.json`, so the same irreversible-command floor is wired
 in `.codex/hooks.json` — a PreToolUse hook calling the shared dispatcher
-(`~/.claude/hooks/dispatch.py --event pre`, floor v1.3.0): blocks force-push, `rm -rf` outside
-the repo, pipe-to-shell, `sudo`, secret-file writes. It is the SAME dispatcher Claude uses (no
-vendored repo copy to drift). Codex work style: `rg` for search, `apply_patch` for edits,
-narrow diffs, no subagent fan-out at T1, verify with concrete commands and state what was NOT
-verified.
+(`~/.claude/hooks/dispatch.py --event pre --runtime codex`, floor v1.4.1): blocks force-push,
+`rm -rf` outside the repo, pipe-to-shell, `sudo`, and secret-file writes. It is the SAME policy
+Claude uses (no vendored repo copy to drift). Trusted-project defaults live in
+`.codex/config.toml`: hooks are enabled and multi-agent fan-out is disabled at T1; approval and
+sandbox choices remain user-level settings. After the hook file changes, review and trust its
+new hash via `/hooks` before relying on it. Codex work style: `rg` for search, `apply_patch` for
+edits, narrow diffs, inline work only at T1, concrete verification, and an explicit account of
+what was NOT verified.
 
 ## 2. Mission
 
@@ -92,9 +95,10 @@ Venv python: `.venv/Scripts/python.exe`. Quote all paths (spaces).
 
 ## 8. Handoff checklist (before ending any substantial session)
 
-1. `make check && make test` green (or failures explained in HANDOFF.md).
+1. `make check` and `make test` green (or failures explained in HANDOFF.md).
 2. `make validate` passes for both studies.
-3. HANDOFF.md updated: state, failures, open questions, next tasks, verify commands.
-4. BUILD_LOG.md appended with decisions + commands actually run.
-5. No fabricated numbers anywhere; unverified claims labelled.
-6. Human-owned decisions untouched (list in HANDOFF.md).
+3. After any review fix, rerun the relevant gates on the new exact HEAD.
+4. HANDOFF.md updated: state, failures, open questions, next tasks, verify commands.
+5. BUILD_LOG.md appended with decisions + commands actually run.
+6. No fabricated numbers anywhere; unverified claims labelled.
+7. Human-owned decisions untouched (list in HANDOFF.md).

@@ -53,7 +53,7 @@ method does not count. Close work per `AGENTS.md` §8 checklist.
 ## Rules (T1 — keep it minimal)
 
 - **The floor is the one guardrail.** The global PreToolUse deny hook
-  (`~/.claude/hooks/dispatch.py`, floor v1.3.0) rides along for Claude and blocks only the
+  (`~/.claude/hooks/dispatch.py`, floor v1.4.1) rides along for Claude and blocks only the
   irreversible: force-push, `rm -rf` outside the repo, pipe-to-shell, `sudo`, secret-file
   writes. It fires even under `bypassPermissions`. No repo-level hook copy (would double-spawn).
 - **Permissions are `bypassPermissions`** (gitignored `.claude/settings.local.json`) — max

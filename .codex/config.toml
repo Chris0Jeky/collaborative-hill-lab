@@ -1,0 +1,6 @@
+# Trusted-project Codex defaults for this T1 sandbox.
+# Approval and sandbox defaults remain user-owned; do not commit machine trust choices.
+
+[features]
+hooks = true
+multi_agent = false
