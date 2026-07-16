@@ -86,3 +86,10 @@ verify/challenge duplication exploits (engine v2), engine-version-in-hash gap,
   `make test` passed (125 tests), and `make validate` passed for studies 000 and 001.
 - Not run in this refresh: `make study-000`, `make study-001-smoke`, `make replay-smoke`,
   `make report`, or `scripts/acceptance.py`; no product/science code changed.
+- Adversarial review pass 1 (runtime/security) exercised five hook cases and found that the
+  installed floor v1.4.1 differs materially from the designated `agent-harness` template
+  v1.4.0. The working floor was not downgraded; the cross-repo drift is tracked in HANDOFF.
+- Adversarial review pass 2 (operations/science boundaries) found a remaining PowerShell
+  `&&` command, a stale push-status sentence, and an unacknowledged T2 promotion signal.
+  The command/status text was fixed and the tier decision was deferred explicitly to the
+  human while retaining declared T1 authority.

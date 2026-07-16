@@ -43,9 +43,9 @@ exhaustive manifests · ADR-0007 typed LLM actions, safe abstention, no hidden C
 
 ## Workflow & quality bar
 
-Small diffs, commit per logical group; plain `git push` to `main` is fine (solo) — but
-nothing was pushed during founding (task constraint; owner pushes when ready). Work inline —
-no subagent fan-out at T1 (founding session had explicit ultracode authorization; that does
+Small diffs, commit per logical group; plain `git push` to `main` is fine (solo). The founding
+session kept its work local; that foundation is now on `origin/main`. Work inline — no
+subagent fan-out at T1 (the founding session had explicit ultracode authorization; that does
 not carry forward). Tests guard science, not coverage numbers: hand-derived oracles,
 leak canaries, chain equality, metamorphic invariance. A result without a reproducible
 method does not count. Close work per `AGENTS.md` §8 checklist.

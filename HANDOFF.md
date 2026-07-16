@@ -18,9 +18,10 @@ there is no half-finished product work in the tree.
   Approval and sandbox defaults remain user-owned and are not committed.
 - `AGENTS.md`, `CLAUDE.md`, and `.claude/tier.json` now agree on the live floor, M0 state,
   exact-head verification rule, and Codex trust boundary.
-- Human-action file: none (`.claude/tier.json` declares `human_todo=null`). One runtime UI
-  action remains: in the next Codex session, review and trust the changed hook hash via
-  `/hooks`; until then the project hook may be skipped.
+- Human-action file: none (`.claude/tier.json` declares `human_todo=null`). Two human
+  follow-ups remain: review and trust the changed hook hash via `/hooks` in the next Codex
+  session, and decide whether the now-apparent 3rd-return-session signal promotes the repo
+  to T2. Until declared otherwise, T1 and its no-fan-out rule remain authoritative.
 - Verified on this branch: `make check`, `make test` (125 passed), and `make validate`.
   NOT verified in this refresh: the long generated-study/report/replay/acceptance sequence;
   its last clean-state evidence remains the founding-session record below.
@@ -60,7 +61,9 @@ there is no half-finished product work in the tree.
 
 ## Commands to verify this repository (all previously run successfully)
 
-    make doctor && make check && make test
+    make doctor
+    make check
+    make test
     make validate
     make study-000            # ~330 episodes, regenerates REPLICATION_REPORT.md
     make study-001-smoke
@@ -81,6 +84,13 @@ there is no half-finished product work in the tree.
 - The `.claude/settings.local.json` bypassPermissions file is owner-managed (gitignored).
 - Codex project hooks are hash-trusted. After `.codex/hooks.json` changes, use `/hooks` to
   review and trust the new definition before assuming the deny floor is active.
+- The installed shared dispatcher is live-tested floor v1.4.1, but the separate
+  `C:/Users/jekyt/source/agent-harness` template currently identifies itself as v1.4.0 and
+  differs materially. Do not run a blind sync that would downgrade the installed floor;
+  reconcile the harness source and deployed copy as separate harness maintenance.
+- The repo's own 3rd+ return-session promotion signal now appears met. No tier promotion was
+  made silently; T1 remains declared until the human reviews the T2 consequences (including
+  CI and work-loss protections).
 
 ## Open scientific questions
 
@@ -103,6 +113,9 @@ there is no half-finished product work in the tree.
    messages yet.
 4. Study-hash artifact directories use `DRAFT-<hash12>` for unfrozen studies — revisit
    naming when the first frozen study lands.
+5. Why does the deployed floor v1.4.1 differ from the canonical `agent-harness` template
+   v1.4.0, and which reviewed copy should be promoted to canon?
+6. Should this repo now promote to T2 under its 3rd+ return-session criterion?
 
 ## HUMAN-OWNED decisions (do not decide these silently — locked)
 
