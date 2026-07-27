@@ -1,9 +1,8 @@
 # CLAUDE.md — Collaborative Hill Lab
 
-T1 sandbox · push/merge free · authority `.agent-harness/tier.json` · no CI · dual-runtime (Codex
-reads `AGENTS.md`; fan-out off, work inline). Global laws are auto-injected — not repeated here.
-State, open questions and the 10 human-owned decisions: `HANDOFF.md`. T1 stays until something
-consumes this repo's output (first LLM pilot, paper, benchmark, 2nd contributor); sessions don't.
+T1 sandbox · push/merge free · authority `.agent-harness/tier.json` (its notes carry the promotion
+criteria; return sessions are not one) · no CI · dual-runtime (Codex reads `AGENTS.md`; fan-out off,
+work inline). Global laws are auto-injected. State, open questions, the 10 decisions: `HANDOFF.md`.
 
 ## What this is
 A deterministic, fully offline laboratory for one thesis: which interaction, information and
@@ -29,12 +28,13 @@ environment **Evidence Commons**. M0 is built; no real provider, no paid run, no
 - **Determinism is the product** (spec = the `engine/hashing.py` + `engine/seeds.py` docstrings):
   no floats and no wall-clock in hashed content (exact `Fraction` via `frac_str`); no global RNG —
   every draw from `rng_for(<seed path>)`, and no RNG state is ever persisted.
-- An LLM is never authoritative for payoffs, world truth, evidence validity, permissions or
-  metrics; invalid model output becomes `ActionRejected` + abstention, never a silent repair.
+- An LLM is never authoritative for payoffs, world truth, evidence validity, permissions or metrics,
+  and its output is never silently repaired — three paths: unparsable/schema-invalid output abstains
+  (`invalid_llm_output`) after bounded retries; a provider error seals the run `RunFailed`; and only
+  a schema-valid *illegal* action is `ActionRejected` + `invalid_action_policy` (`fail` default | `abstain`).
 - Never fabricate tokens/costs (`None` = unmeasured), never store hidden chain-of-thought, never
   tune results toward the legacy paper, never present a simulation as a prediction about humans.
 - Human-only: freezing a study (`--yes`), any paid LLM run, the `HANDOFF.md` decision list.
-- **Synthetic data only** — if real human-subject data is ever headed here, flip
-  `sensitive_data: true` in `.agent-harness/tier.json` BEFORE it lands.
+- **Synthetic data only** — real human-subject data needs `sensitive_data: true` in the tier file FIRST.
 - ADR-locked (`docs/adr/0001…0007`; change = new ADR, not a refactor): own kernel + Concordia
   cognition-only, hash-linked ledger + CoW branches, five planes, mechanism/skin hash separation.
