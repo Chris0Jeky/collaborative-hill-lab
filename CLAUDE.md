@@ -22,7 +22,7 @@ environment **Evidence Commons**. M0 is built; no real provider, no paid run, no
 | mechanism (`domain/world/`) | `.venv/Scripts/python.exe -m pytest tests/unit/test_nipd_transitions.py tests/unit/test_ec_transitions.py tests/unit/test_payoff_oracle.py tests/unit/test_hidden_truth_leak.py` | 37 passed, 0.5s |
 | LLM adapter (`agents/llm/`) | `.venv/Scripts/python.exe -m pytest tests/unit/test_invalid_llm_output.py tests/unit/test_provider_failure.py tests/unit/test_capability_enforcement.py tests/unit/test_cost_honesty.py` | 16 passed, 0.5s |
 | scenario / skin / study JSON | `make validate`; `cd studies/001-evidence-commons && ../../.venv/Scripts/python.exe certificate.py` | both valid; C1 dilemma True, C3 violations 0; certificate rewritten byte-identically |
-| ledger, reports, anything sealed | `.venv/Scripts/python.exe scripts/acceptance.py`; `.venv/Scripts/python.exe scripts/replay_smoke.py` | 11/11 A–K in 4.6s; 2 sealed runs replayed |
+| ledger, reports, anything sealed | `.venv/Scripts/python.exe scripts/acceptance.py` (self-contained: its runs live in a temp dir it deletes). Replay needs its own input — a fresh clone's `artifacts/` holds only `.gitkeep` — so `make study-000 study-001-smoke` first, then `.venv/Scripts/python.exe scripts/replay_smoke.py` | 11/11 A–K in 4.4s; generation ~60s; 2 sealed runs replayed |
 | unsure | `make test` — the whole suite is 8 seconds | 125 passed (82 unit + 24 property + 9 metamorphic + 10 integration) |
 
 ## Hard rules specific to this repo (full invariant list: `AGENTS.md` §5)
