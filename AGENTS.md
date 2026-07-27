@@ -9,7 +9,8 @@ now carries the architecture map, invariants, and commands it promised.
 
 Codex does not read `~/.claude/settings.json`, so the same irreversible-command floor is wired
 in `.codex/hooks.json` — a PreToolUse hook calling the shared dispatcher
-(`~/.claude/hooks/dispatch.py --event pre --runtime codex`, floor v1.4.1): blocks force-push,
+(`~/.claude/hooks/dispatch.py --event pre --runtime codex`; the floor is versioned outside this
+repo and moves — do not pin its number here): blocks force-push,
 `rm -rf` outside the repo, pipe-to-shell, `sudo`, and secret-file writes. It is the SAME policy
 Claude uses (no vendored repo copy to drift). Trusted-project defaults live in
 `.codex/config.toml`: hooks are enabled and multi-agent fan-out is disabled at T1; approval and

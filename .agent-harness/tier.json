@@ -1,0 +1,27 @@
+{
+  "tier": 1,
+  "name": "sandbox",
+  "authority": {
+    "push": "free",
+    "merge": "free"
+  },
+  "flags": {
+    "sensitive_data": false,
+    "wave_mode": false,
+    "dormant_production": false,
+    "relaxed_work_loss_guards": false
+  },
+  "model_routing": {
+    "harness_and_review": "top",
+    "slices": "mid",
+    "maintenance": "cheap"
+  },
+  "budgets": {
+    "standing_context_tokens": 1000,
+    "session_baseline_tokens": null
+  },
+  "human_todo": null,
+  "runtimes": ["claude", "codex"],
+  "last_reviewed": "2026-07-27",
+  "notes": "T1 research sandbox, offline and deterministic: no deploy, no consumers, no paid LLM run, synthetic data only. T1 is deliberate — promote only when something consumes the repo's output (first LLM pilot, paper, benchmark run, 2nd contributor); return-session count is NOT a trigger. If real human-subject or participant data ever enters, flip sensitive_data BEFORE it lands. Dual-runtime by owner request: Claude gets the deny floor from the GLOBAL PreToolUse hook (~/.claude/hooks/dispatch.py); Codex gets the SAME dispatcher via .codex/hooks.json with --runtime codex, and .codex/config.toml disables multi-agent fan-out. The floor is deliberately NOT vendored here (a repo copy would double-spawn alongside the global hook). Only the PRE deny event is wired at T1. Codex project hooks are trust-gated: review the new hash via /hooks after .codex/hooks.json changes. bypassPermissions lives in gitignored .claude/settings.local.json; committed .claude/settings.json keeps acceptEdits + the deny list as the fresh-clone baseline. human_todo=null: no human-action file at T1 — the human-owned decisions live in HANDOFF.md. Bootstrapped 2026-07-12; migrated from legacy .claude/tier.json on 2026-07-27."
+}
