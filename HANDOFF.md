@@ -1,14 +1,14 @@
-# HANDOFF — exact current state (updated 2026-07-17)
+# HANDOFF — exact current state (updated 2026-07-27)
 
 Written by the founding engineer session (Claude Fable 5) and updated by the Codex runtime
 refresh. Everything below was verified by running it; anything not verified is labelled.
 
 **Picking up in a fresh session:** read this file, then `docs/FOUNDATION_REVIEW.md`, then
 `AGENTS.md` §5 (invariants). Verify the repo with the command block below (~5 min; the
-venv at `.venv/` already exists — only run `make setup` if it is missing). The foundation
-history and the 2026-07-17 Codex runtime refresh are both on `origin/main`, through
-`5bfabcc` — nothing is left unpushed, and `chore/codex-runtime-refresh` has landed. All 16
-founding tasks completed; there is no half-finished product work in the tree.
+venv at `.venv/` already exists — only run `make setup` if it is missing). All product work is
+on `origin/main`: measured 2026-07-27, local `main` == `origin/main` == `ab3127d` (the merge of
+PR #1, the doctrine sweep), and `git branch --no-merged origin/main` is empty — nothing is left
+unpushed. All 16 founding tasks completed; there is no half-finished product work in the tree.
 
 ## Codex runtime refresh (2026-07-17)
 
@@ -16,12 +16,12 @@ founding tasks completed; there is no half-finished product work in the tree.
   simulated force-push was denied and a benign `git status` was allowed.
 - `.codex/config.toml` explicitly enables hooks and disables multi-agent fan-out at T1.
   Approval and sandbox defaults remain user-owned and are not committed.
-- `AGENTS.md`, `CLAUDE.md`, and `.claude/tier.json` now agree on the live floor, M0 state,
+- `AGENTS.md`, `CLAUDE.md`, and the tier file now agree on the live floor, M0 state,
   exact-head verification rule, and Codex trust boundary.
-- Human-action file: none (`.claude/tier.json` declares `human_todo=null`). Two human
-  follow-ups remain: review and trust the changed hook hash via `/hooks` in the next Codex
-  session, and decide whether the now-apparent 3rd-return-session signal promotes the repo
-  to T2. Until declared otherwise, T1 and its no-fan-out rule remain authoritative.
+- Human-action file: none (`.agent-harness/tier.json` declares `human_todo=null`). One human
+  follow-up remains: review and trust the changed hook hash via `/hooks` in the next Codex
+  session. (2026-07-27: the tier file moved to `.agent-harness/tier.json`; T1 is deliberate
+  and its promotion trigger is now "something consumes this repo's output", not session count.)
 - Verified on this branch: `make check`, `make test` (125 passed), and `make validate`.
   NOT verified in this refresh: the long generated-study/report/replay/acceptance sequence;
   its last clean-state evidence remains the founding-session record below.
@@ -50,11 +50,11 @@ founding tasks completed; there is no half-finished product work in the tree.
     scripted fixture runs; mechanism certificate (dilemma certified by enumeration in all
     4 institutions; intervention integrity certified); two skins hash-verified
     mechanism-identical; measured cost worksheet without prices.
-- **Tests**: `make test` = **125 passed** (91 unit + 24 property + 9 metamorphic + 10
-  integration; ~7 s). Zero xfails — no known source defects at handoff. `make check`
-  additionally runs ruff (clean) and `mypy --strict` (clean, 39 files).
-- **Acceptance A–K**: `scripts/acceptance.py` — 11/11 pass (final run from a clean
-  generated state at commit `9ad1212`).
+- **Tests**: `make test` = **125 passed** (82 unit + 24 property + 9 metamorphic + 10
+  integration; ~8 s, re-measured 2026-07-27 at `ab3127d`). Zero xfails — no known source
+  defects. `make check` additionally runs ruff (clean) and `mypy --strict` (clean, 39 files).
+- **Acceptance A–K**: `scripts/acceptance.py` — 11/11 pass (re-run 2026-07-27 at `ab3127d`,
+  4.6 s; original clean-generated-state run was at commit `9ad1212`).
 - **Docs**: ADR-0001…0007 (accepted), FOUNDATION_REVIEW, research suite under
   `docs/research/` (charter, legacy audit, related work, novelty matrix, methodology,
   SAP, claims+limitations, threat model, prereg template, replication report).
@@ -72,7 +72,8 @@ founding tasks completed; there is no half-finished product work in the tree.
 
 ## Known failures / caveats (none hidden)
 
-- No CI exists (T1 sandbox — promote to T2 before adding; see `.claude/tier.json`).
+- No CI exists (T1 sandbox — promote to T2 before adding; see `.agent-harness/tier.json`).
+  The proving-check table in `CLAUDE.md` is the gate in its place.
 - `artifacts/` is gitignored and regenerable, never canon. The trees on disk at handoff
   (`DRAFT-5dcde1a9b6c9` = study 000, `DRAFT-a3bffdfcf171` = study 001) were produced by
   the final clean-state pass under EC engine v2; `make study-000` / `make study-001-smoke`
@@ -84,13 +85,10 @@ founding tasks completed; there is no half-finished product work in the tree.
 - The `.claude/settings.local.json` bypassPermissions file is owner-managed (gitignored).
 - Codex project hooks are hash-trusted. After `.codex/hooks.json` changes, use `/hooks` to
   review and trust the new definition before assuming the deny floor is active.
-- The installed shared dispatcher is live-tested floor v1.4.1, but the separate
-  `C:/Users/jekyt/source/agent-harness` template currently identifies itself as v1.4.0 and
-  differs materially. Do not run a blind sync that would downgrade the installed floor;
-  reconcile the harness source and deployed copy as separate harness maintenance.
-- The repo's own 3rd+ return-session promotion signal now appears met. No tier promotion was
-  made silently; T1 remains declared until the human reviews the T2 consequences (including
-  CI and work-loss protections).
+- The installed shared dispatcher is versioned outside this repo and moves independently
+  (measured 2026-07-27: `~/.claude/hooks/dispatch.py` reports floor 1.6.20; the `.codex/hooks.json`
+  comment still says v1.4.1 — cosmetic, and editing it would force a fresh Codex `/hooks`
+  trust round, so it is left alone). Do not pin a floor version in this repo's docs.
 
 ## Open scientific questions
 
@@ -113,9 +111,8 @@ founding tasks completed; there is no half-finished product work in the tree.
    messages yet.
 4. Study-hash artifact directories use `DRAFT-<hash12>` for unfrozen studies — revisit
    naming when the first frozen study lands.
-5. Why does the deployed floor v1.4.1 differ from the canonical `agent-harness` template
-   v1.4.0, and which reviewed copy should be promoted to canon?
-6. Should this repo now promote to T2 under its 3rd+ return-session criterion?
+5. Should `.codex/hooks.json`'s stale floor-version comment be refreshed? (Costs a Codex
+   `/hooks` re-trust round for a comment; deferred deliberately — see the caveats above.)
 
 ## HUMAN-OWNED decisions (do not decide these silently — locked)
 
@@ -141,7 +138,7 @@ founding tasks completed; there is no half-finished product work in the tree.
 
 ## Read-first for the next model
 
-1. `CLAUDE.md` (locked decisions, never-do list) — 2 minutes.
+1. `CLAUDE.md` (hard rules + the proving-check table) — 2 minutes.
 2. `docs/FOUNDATION_REVIEW.md` (why everything is the way it is) — 5 minutes.
 3. `AGENTS.md` §5 invariants + §7 how-to-add — 5 minutes.
 4. `src/collaborative_hill/engine/runner.py` (the lifecycle, top docstring).
