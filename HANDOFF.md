@@ -6,9 +6,9 @@ refresh. Everything below was verified by running it; anything not verified is l
 **Picking up in a fresh session:** read this file, then `docs/FOUNDATION_REVIEW.md`, then
 `AGENTS.md` §5 (invariants). Verify the repo with the command block below (~5 min; the
 venv at `.venv/` already exists — only run `make setup` if it is missing). The foundation
-history is on `origin/main` through `65a387f`; the 2026-07-17 Codex refresh is on
-`chore/codex-runtime-refresh`, starting with `7954abb`. All 16 founding tasks completed;
-there is no half-finished product work in the tree.
+history and the 2026-07-17 Codex runtime refresh are both on `origin/main`, through
+`5bfabcc` — nothing is left unpushed, and `chore/codex-runtime-refresh` has landed. All 16
+founding tasks completed; there is no half-finished product work in the tree.
 
 ## Codex runtime refresh (2026-07-17)
 
