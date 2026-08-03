@@ -1,5 +1,4 @@
 {
-  "_comment": "Collaborative Hill Lab T1 — Codex deny floor only. Points at the SHARED GLOBAL dispatcher (~/.claude/hooks/dispatch.py, floor v1.4.1), the same policy Claude uses, so there is no vendored repo copy to drift. --runtime codex makes unsupported ask decisions fail closed. The dispatcher resolves the project dir from this hook payload's cwd; absent it, it falls back to T1 defaults (identical floor, since this repo carries no overlay flags). Floor-only by tier: no session/post/stop machinery at T1. Codex loads project hooks only after the repo and exact hook definition are trusted; review changed hashes via /hooks.",
   "hooks": {
     "PreToolUse": [
       {
@@ -7,8 +6,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$HOME/.claude/hooks/dispatch.py\" --event pre --runtime codex",
-            "commandWindows": "python \"$env:USERPROFILE\\.claude\\hooks\\dispatch.py\" --event pre --runtime codex",
+            "command": "expected=962f404bada6c611bde42c62651132f17b4248b98b891dceee632d5d5c400884; python3 \"$HOME/.claude/hooks/dispatch.py\" --event pre --runtime codex",
+            "commandWindows": "$expected='962f404bada6c611bde42c62651132f17b4248b98b891dceee632d5d5c400884'; python \"$env:USERPROFILE\\.claude\\hooks\\dispatch.py\" --event pre --runtime codex",
             "timeout": 5,
             "statusMessage": "Checking irreversible-command policy"
           }
