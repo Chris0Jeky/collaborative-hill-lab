@@ -1,5 +1,9 @@
 # HANDOFF — exact current state (updated 2026-07-27)
 
+**Licence decision (2026-08-12):** current and future owner-authored software is
+`GPL-3.0-only`. Earlier MIT releases retain their historical grant. See
+`LICENSE`, `RELICENSING.md`, and `LICENSES/MIT.txt`.
+
 Written by the founding engineer session (Claude Fable 5) and updated by the Codex runtime
 refresh. Everything below was verified by running it; anything not verified is labelled.
 
