@@ -97,3 +97,9 @@ Decisions with rationale: `docs/adr/0001…0007`. Synthesis: `docs/FOUNDATION_RE
 
 Contributor guide (humans and coding agents): `AGENTS.md`. Locked rules: `CLAUDE.md`.
 Current state and next steps: `HANDOFF.md`, `NEXT.md`, `PLAN.md`.
+
+## License
+
+Current releases are licensed under the GNU General Public License version 3 only
+(`GPL-3.0-only`). See `LICENSE`. Versions published before 12 August 2026 remain
+available under their existing MIT grant; see `RELICENSING.md` and `LICENSES/MIT.txt`.

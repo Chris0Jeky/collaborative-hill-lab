@@ -93,3 +93,13 @@ verify/challenge duplication exploits (engine v2), engine-version-in-hash gap,
   `&&` command, a stale push-status sentence, and an unacknowledged T2 promotion signal.
   The command/status text was fixed and the tier decision was deferred explicitly to the
   human while retaining declared T1 authority.
+
+## GPLv3-only licensing — 2026-08-12
+
+- The owner relicensed current and future owner-authored software as
+  `GPL-3.0-only`, while preserving the historical MIT grant for earlier revisions.
+- Release identity advanced from 0.1.0 (MIT) to 0.1.1 (GPLv3-only); package and
+  citation metadata now agree and the current package exposes only `LICENSE` as
+  its `License-File`.
+- Verification: `make check`, `make test`, and `make validate` all exited 0 using
+  the repository-locked Ruff 0.15.21; `git diff --check` passed.
