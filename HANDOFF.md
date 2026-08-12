@@ -1,4 +1,4 @@
-# HANDOFF — exact current state (updated 2026-07-27)
+# HANDOFF — exact current state (updated 2026-08-12)
 
 **Licence decision (2026-08-12):** current and future owner-authored software is
 `GPL-3.0-only`. Earlier MIT releases retain their historical grant. See
