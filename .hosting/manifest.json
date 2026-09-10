@@ -1,0 +1,15 @@
+{
+  "schema_version":1,"reviewed_on":"2026-09-10","repository":"Chris0Jeky/collaborative-hill-lab","stable_id":"collaborative-hill-lab","runtime_class":"local",
+  "public_origin":null,"origin_evidence":"not-configured",
+  "target":"Local or batch simulation; reviewed static research outputs only",
+  "source_paths":["README.md","AGENTS.md"],
+  "persistent_state":["Local reproducible runs and sealed ledgers"],
+  "invariants":["Deterministic mechanisms and replay remain authoritative","No paid provider or human-subject data activation","Study freezing stays explicitly human-owned","Simulation outputs are not predictions about humans"],
+  "gates":["Reviewed report allowlist and provenance","Replay and hidden-truth leak acceptance","Separate publication or paid-run approval"],
+  "tasks":[
+    {"id":"CH1","goal":"Define reviewed static report publication","acceptance":"Selected artifacts include provenance and limitations without raw private inputs or credentials"},
+    {"id":"CH2","goal":"Keep reproducibility local and intact","acceptance":"Existing replay, hash and leak tests pass; no server or engine rewrite is introduced"},
+    {"id":"CH3","goal":"Separate hosting from costly research capabilities","acceptance":"No paid run, real dataset or study freeze occurs as a publishing side effect"}
+  ],
+  "activation_authorized":false
+}
