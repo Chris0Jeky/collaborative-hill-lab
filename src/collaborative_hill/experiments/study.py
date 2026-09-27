@@ -187,6 +187,35 @@ def _fraction(value: Any) -> Any:
     return Fraction(str(value))
 
 
+def _planned_run_dirs(
+    artifacts_root: Path,
+    study_prefix: str,
+    spec: StudySpec,
+    only_condition: str | None,
+    replicates: int,
+) -> list[Path]:
+    """Every run directory a ``run_study`` call is about to write."""
+    run_dirs: list[Path] = []
+    for cond in spec.conditions:
+        if only_condition is not None and cond.condition_id != only_condition:
+            continue
+        for r in range(replicates):
+            run_id = f"{cond.condition_id}-r{r:03d}"
+            run_dirs.append(Path(artifacts_root) / study_prefix / cond.condition_id / run_id)
+    return run_dirs
+
+
+def _refuse_if_runs_exist(run_dirs: list[Path]) -> None:
+    """Refuse to re-run into directories that already hold a sealed episode."""
+    for run_dir in run_dirs:
+        if (run_dir / "events.jsonl").exists() or (run_dir / "manifest.json").exists():
+            raise FileExistsError(
+                f"refusing to re-run into occupied run directory: {run_dir} — "
+                "one run directory holds exactly one episode; pass a fresh "
+                "--artifacts directory or run `make clean-generated`"
+            )
+
+
 def run_study(
     study_dir: Path,
     artifacts_root: Path,
@@ -212,6 +241,12 @@ def run_study(
     dep_hash = lock_hash(repo_root)
 
     replicates = replicates_override if replicates_override is not None else spec.replicates
+    _refuse_if_runs_exist(
+        _planned_run_dirs(
+            Path(artifacts_root), locked or "DRAFT-" + h[:12],
+            spec, only_condition, replicates,
+        )
+    )
     results: list[RunResult] = []
     for cond in spec.conditions:
         if only_condition is not None and cond.condition_id != only_condition:
