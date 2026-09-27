@@ -56,6 +56,13 @@ def branch_run(
     rebuilt from the resolved scenario.
     """
     parent_dir = Path(parent_dir)
+    child_dir = Path(child_dir)
+    for name in ("events.jsonl", "manifest.json", "branch.json"):
+        if (child_dir / name).exists():
+            raise FileExistsError(
+                f"refusing to branch into existing run directory '{child_dir}': "
+                f"'{name}' already exists; choose a new --out directory"
+            )
     parent_paths = RunPaths(parent_dir)
     ckpts = FileCheckpointStore(parent_paths.checkpoints)
     if fork_seq not in ckpts.list_seqs():
