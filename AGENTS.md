@@ -7,12 +7,12 @@ now carries the architecture map, invariants, and commands it promised.
 
 ## 1. Runtime contract (Codex delta)
 
-Codex does not read `~/.claude/settings.json`, so the same irreversible-command floor is wired
+Codex does not read `~/.claude/settings.json`; its irreversible-command floor is wired
 in `.codex/hooks.json` — a PreToolUse hook calling the shared dispatcher
 (`~/.claude/hooks/dispatch.py --event pre --runtime codex`; the floor is versioned outside this
 repo and moves — do not pin its number here): blocks force-push,
-`rm -rf` outside the repo, pipe-to-shell, `sudo`, and secret-file writes. It is the SAME policy
-Claude uses (no vendored repo copy to drift). Trusted-project defaults live in
+`rm -rf` outside the repo, pipe-to-shell, `sudo`, and secret-file writes. It is the same policy a
+Claude floor applies where one is wired (none on DESKTOP-IHKOOJS; no vendored repo copy to drift). Trusted-project defaults live in
 `.codex/config.toml`: hooks are enabled and multi-agent fan-out is disabled at T1; approval and
 sandbox choices remain user-level settings. After the hook file changes, review and trust its
 new hash via `/hooks` before relying on it. Codex work style: `rg` for search, `apply_patch` for

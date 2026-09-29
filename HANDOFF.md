@@ -20,8 +20,10 @@ unpushed. All 16 founding tasks completed; there is no half-finished product wor
   simulated force-push was denied and a benign `git status` was allowed.
 - `.codex/config.toml` explicitly enables hooks and disables multi-agent fan-out at T1.
   Approval and sandbox defaults remain user-owned and are not committed.
-- `AGENTS.md`, `CLAUDE.md`, and the tier file now agree on the live floor, M0 state,
-  exact-head verification rule, and Codex trust boundary.
+- `AGENTS.md`, `CLAUDE.md`, and the tier file agree on M0 state, the exact-head verification rule
+  and the Codex trust boundary. Floor (updated 2026-09-29): no Claude floor is guaranteed on this
+  host (none on DESKTOP-IHKOOJS; Kraspyon keeps a user-scope hook); Codex's runs only where its
+  reviewed `.codex/hooks.json` is trusted.
 - Human-action file: none (`.agent-harness/tier.json` declares `human_todo=null`). One human
   follow-up remains: review and trust the changed hook hash via `/hooks` in the next Codex
   session. (2026-07-27: the tier file moved to `.agent-harness/tier.json`; T1 is deliberate
