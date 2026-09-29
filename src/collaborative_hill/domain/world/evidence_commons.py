@@ -44,7 +44,7 @@ import random
 from fractions import Fraction
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from collaborative_hill.domain.actions import (
     AbstainAction,
@@ -74,16 +74,16 @@ class ECParams(BaseModel):
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    rounds: int = 12
-    inspect_budget: int = 6
-    verify_budget: int = 3
-    cost_inspect: int = 1
-    cost_share: int = 1
-    cost_propose: int = 1
-    cost_verify: int = 2
-    cost_challenge: int = 1
-    benefit_correct_slot: int = 12
-    penalty_wrong_slot: int = 12
+    rounds: int = Field(default=12, ge=0)
+    inspect_budget: int = Field(default=6, ge=0)
+    verify_budget: int = Field(default=3, ge=0)
+    cost_inspect: int = Field(default=1, ge=0)
+    cost_share: int = Field(default=1, ge=0)
+    cost_propose: int = Field(default=1, ge=0)
+    cost_verify: int = Field(default=2, ge=0)
+    cost_challenge: int = Field(default=1, ge=0)
+    benefit_correct_slot: int = Field(default=12, ge=0)
+    penalty_wrong_slot: int = Field(default=12, ge=0)
     credit_propose_accepted_correct: int = 3
     credit_propose_accepted_wrong: int = -3
     credit_verify_accepted_correct: int = 2
