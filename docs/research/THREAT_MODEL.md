@@ -264,8 +264,8 @@ The canary test is the single highest-value guard and must exist before any LLM 
   re-open this model.
 - **No secrets in-episode.** LLM API keys come from env at the harness boundary, never into the
   corpus, observations, or ledger. Agents have no path to env/secrets (in-memory only, no
-  shell/fs/network). Secret-file writes are blocked by the global deny-floor
-  (`~/.claude/hooks/dispatch.py`), a harness concern, not this model's.
+  shell/fs/network). Secret-file writes are a harness concern, not this model's (no deny floor is
+  guaranteed on this host).
 - **No network / shell / filesystem side effects reachable by an agent in-episode.** So
   RCE/SSRF/path-traversal are out of scope *inside* an episode. They re-enter only if a future
   slice adds a real side-effecting tool — gate behind a tier/overlay review.
