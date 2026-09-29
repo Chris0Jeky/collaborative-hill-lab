@@ -34,6 +34,8 @@ class LLMPolicy:
         self.agent_id = agent_id
         self.provider = provider
         self.skin = skin
+        if max_retries < 0:
+            raise ValueError(f"max_retries must be >= 0, got {max_retries}")
         self.max_retries = max_retries
         self.sampling = sampling or {}
         self.prompt_template_hash = prompt_template_hash(skin)

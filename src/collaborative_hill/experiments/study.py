@@ -174,11 +174,18 @@ def build_policies(resolved: ResolvedScenario) -> dict[str, Any]:
                     fail_at=int(params["fail_at"]) if "fail_at" in params else None,
                 ),
                 skin=resolved.skin,
-                max_retries=int(params.get("max_retries", 1)),
+                max_retries=_require_non_negative_retries(params),
             )
         else:
             raise ValueError(f"unknown policy {name} for agent {agent.agent_id}")
     return policies
+
+
+def _require_non_negative_retries(params: dict[str, Any]) -> int:
+    max_retries = int(params.get("max_retries", 1))
+    if max_retries < 0:
+        raise ValueError(f"max_retries must be >= 0, got {max_retries}")
+    return max_retries
 
 
 def _fraction(value: Any) -> Any:
