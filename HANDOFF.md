@@ -151,3 +151,19 @@ unpushed. All 16 founding tasks completed; there is no half-finished product wor
 5. `studies/000-legacy-reproduction/README.md` + `docs/research/REPLICATION_REPORT.md`
    (what the science says so far).
 6. `docs/research/LEGACY_AUDIT.md` before ever trusting a legacy number.
+
+## Swarm publish candidate (2026-10-01)
+
+Changed: Rejects malformed and unknown branch override parameters with usage errors and accepts rational epsilon values. The three regression cases failed against the original CLI; plain policy overrides remain covered.
+
+Verified in this candidate worktree: `make check`, the full pytest suite, and
+`make validate` for studies 000 and 001. The worker draft was reviewed inline by
+the publishing coordinator. Worktree-local development dependencies were installed
+without shared site packages using `requirements-lock.txt`, including analysis extras.
+
+NOT verified: hosted CI (none declared), the long study/report/acceptance sequence,
+and real providers.
+
+Residual risk: publication is not merge approval; the later land turn must refresh
+review and exact-head evidence. The worktree and its original branch stay in place
+for the host. Human-action file is null; the human-owned decisions above remain open.

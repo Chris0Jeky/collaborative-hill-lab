@@ -101,6 +101,87 @@ def replay(run_dir: Path) -> None:
         raise typer.Exit(code=2)
 
 
+_ALLOWED_EC_OVERRIDE_PARAMS: dict[str, set[str]] = {
+    "ec_contributor": {"share_evidence"},
+    "ec_freerider": set(),
+    "ec_verifier": set(),
+    "ec_misinformer": set(),
+}
+
+_ALLOWED_NIPD_OVERRIDE_PARAMS: dict[str, set[str]] = {
+    "allc": set(),
+    "alld": set(),
+    "random": set(),
+    "tft_pairwise": {"epsilon"},
+    "tft_linked": {"epsilon"},
+    "ptft": {"denominator", "epsilon"},
+    "tft_threshold": {"threshold_num", "threshold_den", "epsilon"},
+}
+
+
+def _rational_float(value: object) -> float:
+    from fractions import Fraction
+
+    return float(Fraction(str(value)))
+
+
+def _parse_override_item(item: str) -> tuple[str, str, dict[str, str]]:
+    agent, sep, policy_expr = item.partition("=")
+    if not sep or not agent or not policy_expr:
+        raise typer.BadParameter(
+            f"invalid --override {item!r}: expected agent=policy[:key=value,...]"
+        )
+    name, _, param_str = policy_expr.partition(":")
+    if not name:
+        raise typer.BadParameter(
+            f"invalid --override {item!r}: expected agent=policy[:key=value,...]"
+        )
+    params: dict[str, str] = {}
+    if param_str:
+        for kv in param_str.split(","):
+            k, ksep, v = kv.partition("=")
+            if not ksep or not k or v == "":
+                raise typer.BadParameter(
+                    f"invalid param segment {kv!r} in --override {item!r}: "
+                    "expected key=value"
+                )
+            params[k] = v
+    return agent, name, params
+
+
+def _coerce_nipd_override_params(params: dict[str, str]) -> dict[str, object]:
+    parsed: dict[str, object] = {}
+    for k, v in params.items():
+        if k == "epsilon":
+            try:
+                parsed[k] = _rational_float(v)
+            except (ValueError, ArithmeticError):
+                raise typer.BadParameter(
+                    f"invalid numeric value {v!r} for param {k!r}: "
+                    "expected a rational like 1/10"
+                ) from None
+        elif k in ("threshold_num", "threshold_den"):
+            try:
+                parsed[k] = int(str(v))
+            except ValueError:
+                raise typer.BadParameter(
+                    f"invalid integer value {v!r} for param {k!r}"
+                ) from None
+        else:
+            parsed[k] = v
+    return parsed
+
+
+def _reject_unknown_params(policy: str, params: dict[str, str],
+                           allowed: set[str], item: str) -> None:
+    unknown = sorted(set(params) - allowed)
+    if unknown:
+        raise typer.BadParameter(
+            f"unknown param(s) {unknown} for policy {policy!r} "
+            f"in --override {item!r}"
+        )
+
+
 @app.command("branch")
 def branch(
     run_dir: Path,
@@ -118,22 +199,36 @@ def branch(
     _, resolved, manifest = load_run(run_dir)
     overrides = {}
     for item in override:
-        agent, _, policy_expr = item.partition("=")
-        name, _, param_str = policy_expr.partition(":")
-        params: dict[str, str | int | bool] = {}
-        if param_str:
-            for kv in param_str.split(","):
-                k, _, v = kv.partition("=")
-                params[k] = v
+        agent, name, params = _parse_override_item(item)
         if isinstance(resolved.spec.world, NIPDWorld):
             from collaborative_hill.agents.scripted.nipd_policies import build_nipd_policy
 
-            parsed = {k: (float(v) if k == "epsilon" else v) for k, v in params.items()}
-            overrides[agent] = build_nipd_policy(name, resolved.spec.world.mode, parsed)
+            allowed = _ALLOWED_NIPD_OVERRIDE_PARAMS.get(name)
+            if allowed is None:
+                raise typer.BadParameter(
+                    f"unknown NIPD policy {name!r} in --override {item!r}"
+                )
+            _reject_unknown_params(name, params, allowed, item)
+            parsed = _coerce_nipd_override_params(params)
+            try:
+                overrides[agent] = build_nipd_policy(
+                    name, resolved.spec.world.mode, parsed
+                )
+            except ValueError as exc:
+                raise typer.BadParameter(str(exc)) from exc
         else:
             from collaborative_hill.agents.scripted.ec_policies import build_ec_policy
 
-            overrides[agent] = build_ec_policy(name, params)
+            allowed = _ALLOWED_EC_OVERRIDE_PARAMS.get(name)
+            if allowed is None:
+                raise typer.BadParameter(
+                    f"unknown EC policy {name!r} in --override {item!r}"
+                )
+            _reject_unknown_params(name, params, allowed, item)
+            try:
+                overrides[agent] = build_ec_policy(name, params)
+            except ValueError as exc:
+                raise typer.BadParameter(str(exc)) from exc
     child_run_id = run_id or f"{manifest['run_id']}-branch{at_event}"
     result, branch_manifest = branch_run(
         parent_dir=run_dir, fork_seq=at_event, child_dir=out,

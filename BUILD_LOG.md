@@ -103,3 +103,16 @@ verify/challenge duplication exploits (engine v2), engine-version-in-hash gap,
   its `License-File`.
 - Verification: `make check`, `make test`, and `make validate` all exited 0 using
   the repository-locked Ruff 0.15.21; `git diff --check` passed.
+
+## Swarm draft qualification - 2026-10-01
+
+- Rejects malformed and unknown branch override parameters with usage errors and accepts rational epsilon values. The three regression cases failed against the original CLI; plain policy overrides remain covered.
+- Ran the item's targeted pytest command, `make check`, the full pytest suite,
+  and `make validate` for both studies from this candidate worktree.
+- Initial worker verification failed because the checkout package was not installed.
+  Shared-site-package experiments exposed an unrelated PyArrow typing error and,
+  in one run, a Hypothesis input-generation health check under concurrent load.
+  Development-only isolation also exposed the doctor test's analysis-extra requirement.
+  Installed the complete `requirements-lock.txt` in the isolated environment.
+- No primary-checkout edits, study freeze, paid provider call, or human decision.
+  Muse wrote the first draft; the coordinator reviewed and qualified it for a PR.
