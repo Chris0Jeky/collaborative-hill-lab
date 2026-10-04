@@ -22,7 +22,7 @@ Per round (all deterministic given policies' recorded outputs; ADR-0001):
 Wall-clock time and other environment facts go only into unhashed event meta.
 """
 
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict
 
@@ -39,6 +39,9 @@ from collaborative_hill.engine.seeds import rng_for
 from collaborative_hill.engine.store import FileCheckpointStore, FileEventStore, RunPaths
 
 
+InvalidActionPolicy = Literal["fail", "abstain"]
+
+
 class RunConfig(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
@@ -46,7 +49,7 @@ class RunConfig(BaseModel):
     run_id: str
     seed_root: tuple[str | int, ...]
     checkpoint_every: int = 0  # rounds; 0 = final checkpoint only
-    invalid_action_policy: str = "fail"  # "fail" | "abstain"
+    invalid_action_policy: InvalidActionPolicy = "fail"
 
 
 class _Emitter:

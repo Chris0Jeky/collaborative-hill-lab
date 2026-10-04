@@ -21,7 +21,7 @@ conditions differing only in institution reuse identical policy randomness.
 
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict
 
@@ -47,6 +47,8 @@ from collaborative_hill.experiments.scenario import (
     compile_scenario,
 )
 
+InvalidActionPolicy = Literal["fail", "abstain"]
+
 SCRIPTED_NIPD = {"allc", "alld", "random", "tft_pairwise", "tft_linked", "ptft",
                  "tft_threshold"}
 SCRIPTED_EC = {"ec_contributor", "ec_freerider", "ec_verifier", "ec_misinformer"}
@@ -69,7 +71,7 @@ class StudySpec(BaseModel):
     seed: int
     replicates: int = 1
     checkpoint_every: int = 0
-    invalid_action_policy: str = "fail"
+    invalid_action_policy: InvalidActionPolicy = "fail"
     conditions: tuple[ConditionSpec, ...]
 
 
