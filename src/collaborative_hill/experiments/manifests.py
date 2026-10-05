@@ -10,11 +10,13 @@ import subprocess
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from collaborative_hill.engine.hashing import sha256_hex
+
+InvalidActionPolicy = Literal["fail", "abstain"]
 
 
 class RunManifest(BaseModel):
@@ -47,7 +49,7 @@ class RunManifest(BaseModel):
 
     seed_root: list[str | int] = Field(default_factory=list)
     checkpoint_every: int = 0
-    invalid_action_policy: str = "fail"
+    invalid_action_policy: InvalidActionPolicy = "fail"
     scorer_versions: dict[str, str] = Field(default_factory=dict)
 
     # Never fabricated: None means unmeasured/unavailable.
