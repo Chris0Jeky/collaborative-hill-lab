@@ -15,12 +15,28 @@ def main() -> int:
     if not study_dirs:
         print("no artifacts found")
         return 1
+    failed = False
     for study_dir in study_dirs:
+        study_failed = False
         for run_dir in sorted(p.parent for p in study_dir.glob("*/*/events.jsonl")):
-            run_report(run_dir)
-        out = study_report(study_dir)
+            try:
+                run_report(run_dir)
+            except Exception as exc:
+                print(f"error {run_dir}: {exc}", file=sys.stderr)
+                failed = True
+                study_failed = True
+                continue
+        if study_failed:
+            print(f"skipped study report {study_dir}: run report failed", file=sys.stderr)
+            continue
+        try:
+            out = study_report(study_dir)
+        except Exception as exc:
+            print(f"error {study_dir}: {exc}", file=sys.stderr)
+            failed = True
+            continue
         print(f"wrote {out}")
-    return 0
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":

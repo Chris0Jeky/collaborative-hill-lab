@@ -103,3 +103,27 @@ verify/challenge duplication exploits (engine v2), engine-version-in-hash gap,
   its `License-File`.
 - Verification: `make check`, `make test`, and `make validate` all exited 0 using
   the repository-locked Ruff 0.15.21; `git diff --check` passed.
+
+## Estate-night publication verification — 2026-10-05
+
+Continue reporting later studies after a run/study reporting error, return nonzero, and skip aggregate generation for any study whose run report failed. Coordinator reproduced cached-metrics reuse and added a real corrupt-ledger regression.
+
+The team HIGH claim was reproduced with a corrupt ledger and cached metrics and fixed by skipping that study's aggregate. The stub-only coverage concern is resolved by a real-ledger regression. Broad Exception handling is intentional for the contracted batch failure isolation; programming errors are logged and return nonzero. The error-text notice is informational on this synthetic-only surface.
+
+Commands run from this worktree with PYTHONPATH pointing at its src:
+- py -3 -m pytest tests/unit/test_report_all.py -q (passed after environment setup).
+- Primary locked venv python -m ruff check src tests studies scripts (passed).
+- Primary locked venv python -m mypy (passed, 39 source files).
+- Primary locked venv python -m pytest tests/unit tests/property -q (passed).
+- Primary locked venv python -m pytest tests/ -q (passed).
+- Primary locked venv python -m collaborative_hill.cli study validate studies/000-legacy-reproduction (passed).
+- Primary locked venv python -m collaborative_hill.cli study validate studies/001-evidence-commons (passed).
+- Primary locked venv python scripts/acceptance.py (11/11 passed).
+- Temporary pre-worker source substitution, restored in finally: new regression
+  module exited 1 as expected. Reporting's cached-metrics regression also failed
+  against the worker draft and passed after the coordinator fix.
+- git diff --check (passed).
+
+These are direct equivalents of make check/test/validate; no venv files or
+artifacts were written into the owner's primary checkout. No hosted CI or
+full-size study campaign claimed. Owner decisions remain in HANDOFF.md.
