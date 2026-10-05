@@ -1,5 +1,25 @@
 # HANDOFF — exact current state (updated 2026-08-12)
 
+## Estate-night publication checkpoint (2026-10-05)
+
+- Changed: Reject unknown invalid_action_policy values in RunConfig, StudySpec and RunManifest; preserve exact fail/abstain behavior. Coordinator corrected Ruff import spacing.
+- Verified: the new regression module fails against pre-worker code and passes
+  against this branch. Direct equivalents of `make check`, `make test`, and
+  `make validate` passed using the primary checkout's locked venv interpreter
+  with this worktree's `src` on `PYTHONPATH`; `scripts/acceptance.py` passed 11/11.
+  The narrow command is `py -3 -m pytest tests/unit/test_runner_invalid_policy.py -q`
+  with this worktree's `src` on `PYTHONPATH`.
+- Review triage: The team verification blocker is resolved by executed regression and repository checks. The three identical Literal aliases are retained: consolidation is a non-blocking future-maintenance suggestion, with no current behavioral mismatch.
+- NOT verified: hosted CI, a full-size generated study campaign, and publication
+  readiness of any scientific result. Publication is a ready PR, never a merge.
+- Residual risk: later base integration and merge review remain with the land turn.
+  Previously accepted typo-valued manifests now fail validation deliberately.
+  Worktree stays for the host; ignored contents are
+  disposable Python/test caches only, with no survivor copied out.
+- Human actions: no human-action file (`human_todo=null`); all ten owner decisions
+  in this file remain open and untouched. The older main-state snapshot below is
+  historical; this branch's product work is pending publication and merge.
+
 **Licence decision (2026-08-12):** current and future owner-authored software is
 `GPL-3.0-only`. Earlier MIT releases retain their historical grant. See
 `LICENSE`, `RELICENSING.md`, and `LICENSES/MIT.txt`.

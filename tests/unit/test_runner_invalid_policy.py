@@ -5,9 +5,8 @@ the spec/config boundary instead of silently behaving as "fail" at runtime.
 """
 
 import pytest
-from pydantic import ValidationError
-
 from _fixtures import AGENTS, ec_hand_example, run_episode_tmp
+from pydantic import ValidationError
 
 from collaborative_hill.agents.llm import FakeProvider, LLMPolicy
 from collaborative_hill.domain.institutions import InstitutionConfig

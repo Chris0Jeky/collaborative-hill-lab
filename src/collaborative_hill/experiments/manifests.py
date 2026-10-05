@@ -16,7 +16,6 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from collaborative_hill.engine.hashing import sha256_hex
 
-
 InvalidActionPolicy = Literal["fail", "abstain"]
 
 

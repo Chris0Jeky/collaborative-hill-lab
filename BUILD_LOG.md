@@ -103,3 +103,26 @@ verify/challenge duplication exploits (engine v2), engine-version-in-hash gap,
   its `License-File`.
 - Verification: `make check`, `make test`, and `make validate` all exited 0 using
   the repository-locked Ruff 0.15.21; `git diff --check` passed.
+
+## Estate-night publication verification — 2026-10-05
+
+Reject unknown invalid_action_policy values in RunConfig, StudySpec and RunManifest; preserve exact fail/abstain behavior. Coordinator corrected Ruff import spacing.
+
+The team verification blocker is resolved by executed regression and repository checks. The three identical Literal aliases are retained: consolidation is a non-blocking future-maintenance suggestion, with no current behavioral mismatch.
+
+Commands run from this worktree with PYTHONPATH pointing at its src:
+- py -3 -m pytest tests/unit/test_runner_invalid_policy.py -q (passed after environment setup).
+- Primary locked venv python -m ruff check src tests studies scripts (passed).
+- Primary locked venv python -m mypy (passed, 39 source files).
+- Primary locked venv python -m pytest tests/unit tests/property -q (passed).
+- Primary locked venv python -m pytest tests/ -q (passed).
+- Primary locked venv python -m collaborative_hill.cli study validate studies/000-legacy-reproduction (passed).
+- Primary locked venv python -m collaborative_hill.cli study validate studies/001-evidence-commons (passed).
+- Primary locked venv python scripts/acceptance.py (11/11 passed).
+- Temporary pre-worker source substitution, restored in finally: new regression
+  module exited 1 as expected (nine invalid-policy assertions failed).
+- git diff --check (passed).
+
+These are direct equivalents of make check/test/validate; no venv files or
+artifacts were written into the owner's primary checkout. No hosted CI or
+full-size study campaign claimed. Owner decisions remain in HANDOFF.md.

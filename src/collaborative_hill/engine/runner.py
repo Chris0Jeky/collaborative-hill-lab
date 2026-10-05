@@ -38,7 +38,6 @@ from collaborative_hill.engine.interfaces import MechanismEngine
 from collaborative_hill.engine.seeds import rng_for
 from collaborative_hill.engine.store import FileCheckpointStore, FileEventStore, RunPaths
 
-
 InvalidActionPolicy = Literal["fail", "abstain"]
 
 
