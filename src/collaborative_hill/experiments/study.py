@@ -23,7 +23,7 @@ import json
 from pathlib import Path
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from collaborative_hill.agents.llm import FakeProvider, LLMPolicy
 from collaborative_hill.agents.scripted.ec_policies import build_ec_policy
@@ -70,7 +70,7 @@ class StudySpec(BaseModel):
     study_id: str
     title: str = ""
     seed: int
-    replicates: int = 1
+    replicates: int = Field(default=1, ge=1)
     checkpoint_every: int = 0
     invalid_action_policy: InvalidActionPolicy = "fail"
     conditions: tuple[ConditionSpec, ...]
@@ -237,12 +237,19 @@ def run_study(
             f"study content changed after freeze: lock={locked[:12]} current={h[:12]} — "
             "a frozen study is immutable; create a new version instead"
         )
+    replicates = replicates_override if replicates_override is not None else spec.replicates
+    if replicates < 1:
+        raise ValueError(f"replicates must be >= 1, got {replicates}")
+    if only_condition is not None and all(
+        c.condition_id != only_condition for c in spec.conditions
+    ):
+        known = ", ".join(sorted(c.condition_id for c in spec.conditions))
+        raise ValueError(f"unknown condition {only_condition!r}; known conditions: {known}")
     repo_root = _find_repo_root(study_dir)
     commit, dirty = git_provenance(repo_root)
     env = environment_provenance()
     dep_hash = lock_hash(repo_root)
 
-    replicates = replicates_override if replicates_override is not None else spec.replicates
     _refuse_if_runs_exist(
         _planned_run_dirs(
             Path(artifacts_root), locked or "DRAFT-" + h[:12],

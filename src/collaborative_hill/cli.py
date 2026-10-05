@@ -79,8 +79,15 @@ def run(
     """Run a study's conditions x replicates."""
     from collaborative_hill.experiments.study import run_study
 
-    results = run_study(study_dir, artifacts, only_condition=condition,
-                        replicates_override=replicates)
+    try:
+        results = run_study(study_dir, artifacts, only_condition=condition,
+                            replicates_override=replicates)
+    except ValueError as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(code=2) from exc
+    if not results:
+        typer.echo("error: no runs executed", err=True)
+        raise typer.Exit(code=2)
     for r in results:
         line = f"{r.run_id}: {r.status} ({r.event_count} events, {r.rounds_played} rounds)"
         if r.failure_reason:
