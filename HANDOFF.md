@@ -1,5 +1,25 @@
 # HANDOFF — exact current state (updated 2026-08-12)
 
+## Estate-night publication checkpoint (2026-10-05)
+
+- Changed: Continue reporting later studies after a run/study reporting error, return nonzero, and skip aggregate generation for any study whose run report failed. Coordinator reproduced cached-metrics reuse and added a real corrupt-ledger regression.
+- Verified: the new regression module fails against pre-worker code and passes
+  against this branch. Direct equivalents of `make check`, `make test`, and
+  `make validate` passed using the primary checkout's locked venv interpreter
+  with this worktree's `src` on `PYTHONPATH`; `scripts/acceptance.py` passed 11/11.
+  The narrow command is `py -3 -m pytest tests/unit/test_report_all.py -q`
+  with this worktree's `src` on `PYTHONPATH`.
+- Review triage: The team HIGH claim was reproduced with a corrupt ledger and cached metrics and fixed by skipping that study's aggregate. The stub-only coverage concern is resolved by a real-ledger regression. Broad Exception handling is intentional for the contracted batch failure isolation; programming errors are logged and return nonzero. The error-text notice is informational on this synthetic-only surface.
+- NOT verified: hosted CI, a full-size generated study campaign, and publication
+  readiness of any scientific result. Publication is a ready PR, never a merge.
+- Residual risk: later base integration and merge review remain with the land turn.
+  Existing generated reports are preserved on failure; stderr and the nonzero exit
+  status remain authoritative. Worktree stays for the host; ignored contents are
+  disposable Python/test caches only, with no survivor copied out.
+- Human actions: no human-action file (`human_todo=null`); all ten owner decisions
+  in this file remain open and untouched. The older main-state snapshot below is
+  historical; this branch's product work is pending publication and merge.
+
 **Licence decision (2026-08-12):** current and future owner-authored software is
 `GPL-3.0-only`. Earlier MIT releases retain their historical grant. See
 `LICENSE`, `RELICENSING.md`, and `LICENSES/MIT.txt`.

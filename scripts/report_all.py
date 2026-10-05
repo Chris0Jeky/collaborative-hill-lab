@@ -17,13 +17,18 @@ def main() -> int:
         return 1
     failed = False
     for study_dir in study_dirs:
+        study_failed = False
         for run_dir in sorted(p.parent for p in study_dir.glob("*/*/events.jsonl")):
             try:
                 run_report(run_dir)
             except Exception as exc:
                 print(f"error {run_dir}: {exc}", file=sys.stderr)
                 failed = True
+                study_failed = True
                 continue
+        if study_failed:
+            print(f"skipped study report {study_dir}: run report failed", file=sys.stderr)
+            continue
         try:
             out = study_report(study_dir)
         except Exception as exc:

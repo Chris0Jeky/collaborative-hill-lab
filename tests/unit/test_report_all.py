@@ -1,7 +1,11 @@
 """report_all must not abort when one run ledger is corrupt."""
 
 import importlib.util
+import shutil
 from pathlib import Path
+
+from collaborative_hill.experiments.study import run_study
+from collaborative_hill.reporting import run_report
 
 REPORT_ALL_PATH = Path(__file__).resolve().parents[2] / "scripts" / "report_all.py"
 
@@ -48,7 +52,7 @@ def test_corrupt_first_run_does_not_skip_later_study(tmp_path, monkeypatch, caps
     out = captured.out + captured.err
 
     assert sorted(calls) == ["run-a", "run-b"]
-    assert sorted(studied) == ["study-000", "study-001"]
+    assert studied == ["study-001"]
     assert rc != 0
     assert "run-a" in out
 
@@ -79,3 +83,29 @@ def test_all_ok_returns_zero(tmp_path, monkeypatch, capsys):
     assert sorted(calls) == ["run-a", "run-b"]
     assert sorted(studied) == ["study-000", "study-001"]
     assert rc == 0
+
+
+def test_corrupt_ledger_with_cached_metrics_skips_aggregate(tmp_path, monkeypatch, capsys):
+    mod = _load_report_all_module()
+    study = REPORT_ALL_PATH.parents[1] / "studies" / "001-evidence-commons"
+    results = run_study(
+        study, tmp_path / "seed", only_condition="agg-priv", replicates_override=1
+    )
+    assert results[0].status == "completed"
+    (source_run,) = (tmp_path / "seed").glob("*/*/*/events.jsonl")
+    run_report(source_run.parent)
+    bad_study = tmp_path / "artifacts" / "a-corrupt"
+    good_study = tmp_path / "artifacts" / "b-intact"
+    for target in (bad_study, good_study):
+        shutil.copytree(source_run.parent.parent.parent, target)
+    (bad_ledger,) = bad_study.glob("*/*/events.jsonl")
+    bad_ledger.write_text("not-json\n", encoding="utf-8")
+    monkeypatch.setattr(mod, "REPO", tmp_path)
+
+    assert mod.main() == 1
+    captured = capsys.readouterr()
+    assert str(bad_ledger.parent) in captured.err
+    assert not (bad_study / "report.md").exists()
+    assert (good_study / "report.md").exists()
+    assert f"wrote {good_study / 'report.md'}" in captured.out
+    assert f"wrote {bad_study / 'report.md'}" not in captured.out
