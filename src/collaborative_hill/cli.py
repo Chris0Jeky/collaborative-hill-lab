@@ -111,6 +111,7 @@ def branch(
     run_id: str | None = typer.Option(None, "--run-id"),
 ) -> None:
     """Fork a sealed run at a checkpoint with overridden agent policies."""
+    from collaborative_hill.agents.scripted.params import coerce_policy_params
     from collaborative_hill.engine.branching import branch_run
     from collaborative_hill.engine.replay import load_run
     from collaborative_hill.experiments.scenario import NIPDWorld
@@ -128,12 +129,12 @@ def branch(
         if isinstance(resolved.spec.world, NIPDWorld):
             from collaborative_hill.agents.scripted.nipd_policies import build_nipd_policy
 
-            parsed = {k: (float(v) if k == "epsilon" else v) for k, v in params.items()}
+            parsed = coerce_policy_params(name, params)
             overrides[agent] = build_nipd_policy(name, resolved.spec.world.mode, parsed)
         else:
             from collaborative_hill.agents.scripted.ec_policies import build_ec_policy
 
-            overrides[agent] = build_ec_policy(name, params)
+            overrides[agent] = build_ec_policy(name, coerce_policy_params(name, params))
     child_run_id = run_id or f"{manifest['run_id']}-branch{at_event}"
     result, branch_manifest = branch_run(
         parent_dir=run_dir, fork_seq=at_event, child_dir=out,
