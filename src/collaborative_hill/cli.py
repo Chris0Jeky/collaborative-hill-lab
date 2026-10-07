@@ -79,8 +79,15 @@ def run(
     """Run a study's conditions x replicates."""
     from collaborative_hill.experiments.study import run_study
 
-    results = run_study(study_dir, artifacts, only_condition=condition,
-                        replicates_override=replicates)
+    try:
+        results = run_study(study_dir, artifacts, only_condition=condition,
+                            replicates_override=replicates)
+    except ValueError as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(code=2) from exc
+    if not results:
+        typer.echo("error: no runs executed", err=True)
+        raise typer.Exit(code=2)
     for r in results:
         line = f"{r.run_id}: {r.status} ({r.event_count} events, {r.rounds_played} rounds)"
         if r.failure_reason:
@@ -119,12 +126,6 @@ _ALLOWED_NIPD_OVERRIDE_PARAMS: dict[str, set[str]] = {
 }
 
 
-def _rational_float(value: object) -> float:
-    from fractions import Fraction
-
-    return float(Fraction(str(value)))
-
-
 def _parse_override_item(item: str) -> tuple[str, str, dict[str, str]]:
     agent, sep, policy_expr = item.partition("=")
     if not sep or not agent or not policy_expr:
@@ -149,29 +150,6 @@ def _parse_override_item(item: str) -> tuple[str, str, dict[str, str]]:
     return agent, name, params
 
 
-def _coerce_nipd_override_params(params: dict[str, str]) -> dict[str, object]:
-    parsed: dict[str, object] = {}
-    for k, v in params.items():
-        if k == "epsilon":
-            try:
-                parsed[k] = _rational_float(v)
-            except (ValueError, ArithmeticError):
-                raise typer.BadParameter(
-                    f"invalid numeric value {v!r} for param {k!r}: "
-                    "expected a rational like 1/10"
-                ) from None
-        elif k in ("threshold_num", "threshold_den"):
-            try:
-                parsed[k] = int(str(v))
-            except ValueError:
-                raise typer.BadParameter(
-                    f"invalid integer value {v!r} for param {k!r}"
-                ) from None
-        else:
-            parsed[k] = v
-    return parsed
-
-
 def _reject_unknown_params(policy: str, params: dict[str, str],
                            allowed: set[str], item: str) -> None:
     unknown = sorted(set(params) - allowed)
@@ -192,6 +170,7 @@ def branch(
     run_id: str | None = typer.Option(None, "--run-id"),
 ) -> None:
     """Fork a sealed run at a checkpoint with overridden agent policies."""
+    from collaborative_hill.agents.scripted.params import coerce_policy_params
     from collaborative_hill.engine.branching import branch_run
     from collaborative_hill.engine.replay import load_run
     from collaborative_hill.experiments.scenario import NIPDWorld
@@ -209,8 +188,8 @@ def branch(
                     f"unknown NIPD policy {name!r} in --override {item!r}"
                 )
             _reject_unknown_params(name, params, allowed, item)
-            parsed = _coerce_nipd_override_params(params)
             try:
+                parsed = coerce_policy_params(name, params)
                 overrides[agent] = build_nipd_policy(
                     name, resolved.spec.world.mode, parsed
                 )
@@ -226,7 +205,9 @@ def branch(
                 )
             _reject_unknown_params(name, params, allowed, item)
             try:
-                overrides[agent] = build_ec_policy(name, params)
+                overrides[agent] = build_ec_policy(
+                    name, coerce_policy_params(name, params)
+                )
             except ValueError as exc:
                 raise typer.BadParameter(str(exc)) from exc
     child_run_id = run_id or f"{manifest['run_id']}-branch{at_event}"

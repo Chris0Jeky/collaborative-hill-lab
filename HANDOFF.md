@@ -1,5 +1,49 @@
 # HANDOFF — exact current state (updated 2026-08-12)
 
+## Distribution metric publication checkpoint (2026-10-06)
+
+- Changed: negative utilities are shifted before testing the total for zero.
+  The sealed utility pair [-1, 1] now yields payoff Gini 0.5 instead of 0.0.
+  The Gini formula is unchanged; distribution output and METRIC_VERSIONS
+  advance to version 2. Muse supplied the regression test; the coordinator
+  supplied the minimal fix and required version synchronization.
+- Verified: the new test fails on the original implementation and passes on
+  the corrected implementation. Both sensitivity probes fail as expected:
+  removing the shift and reversing free-rider advantage. The full test suite,
+  unit/property suite, mypy, changed-file Ruff, and both study validations pass.
+  Checks run in this worktree with its src on PYTHONPATH; locked tools use the
+  primary checkout's venv interpreter without modifying that checkout.
+- NOT verified: the complete make check gate is not green. Repository-wide
+  Ruff reports two pre-existing E501 errors in test_checkpoint_list_seqs.py
+  (lines 15 and 16), also present in the base commit. Hosted CI, generated
+  scientific reports and merge eligibility are not claimed.
+- Residual risk: corrected derived metrics differ from version 1 for mixed
+  negative utilities with zero total. Publication is a ready PR only; the
+  later land turn must reconcile the pre-existing lint failures before merge.
+  The host retains this worktree; ignored files are disposable test/tool
+  caches only, with no survivor copied out.
+- Human actions: human_todo is null; the owner decisions below remain untouched.
+
+## Estate-night publication checkpoint (2026-10-05)
+
+- Changed: Reject unknown invalid_action_policy values in RunConfig, StudySpec and RunManifest; preserve exact fail/abstain behavior. Coordinator corrected Ruff import spacing.
+- Verified: the new regression module fails against pre-worker code and passes
+  against this branch. Direct equivalents of `make check`, `make test`, and
+  `make validate` passed using the primary checkout's locked venv interpreter
+  with this worktree's `src` on `PYTHONPATH`; `scripts/acceptance.py` passed 11/11.
+  The narrow command is `py -3 -m pytest tests/unit/test_runner_invalid_policy.py -q`
+  with this worktree's `src` on `PYTHONPATH`.
+- Review triage: The team verification blocker is resolved by executed regression and repository checks. The three identical Literal aliases are retained: consolidation is a non-blocking future-maintenance suggestion, with no current behavioral mismatch.
+- NOT verified: hosted CI, a full-size generated study campaign, and publication
+  readiness of any scientific result. Publication is a ready PR, never a merge.
+- Residual risk: later base integration and merge review remain with the land turn.
+  Previously accepted typo-valued manifests now fail validation deliberately.
+  Worktree stays for the host; ignored contents are
+  disposable Python/test caches only, with no survivor copied out.
+- Human actions: no human-action file (`human_todo=null`); all ten owner decisions
+  in this file remain open and untouched. The older main-state snapshot below is
+  historical; this branch's product work is pending publication and merge.
+
 **Licence decision (2026-08-12):** current and future owner-authored software is
 `GPL-3.0-only`. Earlier MIT releases retain their historical grant. See
 `LICENSE`, `RELICENSING.md`, and `LICENSES/MIT.txt`.

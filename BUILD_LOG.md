@@ -104,6 +104,61 @@ verify/challenge duplication exploits (engine v2), engine-version-in-hash gap,
 - Verification: `make check`, `make test`, and `make validate` all exited 0 using
   the repository-locked Ruff 0.15.21; `git diff --check` passed.
 
+## Estate-night publication verification — 2026-10-05
+
+Reject unknown invalid_action_policy values in RunConfig, StudySpec and RunManifest; preserve exact fail/abstain behavior. Coordinator corrected Ruff import spacing.
+
+The team verification blocker is resolved by executed regression and repository checks. The three identical Literal aliases are retained: consolidation is a non-blocking future-maintenance suggestion, with no current behavioral mismatch.
+
+Commands run from this worktree with PYTHONPATH pointing at its src:
+- py -3 -m pytest tests/unit/test_runner_invalid_policy.py -q (passed after environment setup).
+- Primary locked venv python -m ruff check src tests studies scripts (passed).
+- Primary locked venv python -m mypy (passed, 39 source files).
+- Primary locked venv python -m pytest tests/unit tests/property -q (passed).
+- Primary locked venv python -m pytest tests/ -q (passed).
+- Primary locked venv python -m collaborative_hill.cli study validate studies/000-legacy-reproduction (passed).
+- Primary locked venv python -m collaborative_hill.cli study validate studies/001-evidence-commons (passed).
+- Primary locked venv python scripts/acceptance.py (11/11 passed).
+- Temporary pre-worker source substitution, restored in finally: new regression
+  module exited 1 as expected (nine invalid-policy assertions failed).
+- git diff --check (passed).
+
+These are direct equivalents of make check/test/validate; no venv files or
+artifacts were written into the owner's primary checkout. No hosted CI or
+full-size study campaign claimed. Owner decisions remain in HANDOFF.md.
+
+## Distribution metric correction — 2026-10-06
+
+Reproduced the worker test's initial import failure with the system interpreter,
+then set PYTHONPATH to this worktree's src and reproduced the actual zero-sum
+negative-utility Gini failure. Moved the zero-total guard after the existing
+negative shift without changing the formula. Updated distribution versions to 2
+because derived results change. Kept the worker's contract tests and added the
+hand-derived 0.5 oracle and version consistency assertion.
+
+Commands actually run from this worktree (PYTHONPATH=worktree/src):
+- py -3 -m pytest tests/unit/test_distribution_metrics.py -q: failed before
+  correction, passed after correction (one test).
+- Temporary mutations removing the shift and reversing free-rider subtraction:
+  each failed the regression test; source restored byte-for-byte in finally.
+- Primary locked venv python -m ruff check src tests studies scripts:
+  failed on two pre-existing E501 errors in test_checkpoint_list_seqs.py:15-16.
+  git show HEAD:tests/unit/test_checkpoint_list_seqs.py confirmed both in base.
+- Primary locked venv python -m ruff check src/collaborative_hill/metrics
+  tests/unit/test_distribution_metrics.py: passed.
+- Primary locked venv python -m mypy: passed (40 source files).
+- Primary locked venv python -m pytest tests/: passed.
+- Primary locked venv python -m pytest tests/unit tests/property -q: passed.
+- Primary locked venv python -m collaborative_hill.cli study validate
+  studies/000-legacy-reproduction: passed.
+- Primary locked venv python -m collaborative_hill.cli study validate
+  studies/001-evidence-commons: passed.
+- git diff --check: passed.
+
+No hosted CI, report regeneration or merge claim. The primary checkout was
+preserved. Human-owned HANDOFF decisions remain untouched. Host owns teardown;
+ignored contents are disposable Python, Hypothesis, pytest, mypy and Ruff caches.
+
 ## Swarm draft qualification - 2026-10-01
 
 - Rejects malformed and unknown branch override parameters with usage errors and accepts rational epsilon values. The three regression cases failed against the original CLI; plain policy overrides remain covered.

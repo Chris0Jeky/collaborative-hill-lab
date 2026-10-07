@@ -21,13 +21,14 @@ conditions differing only in institution reuse identical policy randomness.
 
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from collaborative_hill.agents.llm import FakeProvider, LLMPolicy
 from collaborative_hill.agents.scripted.ec_policies import build_ec_policy
 from collaborative_hill.agents.scripted.nipd_policies import build_nipd_policy
+from collaborative_hill.agents.scripted.params import coerce_policy_params
 from collaborative_hill.engine.hashing import content_hash
 from collaborative_hill.engine.runner import RunConfig, RunResult, run_episode
 from collaborative_hill.engine.store import RunPaths
@@ -46,6 +47,8 @@ from collaborative_hill.experiments.scenario import (
     ScenarioSpec,
     compile_scenario,
 )
+
+InvalidActionPolicy = Literal["fail", "abstain"]
 
 SCRIPTED_NIPD = {"allc", "alld", "random", "tft_pairwise", "tft_linked", "ptft",
                  "tft_threshold"}
@@ -67,9 +70,9 @@ class StudySpec(BaseModel):
     study_id: str
     title: str = ""
     seed: int
-    replicates: int = 1
+    replicates: int = Field(default=1, ge=1)
     checkpoint_every: int = 0
-    invalid_action_policy: str = "fail"
+    invalid_action_policy: InvalidActionPolicy = "fail"
     conditions: tuple[ConditionSpec, ...]
 
 
@@ -158,12 +161,10 @@ def build_policies(resolved: ResolvedScenario) -> dict[str, Any]:
         if name in SCRIPTED_NIPD:
             if mode is None:
                 raise ValueError(f"{name} is an NIPD policy but world is not NIPD")
-            parsed = {
-                k: (float(_fraction(v)) if k == "epsilon" else v) for k, v in params.items()
-            }
+            parsed = coerce_policy_params(name, params)
             policies[agent.agent_id] = build_nipd_policy(name, mode, parsed)
         elif name in SCRIPTED_EC:
-            policies[agent.agent_id] = build_ec_policy(name, params)
+            policies[agent.agent_id] = build_ec_policy(name, coerce_policy_params(name, params))
         elif name == "llm_fake":
             script = json.loads(str(params.get("script", "[]")))
             policies[agent.agent_id] = LLMPolicy(
@@ -186,12 +187,6 @@ def _require_non_negative_retries(params: dict[str, Any]) -> int:
     if max_retries < 0:
         raise ValueError(f"max_retries must be >= 0, got {max_retries}")
     return max_retries
-
-
-def _fraction(value: Any) -> Any:
-    from fractions import Fraction
-
-    return Fraction(str(value))
 
 
 def _planned_run_dirs(
@@ -242,12 +237,19 @@ def run_study(
             f"study content changed after freeze: lock={locked[:12]} current={h[:12]} — "
             "a frozen study is immutable; create a new version instead"
         )
+    replicates = replicates_override if replicates_override is not None else spec.replicates
+    if replicates < 1:
+        raise ValueError(f"replicates must be >= 1, got {replicates}")
+    if only_condition is not None and all(
+        c.condition_id != only_condition for c in spec.conditions
+    ):
+        known = ", ".join(sorted(c.condition_id for c in spec.conditions))
+        raise ValueError(f"unknown condition {only_condition!r}; known conditions: {known}")
     repo_root = _find_repo_root(study_dir)
     commit, dirty = git_provenance(repo_root)
     env = environment_provenance()
     dep_hash = lock_hash(repo_root)
 
-    replicates = replicates_override if replicates_override is not None else spec.replicates
     _refuse_if_runs_exist(
         _planned_run_dirs(
             Path(artifacts_root), locked or "DRAFT-" + h[:12],
