@@ -158,3 +158,16 @@ Commands actually run from this worktree (PYTHONPATH=worktree/src):
 No hosted CI, report regeneration or merge claim. The primary checkout was
 preserved. Human-owned HANDOFF decisions remain untouched. Host owns teardown;
 ignored contents are disposable Python, Hypothesis, pytest, mypy and Ruff caches.
+
+## Swarm draft qualification - 2026-10-01
+
+- Adds an Evidence Commons verification regression for stale cited evidence and an inaccessible supporting item. Both targeted guard-removal probes failed at the new assertions, and the source was restored byte-for-byte.
+- Ran the item's targeted pytest command, `make check`, the full pytest suite,
+  and `make validate` for both studies from this candidate worktree.
+- Initial worker verification failed because the checkout package was not installed.
+  Shared-site-package experiments exposed an unrelated PyArrow typing error and,
+  in one run, a Hypothesis input-generation health check under concurrent load.
+  Development-only isolation also exposed the doctor test's analysis-extra requirement.
+  Installed the complete `requirements-lock.txt` in the isolated environment.
+- No primary-checkout edits, study freeze, paid provider call, or human decision.
+  Muse wrote the first draft; the coordinator reviewed and qualified it for a PR.
