@@ -198,6 +198,8 @@ unpushed. All 16 founding tasks completed; there is no half-finished product wor
 
 ## Swarm publish candidate (2026-10-01)
 
+Changed: Adds an Evidence Commons verification regression for stale cited evidence and an inaccessible supporting item. Both targeted guard-removal probes failed at the new assertions, and the source was restored byte-for-byte.
+
 Changed: Rejects malformed and unknown branch override parameters with usage errors and accepts rational epsilon values. The three regression cases failed against the original CLI; plain policy overrides remain covered.
 
 Verified in this candidate worktree: `make check`, the full pytest suite, and
