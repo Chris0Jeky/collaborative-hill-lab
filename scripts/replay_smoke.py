@@ -1,4 +1,4 @@
-"""Replay every study's first sealed run and verify chain equality (make replay-smoke)."""
+"""Replay every sealed run and verify chain equality (make replay-smoke)."""
 
 import sys
 from pathlib import Path
@@ -15,14 +15,11 @@ def main() -> int:
     if not run_dirs:
         print("no sealed runs under artifacts/ — run `make study-000` first")
         return 1
-    # one run per study hash keeps the smoke fast while covering both mechanisms
-    seen: set[str] = set()
+    # replay every run dir: two runs under the same study hash may differ
+    # (e.g. a tampered events.jsonl), so per-study deduplication would hide failures
     failures = 0
     for run_dir in run_dirs:
         study = run_dir.parent.parent.name
-        if study in seen:
-            continue
-        seen.add(study)
         report = replay_run(run_dir)
         status = "OK " if report.chains_match else "FAIL"
         print(f"{status} {study[:16]}.../{run_dir.name}: "
