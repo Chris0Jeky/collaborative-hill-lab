@@ -162,6 +162,7 @@ ignored contents are disposable Python, Hypothesis, pytest, mypy and Ruff caches
 ## Swarm draft qualification - 2026-10-01
 
 - Adds an Evidence Commons verification regression for stale cited evidence and an inaccessible supporting item. Both targeted guard-removal probes failed at the new assertions, and the source was restored byte-for-byte.
+- Rejects malformed and unknown branch override parameters with usage errors and accepts rational epsilon values. The three regression cases failed against the original CLI; plain policy overrides remain covered.
 - Ran the item's targeted pytest command, `make check`, the full pytest suite,
   and `make validate` for both studies from this candidate worktree.
 - Initial worker verification failed because the checkout package was not installed.
