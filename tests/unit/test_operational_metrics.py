@@ -15,7 +15,7 @@ from collaborative_hill.metrics.operations import operational_metrics
 
 
 def _ev(seq: int, parent: str, event_type: EventType, payload: dict) -> Event:
-    ev = make_event(
+    return make_event(
         study_id="S",
         run_id="R",
         seq=seq,
@@ -25,7 +25,6 @@ def _ev(seq: int, parent: str, event_type: EventType, payload: dict) -> Event:
         payload=payload,
         parent_hash=parent,
     )
-    return ev
 
 
 def _ledger(specs: list[tuple[EventType, dict]]) -> list[Event]:
