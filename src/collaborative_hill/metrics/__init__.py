@@ -16,7 +16,7 @@ from collaborative_hill.metrics.operations import operational_metrics
 METRIC_VERSIONS = {
     "cooperation": "1",
     "epistemics": "1",
-    "distribution": "1",
+    "distribution": "2",
     "operations": "1",
 }
 

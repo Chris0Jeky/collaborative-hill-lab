@@ -133,6 +133,9 @@ class FileCheckpointStore:
     def list_seqs(self) -> list[int]:
         if not self.directory.exists():
             return []
-        return sorted(
-            int(p.stem.split("-")[1]) for p in self.directory.glob("ckpt-*.json")
-        )
+        seqs: list[int] = []
+        for p in self.directory.glob("ckpt-*.json"):
+            suffix = p.stem.partition("-")[2]
+            if suffix.isdigit():
+                seqs.append(int(suffix))
+        return sorted(seqs)

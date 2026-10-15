@@ -101,6 +101,38 @@ def test_verification_not_supported_when_evidence_inaccessible():
         {"agent": "a3", "outcome": "not_supported"}]
 
 
+def test_verify_rejects_stale_evidence():
+    # Stale accessible supports item matching slot+proposition -> not_supported.
+    e_stale = make_evidence("e_stale", "s1", "p1a", "supports", "p1a",
+                            holders=("a1", "a2"), freshness="stale")
+    spec = ECWorldSpec(agent_ids=AGENTS, slots={"s1": ("p1a", "p1b")},
+                       true_propositions={"s1": "p1a"}, evidence=(e_stale,))
+    mech = EvidenceCommonsMechanism(spec=spec, institution=ATTR)
+    state = mech.initial_state()
+    state, _ = step(mech, state, {
+        "a1": ProposeClaimAction(slot_id="s1", proposition_id="p1a",
+                                 evidence_ids=("e_stale",)),
+        **_withhold_all(exclude=("a1",))})
+    state, _ = step(mech, state, {
+        "a2": VerifyClaimAction(claim_id="c1"), **_withhold_all(exclude=("a2",))})
+    assert state["claims"]["c1"]["verifications"] == [
+        {"agent": "a2", "outcome": "not_supported"}]
+    # Fresh supports item inaccessible to the verifier -> not_supported.
+    e_priv = make_evidence("e_priv", "s1", "p1a", "supports", "p1a", holders=("a1",))
+    spec = ECWorldSpec(agent_ids=AGENTS, slots={"s1": ("p1a", "p1b")},
+                       true_propositions={"s1": "p1a"}, evidence=(e_priv,))
+    mech = EvidenceCommonsMechanism(spec=spec, institution=ATTR)
+    state = mech.initial_state()
+    state, _ = step(mech, state, {
+        "a1": ProposeClaimAction(slot_id="s1", proposition_id="p1a",
+                                 evidence_ids=("e_priv",)),
+        **_withhold_all(exclude=("a1",))})
+    state, _ = step(mech, state, {
+        "a2": VerifyClaimAction(claim_id="c1"), **_withhold_all(exclude=("a2",))})
+    assert state["claims"]["c1"]["verifications"] == [
+        {"agent": "a2", "outcome": "not_supported"}]
+
+
 def test_challenge_valid_only_with_fresh_contradicting_accessible_evidence():
     # e_sup supports p1a (a1); e_con contradicts p1a (a2). a1 proposes, a2 challenges.
     e_sup = make_evidence("e_sup", "s1", "p1a", "supports", "p1a", holders=("a1",))

@@ -1,4 +1,4 @@
-"""Distributional metrics (v1): who gains, who pays.
+"""Distributional metrics (v2): who gains, who pays.
 
 - utilities / efforts per agent (from the sealed summary).
 - payoff_gini: Gini coefficient over final utilities (0 = equal).
@@ -16,16 +16,13 @@ def _gini(values: list[float]) -> float:
     n = len(values)
     if n == 0:
         return 0.0
-    total = sum(values)
-    if total == 0:
-        return 0.0
     shifted = values
     if min(values) < 0:  # Gini needs non-negative values; shift and note it
         shift = -min(values)
         shifted = [v + shift for v in values]
-        total = sum(shifted)
-        if total == 0:
-            return 0.0
+    total = sum(shifted)
+    if total == 0:
+        return 0.0
     sorted_v = sorted(shifted)
     cum = 0.0
     for i, v in enumerate(sorted_v, start=1):
@@ -39,7 +36,7 @@ def distribution_metrics(events: list[Event]) -> dict[str, Any]:
         if ev.event_type == EventType.RUN_COMPLETED:
             summary = ev.payload
 
-    result: dict[str, Any] = {"version": "1"}
+    result: dict[str, Any] = {"version": "2"}
     if "utility" in summary:  # Evidence Commons
         utilities = {a: float(Fraction(v)) for a, v in summary["utility"].items()}
         efforts = {a: int(v) for a, v in summary["effort"].items()}
