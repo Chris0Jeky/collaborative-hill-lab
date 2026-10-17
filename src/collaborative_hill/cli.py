@@ -65,7 +65,11 @@ def study_freeze(study_dir: Path,
     if not yes:
         typer.echo("Freezing is a human-confirmed step. Re-run with --yes to confirm.")
         raise typer.Exit(code=1)
-    h = freeze_study(study_dir)
+    try:
+        h = freeze_study(study_dir)
+    except ValueError as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(code=2) from exc
     typer.echo(f"frozen: {h}")
 
 

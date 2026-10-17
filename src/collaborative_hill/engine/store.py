@@ -19,7 +19,10 @@ tested directly (acceptance scenario F).
 """
 
 import json
+import os
+import shutil
 from collections.abc import Iterator
+from contextlib import contextmanager, suppress
 from pathlib import Path
 from typing import Any
 
@@ -44,17 +47,32 @@ class RunPaths:
         self.metrics.mkdir(exist_ok=True)
         return self
 
-    def reserve(self) -> "RunPaths":
-        """Exclusively claim an empty output directory before writing run artifacts."""
+    @contextmanager
+    def reserve(self) -> Iterator["RunPaths"]:
+        """Claim an empty run directory; clean up owned, unmanifested failures."""
         self.root.mkdir(parents=True, exist_ok=True)
         if any(self.root.iterdir()):
             raise FileExistsError(
                 f"refusing to write into occupied run directory: {self.root}; "
                 "choose a fresh output directory"
             )
-        with self.events.open("x", encoding="utf-8"):
-            pass
-        return self.create()
+        with self.events.open("x", encoding="utf-8") as stream:
+            reservation = os.fstat(stream.fileno())
+        try:
+            yield self.create()
+        except BaseException:
+            with suppress(OSError):  # Cleanup must not hide the original failure.
+                if (not self.manifest.exists()
+                        and os.path.samestat(reservation, self.events.stat())):
+                    for path in (self.root / "scenario.resolved.json", self.root / "branch.json"):
+                        path.unlink(missing_ok=True)
+                    for directory in (self.checkpoints, self.metrics):
+                        if directory.exists():
+                            shutil.rmtree(directory)
+                    # Release the ledger last; a new reservation then prevents rmdir.
+                    self.events.unlink()
+                    self.root.rmdir()
+            raise
 
 
 def _event_line(event: Event) -> str:

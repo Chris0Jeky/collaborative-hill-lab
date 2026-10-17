@@ -117,3 +117,38 @@ def test_atomic_reservation_preserves_competing_writer(tmp_path, monkeypatch):
     (ledger,) = claimed
     assert ledger.read_bytes() == b"competing reservation\n"
     assert not (ledger.parent / "manifest.json").exists()
+
+
+@pytest.mark.parametrize("failure", [ValueError, KeyboardInterrupt])
+def test_pre_manifest_failure_releases_reservation_for_retry(tmp_path, monkeypatch, failure):
+    build = study.build_policies
+    reserved = []
+
+    def fail(resolved):
+        reserved.append(_single_run_dir(tmp_path))
+        assert not (reserved[0] / "manifest.json").exists()
+        raise failure("synthetic setup failure")
+
+    monkeypatch.setattr(study, "build_policies", fail)
+    with pytest.raises(failure, match="synthetic setup failure"):
+        run_study(STUDY_000, tmp_path, only_condition=CONDITION, replicates_override=1)
+    assert not reserved[0].exists()
+    monkeypatch.setattr(study, "build_policies", build)
+    assert run_study(
+        STUDY_000, tmp_path, only_condition=CONDITION, replicates_override=1
+    )[0].status == "completed"
+
+
+def test_post_manifest_failure_preserves_run(tmp_path, monkeypatch):
+    before = {}
+
+    def fail(**kwargs):
+        run_dir = kwargs["paths"].root
+        before.update({p: p.read_bytes() for p in run_dir.rglob("*") if p.is_file()})
+        raise KeyboardInterrupt("synthetic interruption")
+
+    monkeypatch.setattr(study, "run_episode", fail)
+    with pytest.raises(KeyboardInterrupt):
+        run_study(STUDY_000, tmp_path, only_condition=CONDITION, replicates_override=1)
+    assert before
+    assert {p: p.read_bytes() for p in before} == before

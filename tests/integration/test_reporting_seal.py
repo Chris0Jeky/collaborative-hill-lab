@@ -2,6 +2,7 @@
 
 import json
 import shutil
+from pathlib import Path
 
 import pytest
 
@@ -9,7 +10,7 @@ from collaborative_hill.engine.branching import branch_run
 from collaborative_hill.engine.events import ChainError, EventType, make_event
 from collaborative_hill.engine.store import FileCheckpointStore, FileEventStore
 from collaborative_hill.experiments import study
-from collaborative_hill.reporting import run_report, study_report, write_run_metrics
+from collaborative_hill.reporting import report, run_report, study_report, write_run_metrics
 
 from ._helpers import STUDY_000, STUDY_001, find_run_dirs
 
@@ -126,3 +127,49 @@ def test_failed_run_is_reported_as_failed_without_completed_outcomes(tmp_path, m
     assert "failed" in aggregate
     assert "correct" not in aggregate
     assert "mean_coop" not in aggregate
+
+
+@pytest.mark.parametrize("cached", [True, False])
+@pytest.mark.parametrize("later_invalid", [True, False])
+def test_study_report_reads_archived_runs_without_writes(
+    tmp_path, sealed_run, monkeypatch, cached, later_invalid,
+):
+    root = tmp_path / "study"
+    run_dir = root / "condition" / "a-valid"
+    shutil.copytree(sealed_run, run_dir)
+    if cached:
+        metrics_path = run_dir / "metrics" / "metrics.json"
+        metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
+        metrics["epistemics"]["accepted_correct"] = 9876
+        metrics_path.write_text(json.dumps(metrics), encoding="utf-8")
+        (run_dir / "metrics" / "events.parquet").write_bytes(b"archived parquet")
+    else:
+        shutil.rmtree(run_dir / "metrics")
+    if later_invalid:
+        invalid = root / "condition" / "z-invalid"
+        shutil.copytree(sealed_run, invalid)
+        ledger = invalid / "events.jsonl"
+        ledger.write_text("", encoding="utf-8")
+    before = {p: (p.read_bytes(), p.stat().st_mtime_ns)
+              for p in root.rglob("*") if p.is_file()}
+    original_open = Path.open
+
+    def readonly_run(path, mode="r", *args, **kwargs):
+        if path.is_relative_to(root / "condition") and any(c in mode for c in "wax+"):
+            raise PermissionError("archived run is read-only")
+        return original_open(path, mode, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "open", readonly_run)
+    monkeypatch.setitem(report.METRIC_VERSIONS, "epistemics", "future")
+    if later_invalid:
+        with pytest.raises(ChainError):
+            study_report(root)
+        assert not (root / "report.md").exists()
+    else:
+        aggregate = study_report(root).read_text(encoding="utf-8")
+        assert "completed" in aggregate
+        if cached:
+            assert "9876" in aggregate
+    after = {p: (p.read_bytes(), p.stat().st_mtime_ns)
+             for p in (root / "condition").rglob("*") if p.is_file()}
+    assert after == before

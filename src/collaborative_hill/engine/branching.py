@@ -74,65 +74,65 @@ def branch_run(
 
     # copy-on-write prefix: byte-identical lines 0..fork_seq
     child_dir = Path(child_dir)
-    child_paths = RunPaths(child_dir).reserve()
-    with parent_paths.events.open(encoding="utf-8") as src:
-        lines = src.readlines()[: fork_seq + 1]
-    with child_paths.events.open("w", encoding="utf-8", newline="") as dst:
-        dst.writelines(lines)
+    with RunPaths(child_dir).reserve() as child_paths:
+        with parent_paths.events.open(encoding="utf-8") as src:
+            lines = src.readlines()[: fork_seq + 1]
+        with child_paths.events.open("w", encoding="utf-8", newline="") as dst:
+            dst.writelines(lines)
 
-    # rebuild policies: originals from the scenario, overrides on top
-    from collaborative_hill.experiments.study import build_policies  # cycle-free at runtime
+        # rebuild policies: originals from the scenario, overrides on top
+        from collaborative_hill.experiments.study import build_policies  # cycle-free at runtime
 
-    mechanism = resolved.build_mechanism()
-    policies = build_policies(resolved)
-    original_ids = policy_ids_from_events(parent_events)
-    changed: dict[str, str] = {}
-    for agent, policy in policy_overrides.items():
-        if agent not in policies:
-            raise ValueError(f"override for unknown agent {agent}")
-        policies[agent] = policy
-        changed[agent] = policy.policy_id
+        mechanism = resolved.build_mechanism()
+        policies = build_policies(resolved)
+        original_ids = policy_ids_from_events(parent_events)
+        changed: dict[str, str] = {}
+        for agent, policy in policy_overrides.items():
+            if agent not in policies:
+                raise ValueError(f"override for unknown agent {agent}")
+            policies[agent] = policy
+            changed[agent] = policy.policy_id
 
-    config = RunConfig(
-        study_id=manifest["study_id"],
-        run_id=child_run_id,
-        seed_root=tuple(manifest["seed_root"]),
-        checkpoint_every=manifest["checkpoint_every"],
-        invalid_action_policy=manifest["invalid_action_policy"],
-    )
-    result = run_episode(
-        mechanism=mechanism, policies=policies, config=config, paths=child_paths,
-        start_state=state,
-    )
+        config = RunConfig(
+            study_id=manifest["study_id"],
+            run_id=child_run_id,
+            seed_root=tuple(manifest["seed_root"]),
+            checkpoint_every=manifest["checkpoint_every"],
+            invalid_action_policy=manifest["invalid_action_policy"],
+        )
+        result = run_episode(
+            mechanism=mechanism, policies=policies, config=config, paths=child_paths,
+            start_state=state,
+        )
 
-    branch_manifest = BranchManifest(
-        parent_run_id=manifest["run_id"],
-        parent_run_dir=str(parent_dir),
-        child_run_id=child_run_id,
-        fork_seq=fork_seq,
-        fork_round=record["logical_time"],
-        parent_event_hash_at_fork=record["last_event_hash"],
-        changed_policies=changed,
-        unchanged_policies={a: pid for a, pid in original_ids.items() if a not in changed},
-    )
-    (child_dir / "branch.json").write_text(
-        branch_manifest.model_dump_json(indent=2), encoding="utf-8"
-    )
-    (child_dir / "scenario.resolved.json").write_text(
-        resolved.model_dump_json(indent=2), encoding="utf-8"
-    )
-    child_manifest = dict(manifest)
-    child_manifest.update({
-        "run_id": child_run_id,
-        "parent_run": manifest["run_id"],
-        "parent_event_hash_at_fork": record["last_event_hash"],
-        "fork_seq": fork_seq,
-        "status": result.status,
-        "failure_reason": result.failure_reason,
-        "event_count": result.event_count,
-        "final_event_hash": result.final_event_hash,
-    })
-    child_paths.manifest.write_text(
-        json.dumps(child_manifest, indent=2, sort_keys=True), encoding="utf-8"
-    )
+        branch_manifest = BranchManifest(
+            parent_run_id=manifest["run_id"],
+            parent_run_dir=str(parent_dir),
+            child_run_id=child_run_id,
+            fork_seq=fork_seq,
+            fork_round=record["logical_time"],
+            parent_event_hash_at_fork=record["last_event_hash"],
+            changed_policies=changed,
+            unchanged_policies={a: pid for a, pid in original_ids.items() if a not in changed},
+        )
+        (child_dir / "branch.json").write_text(
+            branch_manifest.model_dump_json(indent=2), encoding="utf-8"
+        )
+        (child_dir / "scenario.resolved.json").write_text(
+            resolved.model_dump_json(indent=2), encoding="utf-8"
+        )
+        child_manifest = dict(manifest)
+        child_manifest.update({
+            "run_id": child_run_id,
+            "parent_run": manifest["run_id"],
+            "parent_event_hash_at_fork": record["last_event_hash"],
+            "fork_seq": fork_seq,
+            "status": result.status,
+            "failure_reason": result.failure_reason,
+            "event_count": result.event_count,
+            "final_event_hash": result.final_event_hash,
+        })
+        child_paths.manifest.write_text(
+            json.dumps(child_manifest, indent=2, sort_keys=True), encoding="utf-8"
+        )
     return result, branch_manifest
