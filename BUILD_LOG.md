@@ -200,7 +200,9 @@ full-size study campaign claimed. Owner decisions remain in HANDOFF.md.
 ## Integrity guard repairs — 2026-10-17 (issues 36, 37, 13)
 
 Worktree: `C:\Users\jekyt\wt\chl`, branch `fix/integrity-batch-36-37-13`,
-base/HEAD `983412097231ad5a7e030ab0bd64b8933fb3d06a`; changes remain uncommitted.
+implementation base `983412097231ad5a7e030ab0bd64b8933fb3d06a`.
+These guards landed in PR #39 at merge commit
+`e6c6033b1d979a4abe7851b2b0d5c18801103dcc`.
 Initial Git status was clean. Read CLAUDE.md, HANDOFF.md and tier authority;
 no owner decisions or shipped study parameters/results were changed.
 
@@ -246,4 +248,69 @@ checks/access). Freeze publication was exercised on this Windows filesystem;
 other filesystems must support hard links or publication fails closed.
 Legacy manifests remain readable without pins, with mandatory seal checks.
 No version-creation/lineage feature was added. Human-action file is null and
-HANDOFF.md retains all owner decisions. All edits await driver commits/PR.
+HANDOFF.md retains all owner decisions. The guard implementation is part of PR #39.
+
+## Issue 40: reporting and reservation repair - 2026-10-17
+
+Worktree `C:/Users/jekyt/wt/chl-40`, branch
+`fix/report-readonly-reservation-cleanup-40`, starting HEAD
+`e6c6033b1d979a4abe7851b2b0d5c18801103dcc` (PR #39). Initial status was clean.
+Edits only; no Git writes, GitHub calls, parallel runners or full suites.
+
+Changed / regression mapping:
+
+| issue | status | files / shared hunks | regression test |
+|---|---|---|---|
+| Study reporting rewrites runs | fixed | reporting/report.py, test_reporting_seal.py | test_study_report_reads_archived_runs_without_writes (cached/missing metrics, valid/later invalid run) |
+| Failed pre-manifest reservations | fixed | engine/store.py, engine/branching.py, run_study reservation hunk in experiments/study.py; test_study_rerun_guard.py, test_branch_out_guard.py, test_run_reservation.py | test_pre_manifest_failure_releases_reservation_for_retry, test_branch_pre_manifest_failure_releases_reservation, test_reservation_setup_failure_removes_owned_directory |
+| Preserve manifested/competing runs | fixed | same item-2 files | test_post_manifest_failure_preserves_run, test_failed_reservation_preserves_manifest_or_new_owner; existing test_atomic_reservation_preserves_competing_writer |
+| CLI freeze ValueError | fixed | cli.py, test_study_freeze_guard.py | test_cli_refreeze_changed_study_is_usage_error |
+| Hard-link publication failure | fixed | freeze_study exception hunk in experiments/study.py, test_study_freeze_guard.py | test_freeze_link_failure_is_clear_and_fail_closed (existing/absent lock) |
+| Stale #39 publication wording | fixed | HANDOFF.md, BUILD_LOG.md | live starting HEAD identifies merged PR #39; no behavior test needed |
+| mkstemp POSIX 0600 mode | skipped | none | Access-widening policy is unspecified; POSIX permission semantics cannot be proved on this Windows host. |
+
+The reporting helper retains all #39 chain/seal/status/identity/count/hash checks.
+The archived-run regression denies write opens and compares bytes and mtimes;
+cached metric values survive a simulated METRIC_VERSIONS change. Missing metrics
+are computed in memory without creating metrics/parquet output. A later invalid
+run leaves earlier artifacts and the study report untouched.
+
+Reservation cleanup checks the original ledger's filesystem identity and absence
+of a manifest, removes owned preparation artifacts, then releases the ledger last.
+The run root is removed only with nonrecursive rmdir, so a new reservation or
+manifest cannot be removed with it. Both reserve callers use its context manager;
+study setup leaves that context after writing the initial manifest. Branch setup
+holds it through its final manifest. Errors during cleanup do not mask the original
+exception. Existing manifested runs and replacement-ledger bytes survive tests.
+
+Red evidence (before source edits): the first focused command produced eight
+expected failures (four archived-run writes, two leaked study reservations,
+CLI exit 1 instead of 2, and raw OSError). The preservation control passed.
+The second command reproduced leaked branch and reservation-setup directories.
+
+Exact commands run from this worktree (same environment for each):
+
+```powershell
+$env:PYTHONPATH='src'
+$env:PYTHONDONTWRITEBYTECODE='1'
+& 'C:/Users/jekyt/Desktop/Printer Config/Others/Git/collaborative-hill-lab/.venv/Scripts/python.exe' -m pytest tests/integration/test_reporting_seal.py tests/integration/test_study_rerun_guard.py tests/integration/test_study_freeze_guard.py -k 'archived_runs or pre_manifest_failure or post_manifest_failure or cli_refreeze or link_failure' -q --tb=short --basetemp=C:/Users/Public/codex-shell-home/chl40-red
+& 'C:/Users/jekyt/Desktop/Printer Config/Others/Git/collaborative-hill-lab/.venv/Scripts/python.exe' -m pytest tests/integration/test_branch_out_guard.py tests/unit/test_run_reservation.py -k 'pre_manifest_failure or setup_failure' -q --tb=short --basetemp=C:/Users/Public/codex-shell-home/chl40-reservation-red
+& 'C:/Users/jekyt/Desktop/Printer Config/Others/Git/collaborative-hill-lab/.venv/Scripts/python.exe' -m pytest tests/integration/test_reporting_seal.py tests/integration/test_study_rerun_guard.py tests/integration/test_study_freeze_guard.py tests/integration/test_branch_out_guard.py tests/unit/test_run_reservation.py -q --tb=short --basetemp=C:/Users/Public/codex-shell-home/chl40-green
+& 'C:/Users/jekyt/Desktop/Printer Config/Others/Git/collaborative-hill-lab/.venv/Scripts/python.exe' -m pytest tests/integration/test_reporting_seal.py tests/integration/test_study_rerun_guard.py tests/integration/test_study_freeze_guard.py tests/integration/test_branch_out_guard.py tests/unit/test_run_reservation.py -o addopts=--strict-markers -q --tb=short --basetemp=C:/Users/Public/codex-shell-home/chl40-final
+& 'C:/Users/jekyt/Desktop/Printer Config/Others/Git/collaborative-hill-lab/.venv/Scripts/python.exe' -m ruff check src/collaborative_hill/reporting/report.py src/collaborative_hill/engine/store.py src/collaborative_hill/engine/branching.py src/collaborative_hill/experiments/study.py src/collaborative_hill/cli.py tests/integration/test_reporting_seal.py tests/integration/test_study_rerun_guard.py tests/integration/test_study_freeze_guard.py tests/integration/test_branch_out_guard.py tests/unit/test_run_reservation.py
+& 'C:/Users/jekyt/Desktop/Printer Config/Others/Git/collaborative-hill-lab/.venv/Scripts/python.exe' -m mypy --follow-imports=silent src/collaborative_hill/reporting/report.py src/collaborative_hill/engine/store.py src/collaborative_hill/engine/branching.py src/collaborative_hill/experiments/study.py src/collaborative_hill/cli.py
+git -c safe.directory=C:/Users/jekyt/wt/chl-40 -c core.safecrlf=false diff --check
+```
+
+Verified: interim green 61 tests, final 62 passed in 15.56s after extending the
+link-failure test to protect an existing lock as well. Ruff initially found one
+import-order issue, corrected; final Ruff passes. Mypy passes on five source
+files. Diff whitespace passes. No venv files in the primary checkout were changed.
+
+NOT verified: full make gates/suites, forced process death/power loss, multiprocess
+stress, POSIX permissions or GitHub state. Residual risk: cleanup is best effort
+if the filesystem refuses deletion, and cannot run after abrupt process death.
+Manifested incomplete runs stay preserved and fail seal validation. Hard-link
+publication still requires filesystem support; there is no unsafe overwrite
+fallback. The mkstemp permission LOW is skipped pending a POSIX sharing policy.
+human_todo=null; HANDOFF.md retains all owner decisions. Driver owns commit/PR.

@@ -37,7 +37,7 @@ def compute_all_metrics(events: list[Event],
     return metrics
 
 
-def write_run_metrics(run_dir: Path) -> dict[str, Any]:
+def _load_sealed_run(run_dir: Path) -> tuple[list[Event], dict[str, Any]]:
     paths = RunPaths(Path(run_dir))
     events = FileEventStore(paths.events).load_all(verify=True)
     manifest = json.loads(paths.manifest.read_text(encoding="utf-8"))
@@ -54,6 +54,12 @@ def write_run_metrics(run_dir: Path) -> dict[str, Any]:
     for field, actual in (("event_count", len(events)), ("final_event_hash", terminal.event_hash)):
         if manifest.get(field) is not None and manifest[field] != actual:
             raise ChainError(f"manifest {field} does not match the sealed ledger")
+    return events, manifest
+
+
+def write_run_metrics(run_dir: Path) -> dict[str, Any]:
+    paths = RunPaths(Path(run_dir))
+    events, manifest = _load_sealed_run(run_dir)
     metrics = compute_all_metrics(events, manifest)
     paths.metrics.mkdir(exist_ok=True)
     (paths.metrics / "metrics.json").write_text(
@@ -168,8 +174,13 @@ def study_report(artifacts_study_dir: Path) -> Path:
     rows = []
     for manifest_path in sorted(root.glob("*/*/manifest.json")):
         run_dir = manifest_path.parent
-        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-        metrics = write_run_metrics(run_dir)
+        events, manifest = _load_sealed_run(run_dir)
+        metrics_path = run_dir / "metrics" / "metrics.json"
+        cached = (json.loads(metrics_path.read_text(encoding="utf-8"))
+                  if metrics_path.exists() else None)
+        # A cache from other metric code is stale: recompute in memory (reports stay read-only).
+        metrics = (cached if cached and cached.get("metric_versions") == dict(METRIC_VERSIONS)
+                   else compute_all_metrics(events, manifest))
         row: dict[str, Any] = {
             "condition": manifest["condition_id"],
             "run": manifest["run_id"],

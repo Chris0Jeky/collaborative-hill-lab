@@ -165,6 +165,11 @@ def freeze_study(study_dir: Path) -> str:
                 raise ValueError(
                     "a frozen study is immutable; create a new version instead"
                 ) from None
+        except OSError as exc:
+            raise ValueError(
+                f"cannot atomically publish study.lock.json: {exc}; "
+                "exclusive hard-link publication is required; study lock is unchanged"
+            ) from exc
     finally:
         Path(temporary).unlink()
     return h
@@ -293,41 +298,41 @@ def run_study(
             run_id = f"{cond.condition_id}-r{r:03d}"
             run_dir = (Path(artifacts_root) / (locked or "DRAFT-" + h[:12])
                        / cond.condition_id / run_id)
-            paths = RunPaths(run_dir).reserve()
-            (run_dir / "scenario.resolved.json").write_text(
-                scenario.model_dump_json(indent=2), encoding="utf-8"
-            )
-            policies = build_policies(scenario)
-            manifest = RunManifest(
-                study_id=spec.study_id,
-                study_hash=h,
-                study_frozen=locked is not None,
-                condition_id=cond.condition_id,
-                run_id=run_id,
-                replicate=r,
-                scenario_hash=scenario.scenario_hash,
-                mechanism_hash=scenario.mechanism_hash,
-                narrative_hash=scenario.narrative_hash,
-                evidence_corpus_hash=scenario.evidence_corpus_hash,
-                institution=scenario.spec.institution.model_dump(mode="json"),
-                code_commit=commit,
-                worktree_dirty=dirty,
-                python_version=env["python_version"],
-                platform=env["platform"],
-                dependency_lock_sha256=dep_hash,
-                policies={a: p.policy_id for a, p in sorted(policies.items())},
-                providers={a: p.provider.model_id for a, p in sorted(policies.items())
-                           if isinstance(p, LLMPolicy)},
-                prompt_template_hashes={a: p.prompt_template_hash
-                                        for a, p in sorted(policies.items())
-                                        if isinstance(p, LLMPolicy)},
-                seed_root=[spec.seed, cond.condition_id, r],
-                checkpoint_every=spec.checkpoint_every,
-                invalid_action_policy=spec.invalid_action_policy,
-                scorer_versions=_scorer_versions(),
-                started_at=utc_now_iso(),
-            )
-            write_manifest(manifest, paths.manifest)
+            with RunPaths(run_dir).reserve() as paths:
+                (run_dir / "scenario.resolved.json").write_text(
+                    scenario.model_dump_json(indent=2), encoding="utf-8"
+                )
+                policies = build_policies(scenario)
+                manifest = RunManifest(
+                    study_id=spec.study_id,
+                    study_hash=h,
+                    study_frozen=locked is not None,
+                    condition_id=cond.condition_id,
+                    run_id=run_id,
+                    replicate=r,
+                    scenario_hash=scenario.scenario_hash,
+                    mechanism_hash=scenario.mechanism_hash,
+                    narrative_hash=scenario.narrative_hash,
+                    evidence_corpus_hash=scenario.evidence_corpus_hash,
+                    institution=scenario.spec.institution.model_dump(mode="json"),
+                    code_commit=commit,
+                    worktree_dirty=dirty,
+                    python_version=env["python_version"],
+                    platform=env["platform"],
+                    dependency_lock_sha256=dep_hash,
+                    policies={a: p.policy_id for a, p in sorted(policies.items())},
+                    providers={a: p.provider.model_id for a, p in sorted(policies.items())
+                               if isinstance(p, LLMPolicy)},
+                    prompt_template_hashes={a: p.prompt_template_hash
+                                            for a, p in sorted(policies.items())
+                                            if isinstance(p, LLMPolicy)},
+                    seed_root=[spec.seed, cond.condition_id, r],
+                    checkpoint_every=spec.checkpoint_every,
+                    invalid_action_policy=spec.invalid_action_policy,
+                    scorer_versions=_scorer_versions(),
+                    started_at=utc_now_iso(),
+                )
+                write_manifest(manifest, paths.manifest)
 
             config = RunConfig(
                 study_id=spec.study_id,

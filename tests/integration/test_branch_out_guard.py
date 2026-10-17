@@ -133,3 +133,15 @@ def test_cli_occupied_branch_is_usage_error(tmp_path):
     assert result.exit_code == 2
     assert "error:" in result.output
     assert "refusing" in result.output
+
+
+def test_branch_pre_manifest_failure_releases_reservation(tmp_path):
+    parent, fork = _make_parent(tmp_path)
+    child = tmp_path / "child"
+    with pytest.raises(ValueError, match="unknown agent"):
+        branch_run(parent_dir=parent, fork_seq=fork, child_dir=child,
+                   child_run_id="child", policy_overrides={"unknown": _override()["a3"]})
+    assert not child.exists()
+    result, _ = branch_run(parent_dir=parent, fork_seq=fork, child_dir=child,
+                           child_run_id="child", policy_overrides=_override())
+    assert result.status == "completed"

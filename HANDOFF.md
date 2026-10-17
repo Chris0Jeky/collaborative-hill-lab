@@ -1,6 +1,34 @@
 # HANDOFF — exact current state (updated 2026-10-17)
 
-## Integrity guards for issues 36, 37 and 13 (2026-10-17, uncommitted)
+## Issue 40: read-only reporting and reservation cleanup (2026-10-17)
+
+- Changed: study reports validate every seal before reading cached metrics;
+  missing metrics are computed in memory. No per-run JSON/parquet is written.
+  Run/branch reservations clean up pre-manifest exceptions, including Ctrl-C,
+  only while the ledger still identifies this writer. Manifests and replaced
+  reservations are preserved. Freeze errors now have clean CLI messages, and
+  failed hard-link publication explains its fail-closed requirement.
+- Verified: the new defect regressions failed before the source fixes.
+  The five touched test modules pass (62 tests); Ruff on touched source/tests,
+  mypy on five source files, and diff whitespace checks pass. Exact commands
+  and test-to-issue mapping are in BUILD_LOG.md.
+- NOT verified: full suites/gates, forced process termination/power loss,
+  multiprocess stress, POSIX permissions or GitHub. The driver requested edits
+  only and focused checks. No Git writes, shipped study freezes or paid runs.
+- Residual risk: cleanup is best effort on filesystem errors; abrupt process
+  death cannot execute it. Runs with manifests remain preserved and unsealed
+  runs remain rejected by reporting. The 0600 mkstemp mode is deliberately
+  unchanged: widening access needs a POSIX archive-sharing policy and proof.
+- Commit boundaries: reporting/report.py + test_reporting_seal.py are item 1;
+  engine/store.py + engine/branching.py + run_study's reservation hunk in
+  experiments/study.py + test_study_rerun_guard.py + test_branch_out_guard.py
+  + test_run_reservation.py are item 2. cli.py + the freeze_study exception
+  hunk in study.py + test_study_freeze_guard.py are the two error-message LOWs.
+  This section and BUILD_LOG.md cover all changes and correct the stale #39
+  publication wording below. Work remains as edits for the driver to commit.
+- Human actions: human_todo=null; the ten owner decisions below are untouched.
+
+## Integrity guards for issues 36, 37 and 13 (2026-10-17, landed in PR #39)
 
 - Changed (#36): metrics/run/study reporting requires a nonempty, hash-valid
   ledger with exactly one final terminal event matching manifest status and
@@ -34,7 +62,7 @@
   changed test files belong to #13. This section and BUILD_LOG.md cover all three.
 - Human actions: `human_todo=null`; all ten owner decisions below remain open
   and untouched. New scientific version creation/lineage authoring is outside
-  this guard repair. The driver owns commits, PR publication and review.
+  this guard repair. These guards landed in PR #39 at e6c6033.
 
 ## Distribution metric publication checkpoint (2026-10-06)
 

@@ -5,7 +5,9 @@ import shutil
 from pathlib import Path
 
 import pytest
+from typer.testing import CliRunner
 
+from collaborative_hill.cli import app
 from collaborative_hill.experiments import study
 
 from ._helpers import STUDY_001
@@ -64,4 +66,40 @@ def test_competing_freeze_cannot_replace_published_lock(draft, monkeypatch):
     with pytest.raises(ValueError, match="immutable"):
         study.freeze_study(draft)
     assert (draft / "study.lock.json").read_bytes() == winner
+    assert not list(draft.glob(".study-lock-*.tmp"))
+
+
+def test_cli_refreeze_changed_study_is_usage_error(draft):
+    runner = CliRunner()
+    assert runner.invoke(app, ["study", "freeze", str(draft), "--yes"]).exit_code == 0
+    lock = draft / "study.lock.json"
+    before = lock.read_bytes()
+    spec_path = draft / "study.json"
+    spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    spec["seed"] += 1
+    spec_path.write_text(json.dumps(spec), encoding="utf-8")
+
+    result = runner.invoke(app, ["study", "freeze", str(draft), "--yes"])
+
+    assert result.exit_code == 2
+    assert "error:" in result.output
+    assert "immutable" in result.output
+    assert "Traceback" not in result.output
+    assert lock.read_bytes() == before
+
+
+@pytest.mark.parametrize("existing", [True, False])
+def test_freeze_link_failure_is_clear_and_fail_closed(draft, monkeypatch, existing):
+    lock = draft / "study.lock.json"
+    if existing:
+        study.freeze_study(draft)
+    before = lock.read_bytes() if existing else None
+
+    def unsupported_link(*args):
+        raise OSError("hard links unavailable")
+
+    monkeypatch.setattr(study.os, "link", unsupported_link)
+    with pytest.raises(ValueError, match="cannot atomically publish.*unchanged"):
+        study.freeze_study(draft)
+    assert (lock.read_bytes() if lock.exists() else None) == before
     assert not list(draft.glob(".study-lock-*.tmp"))
