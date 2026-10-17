@@ -176,8 +176,9 @@ def study_report(artifacts_study_dir: Path) -> Path:
         run_dir = manifest_path.parent
         events, manifest = _load_sealed_run(run_dir)
         metrics_path = run_dir / "metrics" / "metrics.json"
-        cached = json.loads(metrics_path.read_text(encoding="utf-8")) if metrics_path.exists() else None
-        # A cache written under other metric code is stale: recompute in memory (reports stay read-only).
+        cached = (json.loads(metrics_path.read_text(encoding="utf-8"))
+                  if metrics_path.exists() else None)
+        # A cache from other metric code is stale: recompute in memory (reports stay read-only).
         metrics = (cached if cached and cached.get("metric_versions") == dict(METRIC_VERSIONS)
                    else compute_all_metrics(events, manifest))
         row: dict[str, Any] = {
