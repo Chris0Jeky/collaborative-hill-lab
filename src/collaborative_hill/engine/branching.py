@@ -57,12 +57,6 @@ def branch_run(
     """
     parent_dir = Path(parent_dir)
     child_dir = Path(child_dir)
-    for name in ("events.jsonl", "manifest.json", "branch.json"):
-        if (child_dir / name).exists():
-            raise FileExistsError(
-                f"refusing to branch into existing run directory '{child_dir}': "
-                f"'{name}' already exists; choose a new --out directory"
-            )
     parent_paths = RunPaths(parent_dir)
     ckpts = FileCheckpointStore(parent_paths.checkpoints)
     if fork_seq not in ckpts.list_seqs():
@@ -80,7 +74,7 @@ def branch_run(
 
     # copy-on-write prefix: byte-identical lines 0..fork_seq
     child_dir = Path(child_dir)
-    child_paths = RunPaths(child_dir).create()
+    child_paths = RunPaths(child_dir).reserve()
     with parent_paths.events.open(encoding="utf-8") as src:
         lines = src.readlines()[: fork_seq + 1]
     with child_paths.events.open("w", encoding="utf-8", newline="") as dst:
@@ -134,6 +128,9 @@ def branch_run(
         "parent_event_hash_at_fork": record["last_event_hash"],
         "fork_seq": fork_seq,
         "status": result.status,
+        "failure_reason": result.failure_reason,
+        "event_count": result.event_count,
+        "final_event_hash": result.final_event_hash,
     })
     child_paths.manifest.write_text(
         json.dumps(child_manifest, indent=2, sort_keys=True), encoding="utf-8"

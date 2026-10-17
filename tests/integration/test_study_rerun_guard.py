@@ -6,7 +6,11 @@ if str(_SRC) not in sys.path:
     sys.path.insert(0, str(_SRC))
 
 import pytest  # noqa: E402
+from typer.testing import CliRunner  # noqa: E402
 
+from collaborative_hill.cli import app  # noqa: E402
+from collaborative_hill.engine.store import FileEventStore  # noqa: E402
+from collaborative_hill.experiments import study  # noqa: E402
 from collaborative_hill.experiments.study import run_study  # noqa: E402
 
 pytestmark = pytest.mark.integration
@@ -65,3 +69,51 @@ def test_existing_empty_run_dir_is_accepted(tmp_path: Path) -> None:
     )
     assert len(second) == 1
     assert second[0].status == "completed"
+
+
+def test_run_directory_is_reserved_before_policy_construction(tmp_path, monkeypatch):
+    build = study.build_policies
+    contended = False
+
+    def competing_run(resolved):
+        nonlocal contended
+        if not contended:
+            contended = True
+            with pytest.raises(FileExistsError):
+                run_study(STUDY_000, tmp_path, only_condition=CONDITION, replicates_override=1)
+        return build(resolved)
+
+    monkeypatch.setattr(study, "build_policies", competing_run)
+    results = run_study(STUDY_000, tmp_path, only_condition=CONDITION, replicates_override=1)
+    assert results[0].status == "completed"
+    assert len(FileEventStore(_single_run_dir(tmp_path) / "events.jsonl").load_all()) > 0
+
+
+def test_cli_occupied_run_is_usage_error(tmp_path):
+    run_study(STUDY_000, tmp_path, only_condition=CONDITION, replicates_override=1)
+    result = CliRunner().invoke(app, [
+        "run", str(STUDY_000), "--artifacts", str(tmp_path),
+        "--condition", CONDITION, "--replicates", "1",
+    ])
+    assert result.exit_code == 2
+    assert "error:" in result.output
+    assert "refusing" in result.output
+
+
+def test_atomic_reservation_preserves_competing_writer(tmp_path, monkeypatch):
+    original_open = Path.open
+    claimed = []
+
+    def claim_first(path, mode="r", *args, **kwargs):
+        if path.name == "events.jsonl" and mode in {"x", "w", "a"} and not claimed:
+            claimed.append(path)
+            with original_open(path, "x", encoding="utf-8", newline="\n") as stream:
+                stream.write("competing reservation\n")
+        return original_open(path, mode, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "open", claim_first)
+    with pytest.raises(FileExistsError):
+        run_study(STUDY_000, tmp_path, only_condition=CONDITION, replicates_override=1)
+    (ledger,) = claimed
+    assert ledger.read_bytes() == b"competing reservation\n"
+    assert not (ledger.parent / "manifest.json").exists()

@@ -82,7 +82,7 @@ def run(
     try:
         results = run_study(study_dir, artifacts, only_condition=condition,
                             replicates_override=replicates)
-    except ValueError as exc:
+    except (ValueError, FileExistsError) as exc:
         typer.echo(f"error: {exc}", err=True)
         raise typer.Exit(code=2) from exc
     if not results:
@@ -211,10 +211,14 @@ def branch(
             except ValueError as exc:
                 raise typer.BadParameter(str(exc)) from exc
     child_run_id = run_id or f"{manifest['run_id']}-branch{at_event}"
-    result, branch_manifest = branch_run(
-        parent_dir=run_dir, fork_seq=at_event, child_dir=out,
-        child_run_id=child_run_id, policy_overrides=overrides,
-    )
+    try:
+        result, branch_manifest = branch_run(
+            parent_dir=run_dir, fork_seq=at_event, child_dir=out,
+            child_run_id=child_run_id, policy_overrides=overrides,
+        )
+    except FileExistsError as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(code=2) from exc
     typer.echo(branch_manifest.model_dump_json(indent=2))
     typer.echo(f"{result.run_id}: {result.status} ({result.event_count} events)")
 

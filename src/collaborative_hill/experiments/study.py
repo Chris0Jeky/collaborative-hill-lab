@@ -20,10 +20,12 @@ conditions differing only in institution reuse identical policy randomness.
 """
 
 import json
+import os
+import tempfile
 from pathlib import Path
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from collaborative_hill.agents.llm import FakeProvider, LLMPolicy
 from collaborative_hill.agents.scripted.ec_policies import build_ec_policy
@@ -74,6 +76,16 @@ class StudySpec(BaseModel):
     checkpoint_every: int = 0
     invalid_action_policy: InvalidActionPolicy = "fail"
     conditions: tuple[ConditionSpec, ...]
+
+    @field_validator("conditions")
+    @classmethod
+    def unique_condition_ids(
+        cls, conditions: tuple[ConditionSpec, ...]
+    ) -> tuple[ConditionSpec, ...]:
+        ids = [condition.condition_id for condition in conditions]
+        if len(ids) != len(set(ids)):
+            raise ValueError("condition IDs must be unique")
+        return conditions
 
 
 def load_study(study_dir: Path) -> tuple[StudySpec, dict[str, ResolvedScenario]]:
@@ -136,9 +148,25 @@ def freeze_study(study_dir: Path) -> str:
         "scenario_hashes": {cid: r.scenario_hash for cid, r in sorted(resolved.items())},
         "frozen_at": utc_now_iso(),
     }
-    (Path(study_dir) / "study.lock.json").write_text(
-        json.dumps(lock, indent=2, sort_keys=True), encoding="utf-8"
-    )
+    lock_path = Path(study_dir) / "study.lock.json"
+    fd, temporary = tempfile.mkstemp(prefix=".study-lock-", suffix=".tmp", dir=study_dir)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as stream:
+            json.dump(lock, stream, indent=2, sort_keys=True)
+            stream.flush()
+            os.fsync(stream.fileno())
+        try:
+            # Publish the complete, flushed lock without replacing a competing freeze.
+            os.link(temporary, lock_path)
+        except FileExistsError:
+            existing = json.loads(lock_path.read_text(encoding="utf-8"))
+            if any(existing.get(key) != lock[key]
+                   for key in ("study_id", "study_hash", "scenario_hashes")):
+                raise ValueError(
+                    "a frozen study is immutable; create a new version instead"
+                ) from None
+    finally:
+        Path(temporary).unlink()
     return h
 
 
@@ -208,9 +236,9 @@ def _planned_run_dirs(
 
 
 def _refuse_if_runs_exist(run_dirs: list[Path]) -> None:
-    """Refuse to re-run into directories that already hold a sealed episode."""
+    """Preflight all output directories, including partial runs, before starting."""
     for run_dir in run_dirs:
-        if (run_dir / "events.jsonl").exists() or (run_dir / "manifest.json").exists():
+        if run_dir.exists() and any(run_dir.iterdir()):
             raise FileExistsError(
                 f"refusing to re-run into occupied run directory: {run_dir} — "
                 "one run directory holds exactly one episode; pass a fresh "
@@ -265,7 +293,7 @@ def run_study(
             run_id = f"{cond.condition_id}-r{r:03d}"
             run_dir = (Path(artifacts_root) / (locked or "DRAFT-" + h[:12])
                        / cond.condition_id / run_id)
-            paths = RunPaths(run_dir).create()
+            paths = RunPaths(run_dir).reserve()
             (run_dir / "scenario.resolved.json").write_text(
                 scenario.model_dump_json(indent=2), encoding="utf-8"
             )
@@ -332,6 +360,8 @@ def run_study(
                 "ended_at": utc_now_iso(),
                 "status": result.status,
                 "failure_reason": result.failure_reason,
+                "event_count": result.event_count,
+                "final_event_hash": result.final_event_hash,
             })
             write_manifest(manifest, paths.manifest)
             results.append(result)

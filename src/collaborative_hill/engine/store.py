@@ -44,6 +44,18 @@ class RunPaths:
         self.metrics.mkdir(exist_ok=True)
         return self
 
+    def reserve(self) -> "RunPaths":
+        """Exclusively claim an empty output directory before writing run artifacts."""
+        self.root.mkdir(parents=True, exist_ok=True)
+        if any(self.root.iterdir()):
+            raise FileExistsError(
+                f"refusing to write into occupied run directory: {self.root}; "
+                "choose a fresh output directory"
+            )
+        with self.events.open("x", encoding="utf-8"):
+            pass
+        return self.create()
+
 
 def _event_line(event: Event) -> str:
     """Deterministic single-line serialization of a full event (incl. hash and meta)."""

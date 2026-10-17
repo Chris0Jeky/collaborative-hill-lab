@@ -196,3 +196,54 @@ full-size study campaign claimed. Owner decisions remain in HANDOFF.md.
   Installed the complete `requirements-lock.txt` in the isolated environment.
 - No primary-checkout edits, study freeze, paid provider call, or human decision.
   Muse wrote the first draft; the coordinator reviewed and qualified it for a PR.
+
+## Integrity guard repairs — 2026-10-17 (issues 36, 37, 13)
+
+Worktree: `C:\Users\jekyt\wt\chl`, branch `fix/integrity-batch-36-37-13`,
+base/HEAD `983412097231ad5a7e030ab0bd64b8933fb3d06a`; changes remain uncommitted.
+Initial Git status was clean. Read CLAUDE.md, HANDOFF.md and tier authority;
+no owner decisions or shipped study parameters/results were changed.
+
+- #36: reject chain-valid prefixes, missing/duplicate/misplaced seals and
+  manifest status/identity/count/hash mismatches before writing derived output.
+  Pin new run/branch manifests; revalidate cached aggregate inputs; keep failed
+  status while excluding partial outcomes from study tables.
+- #37: publish a complete flushed lock with `os.link` (exclusive, no replacement),
+  preserve byte-identical idempotence and refuse changed commitments. Only
+  temporary synthetic copies of Study 001 were frozen in tests.
+- #13: reserve the ledger with `open("x")` before artifacts, reject nonempty
+  directories/duplicate condition IDs and map CLI collisions to exit 2.
+  Real filesystem interleavings test competing claims and preserve winner bytes.
+- Red evidence: before production edits, the focused test command below (then
+  using `-q --tb=short --basetemp=C:/Users/Public/codex-shell-home/chl-integrity-red`)
+  failed at the expected missing-refusal, rewritten-lock, collision-exit and
+  missing-pin assertions. The failed-run outcome test separately failed with
+  partial NIPD cooperation included in the study table.
+- Fix-round failures: one Ruff line-length violation was corrected; a new race
+  fixture initially expected LF after a Windows text write, corrected by setting
+  `newline="\n"`. Its isolated rerun passed, then the entire focused set passed.
+
+Exact final checks, run from this worktree (the primary venv is used only as
+an interpreter/tool installation; PYTHONPATH selects this worktree's source):
+
+```powershell
+$env:PYTHONPATH=(Resolve-Path 'src').Path
+$env:PYTHONDONTWRITEBYTECODE='1'
+& 'C:\Users\jekyt\Desktop\Printer Config\Others\Git\collaborative-hill-lab\.venv\Scripts\python.exe' -m pytest tests/integration/test_reporting_seal.py tests/integration/test_study_freeze_guard.py tests/integration/test_study_rerun_guard.py tests/integration/test_branch_out_guard.py tests/unit/test_run_study_validation.py -o addopts=--strict-markers -q --tb=short --basetemp=C:/Users/Public/codex-shell-home/chl-integrity-closeout
+& 'C:\Users\jekyt\Desktop\Printer Config\Others\Git\collaborative-hill-lab\.venv\Scripts\python.exe' -m pytest tests/unit/test_report_all.py tests/unit/test_manifest.py tests/unit/test_cli_override_validation.py tests/integration/test_clean_state_manifest.py tests/metamorphic/test_branch_prefix.py -o addopts=--strict-markers -q --tb=short --basetemp=C:/Users/Public/codex-shell-home/chl-caller-final
+& 'C:\Users\jekyt\Desktop\Printer Config\Others\Git\collaborative-hill-lab\.venv\Scripts\python.exe' -m ruff check src/collaborative_hill/reporting/report.py src/collaborative_hill/experiments/manifests.py src/collaborative_hill/experiments/study.py src/collaborative_hill/engine/store.py src/collaborative_hill/engine/branching.py src/collaborative_hill/cli.py tests/integration/test_reporting_seal.py tests/integration/test_study_freeze_guard.py tests/integration/test_study_rerun_guard.py tests/integration/test_branch_out_guard.py tests/unit/test_run_study_validation.py
+& 'C:\Users\jekyt\Desktop\Printer Config\Others\Git\collaborative-hill-lab\.venv\Scripts\python.exe' -m mypy --follow-imports=silent src/collaborative_hill/reporting/report.py src/collaborative_hill/experiments/manifests.py src/collaborative_hill/experiments/study.py src/collaborative_hill/engine/store.py src/collaborative_hill/engine/branching.py src/collaborative_hill/cli.py
+git -c safe.directory=C:/Users/jekyt/wt/chl -c core.safecrlf=false diff --check
+```
+
+Results: 57 tests passed in 11.14s; 15 caller tests passed in 2.07s;
+Ruff clean; mypy clean on six source files; diff whitespace clean.
+The Git safe-directory setting was per-command, with no config writes.
+
+NOT verified: full suite/gates, mutation testing, long builds, multiprocess
+stress, power-loss recovery or GitHub state (driver prohibited these broader
+checks/access). Freeze publication was exercised on this Windows filesystem;
+other filesystems must support hard links or publication fails closed.
+Legacy manifests remain readable without pins, with mandatory seal checks.
+No version-creation/lineage feature was added. Human-action file is null and
+HANDOFF.md retains all owner decisions. All edits await driver commits/PR.

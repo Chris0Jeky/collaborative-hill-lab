@@ -6,8 +6,10 @@ if str(_SRC) not in sys.path:
     sys.path.insert(0, str(_SRC))
 
 import pytest  # noqa: E402
+from typer.testing import CliRunner  # noqa: E402
 
 from collaborative_hill.agents.scripted.nipd_policies import build_nipd_policy  # noqa: E402
+from collaborative_hill.cli import app  # noqa: E402
 from collaborative_hill.engine.branching import branch_run  # noqa: E402
 from collaborative_hill.engine.store import FileCheckpointStore, RunPaths  # noqa: E402
 from collaborative_hill.experiments.study import run_study  # noqa: E402
@@ -85,3 +87,49 @@ def test_branch_into_empty_existing_dir_is_accepted(tmp_path: Path) -> None:
     )
     assert result.status == "completed"
     assert (child / "events.jsonl").exists()
+
+
+def test_branch_refuses_stale_checkpoints(tmp_path):
+    parent, fork = _make_parent(tmp_path)
+    child = tmp_path / "child"
+    (child / "checkpoints").mkdir(parents=True)
+    sentinel = child / "checkpoints" / "ckpt-000000.json"
+    sentinel.write_bytes(b"preserve me")
+    with pytest.raises(FileExistsError):
+        branch_run(parent_dir=parent, fork_seq=fork, child_dir=child,
+                   child_run_id="child", policy_overrides=_override())
+    assert sentinel.read_bytes() == b"preserve me"
+    assert not (child / "events.jsonl").exists()
+
+
+def test_branch_directory_is_reserved_before_prefix_write(tmp_path, monkeypatch):
+    parent, fork = _make_parent(tmp_path)
+    child = tmp_path / "child"
+    original_open = Path.open
+    contended = False
+
+    def competing_branch(path, mode="r", *args, **kwargs):
+        nonlocal contended
+        if path == child / "events.jsonl" and mode == "w" and not contended:
+            contended = True
+            with pytest.raises(FileExistsError):
+                branch_run(parent_dir=parent, fork_seq=fork, child_dir=child,
+                           child_run_id="competitor", policy_overrides=_override())
+        return original_open(path, mode, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "open", competing_branch)
+    result, _ = branch_run(parent_dir=parent, fork_seq=fork, child_dir=child,
+                           child_run_id="winner", policy_overrides=_override())
+    assert contended
+    assert result.status == "completed"
+
+
+def test_cli_occupied_branch_is_usage_error(tmp_path):
+    parent, fork = _make_parent(tmp_path)
+    result = CliRunner().invoke(app, [
+        "branch", str(parent), "--at-event", str(fork), "--override", "a3=allc",
+        "--out", str(parent),
+    ])
+    assert result.exit_code == 2
+    assert "error:" in result.output
+    assert "refusing" in result.output

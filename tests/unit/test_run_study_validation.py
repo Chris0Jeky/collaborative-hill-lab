@@ -14,7 +14,7 @@ from pydantic import ValidationError
 from typer.testing import CliRunner
 
 from collaborative_hill.cli import app
-from collaborative_hill.experiments.study import StudySpec, run_study
+from collaborative_hill.experiments.study import ConditionSpec, StudySpec, run_study
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 STUDY_000 = REPO_ROOT / "studies" / "000-legacy-reproduction"
@@ -74,3 +74,9 @@ def test_cli_zero_replicates_exits_2(tmp_path: Path) -> None:
     )
     assert result.exit_code == 2
     assert not artifacts.exists()
+
+
+def test_duplicate_condition_ids_are_rejected() -> None:
+    condition = ConditionSpec(condition_id="same", scenario="s.json", skin="skin.json")
+    with pytest.raises(ValidationError, match="unique"):
+        StudySpec(study_id="s", seed=1, conditions=(condition, condition))
