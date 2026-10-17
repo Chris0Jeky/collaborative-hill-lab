@@ -169,7 +169,7 @@ def test_study_report_reads_archived_runs_without_writes(
         aggregate = study_report(root).read_text(encoding="utf-8")
         assert "completed" in aggregate
         if cached:
-            assert "9876" in aggregate
+            assert "9876" not in aggregate  # a stale-version cache is recomputed, not trusted
     after = {p: (p.read_bytes(), p.stat().st_mtime_ns)
              for p in (root / "condition").rglob("*") if p.is_file()}
     assert after == before
