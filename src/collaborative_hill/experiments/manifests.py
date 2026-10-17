@@ -66,6 +66,8 @@ class RunManifest(BaseModel):
     fork_seq: int | None = None
     status: str = "running"
     failure_reason: str | None = None
+    event_count: int | None = None
+    final_event_hash: str | None = None
 
 
 def utc_now_iso() -> str:

@@ -1,4 +1,40 @@
-# HANDOFF — exact current state (updated 2026-08-12)
+# HANDOFF — exact current state (updated 2026-10-17)
+
+## Integrity guards for issues 36, 37 and 13 (2026-10-17, uncommitted)
+
+- Changed (#36): metrics/run/study reporting requires a nonempty, hash-valid
+  ledger with exactly one final terminal event matching manifest status and
+  study/run identity. New run and branch manifests pin event count and final
+  hash. Study reports revalidate cached inputs and omit failed-run outcomes
+  while retaining explicit failed status.
+- Changed (#37): freeze publishes a flushed temporary lock with an exclusive
+  hard link. An identical freeze returns the existing hash without rewriting
+  bytes/timestamp; a different commitment is refused without replacing it.
+- Changed (#13): run/branch output is reserved by exclusive ledger creation
+  before other artifacts. Nonempty directories, including stale checkpoints,
+  are refused; empty precreated directories still work. Duplicate condition
+  IDs fail validation; run/branch CLI collisions produce error/exit 2.
+- Verified: defect regressions failed before the fixes; the final five focused
+  test files pass (57 tests), and five directly affected caller/compatibility
+  test files pass (15 tests). Changed-file Ruff and mypy (six source files)
+  pass; `git diff --check` passes. Exact commands are in BUILD_LOG.md.
+- NOT verified: full suites, make check/test/validate, long acceptance builds,
+  mutation testing, multiprocess stress or power-loss recovery. The driver
+  explicitly limited verification to focused tests; no GitHub calls or Git
+  writes were made. No frozen inputs, locks or scientific results were edited.
+- Residual risk: legacy manifests without pins still require a valid terminal
+  seal but lack an independent historical count/hash. Atomic freeze publication
+  needs filesystem hard-link support and fails closed when unavailable.
+  Existing generated reports are preserved on validation failure.
+- Shared-file commit boundaries: study.py final manifest fields and branching.py
+  final manifest fields belong to #36; study.py os/tempfile imports + freeze
+  function belong to #37; study.py validator/preflight/reserve, branching.py
+  output guard/reserve, store.py and cli.py belong to #13. The new reporting
+  and freeze test modules belong to #36 and #37 respectively; the other three
+  changed test files belong to #13. This section and BUILD_LOG.md cover all three.
+- Human actions: `human_todo=null`; all ten owner decisions below remain open
+  and untouched. New scientific version creation/lineage authoring is outside
+  this guard repair. The driver owns commits, PR publication and review.
 
 ## Distribution metric publication checkpoint (2026-10-06)
 

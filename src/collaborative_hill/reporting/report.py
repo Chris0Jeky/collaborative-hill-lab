@@ -10,7 +10,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from collaborative_hill.engine.events import Event
+from collaborative_hill.engine.events import ChainError, Event, EventType
 from collaborative_hill.engine.store import FileEventStore, RunPaths
 from collaborative_hill.metrics import (
     METRIC_VERSIONS,
@@ -41,6 +41,19 @@ def write_run_metrics(run_dir: Path) -> dict[str, Any]:
     paths = RunPaths(Path(run_dir))
     events = FileEventStore(paths.events).load_all(verify=True)
     manifest = json.loads(paths.manifest.read_text(encoding="utf-8"))
+    terminal_types = {EventType.RUN_COMPLETED, EventType.RUN_FAILED}
+    terminals = [i for i, event in enumerate(events) if event.event_type in terminal_types]
+    if terminals != [len(events) - 1]:
+        raise ChainError("reporting requires exactly one terminal seal at the end of the ledger")
+    terminal = events[-1]
+    expected = {"completed": EventType.RUN_COMPLETED, "failed": EventType.RUN_FAILED}
+    if terminal.event_type != expected.get(manifest["status"]):
+        raise ChainError("manifest status does not match the terminal seal")
+    if (terminal.study_id, terminal.run_id) != (manifest["study_id"], manifest["run_id"]):
+        raise ChainError("manifest study/run identity does not match the terminal seal")
+    for field, actual in (("event_count", len(events)), ("final_event_hash", terminal.event_hash)):
+        if manifest.get(field) is not None and manifest[field] != actual:
+            raise ChainError(f"manifest {field} does not match the sealed ledger")
     metrics = compute_all_metrics(events, manifest)
     paths.metrics.mkdir(exist_ok=True)
     (paths.metrics / "metrics.json").write_text(
@@ -156,16 +169,16 @@ def study_report(artifacts_study_dir: Path) -> Path:
     for manifest_path in sorted(root.glob("*/*/manifest.json")):
         run_dir = manifest_path.parent
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-        metrics_path = run_dir / "metrics" / "metrics.json"
-        if not metrics_path.exists():
-            write_run_metrics(run_dir)
-        metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
+        metrics = write_run_metrics(run_dir)
         row: dict[str, Any] = {
             "condition": manifest["condition_id"],
             "run": manifest["run_id"],
             "replicate": manifest["replicate"],
             "status": manifest["status"],
         }
+        if manifest["status"] != "completed":
+            rows.append(row)
+            continue
         if "cooperation" in metrics:
             row["mean_coop"] = round(metrics["cooperation"]["mean_cooperation"], 4)
             row["final_coop"] = round(metrics["cooperation"]["final_window_cooperation"], 4)
