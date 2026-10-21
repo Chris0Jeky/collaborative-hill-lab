@@ -145,3 +145,40 @@ def test_branch_pre_manifest_failure_releases_reservation(tmp_path):
     result, _ = branch_run(parent_dir=parent, fork_seq=fork, child_dir=child,
                            child_run_id="child", policy_overrides=_override())
     assert result.status == "completed"
+
+
+@pytest.mark.parametrize("existing_child", [False, True])
+def test_branch_checkpoint_failure_releases_owned_artifacts(tmp_path, monkeypatch, existing_child):
+    parent, fork = _make_parent(tmp_path)
+    before = {p: p.read_bytes() for p in parent.rglob("*") if p.is_file()}
+    child = tmp_path / "child"
+    if existing_child:
+        child.mkdir()
+    save = FileCheckpointStore.save
+    written = []
+    failure = OSError("synthetic failure after checkpoint write")
+
+    def fail_after_save(store, **kwargs):
+        checkpoint = save(store, **kwargs)
+        assert checkpoint.parent == child / "checkpoints"
+        written.append(checkpoint.read_bytes())
+        assert not (child / "manifest.json").exists()
+        raise failure
+
+    with monkeypatch.context() as patch:
+        patch.setattr(FileCheckpointStore, "save", fail_after_save)
+        with pytest.raises(OSError) as caught:
+            branch_run(parent_dir=parent, fork_seq=fork, child_dir=child,
+                       child_run_id="child", policy_overrides=_override())
+
+    assert caught.value is failure
+    assert written and written[0]
+    assert child.exists() == existing_child
+    if existing_child:
+        assert list(child.iterdir()) == []
+    assert {p: p.read_bytes() for p in parent.rglob("*") if p.is_file()} == before
+
+    result, _ = branch_run(parent_dir=parent, fork_seq=fork, child_dir=child,
+                           child_run_id="child", policy_overrides=_override())
+    assert result.status == "completed"
+    assert FileCheckpointStore(child / "checkpoints").list_seqs()

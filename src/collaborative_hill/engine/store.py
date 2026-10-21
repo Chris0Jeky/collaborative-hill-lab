@@ -49,21 +49,40 @@ class RunPaths:
 
     @contextmanager
     def reserve(self) -> Iterator["RunPaths"]:
-        """Claim an empty run directory; clean up owned, unmanifested failures."""
-        self.root.mkdir(parents=True, exist_ok=True)
+        """Claim an empty run directory; clean up owned, unmanifested failures.
+
+        If the filesystem cannot identify the reserved ledger, retain the
+        artifacts for manual inspection rather than risk deleting a new owner.
+        """
+        created_root = False
+        try:
+            self.root.mkdir(parents=True)
+            created_root = True
+        except FileExistsError:
+            if not self.root.is_dir():
+                raise
         if any(self.root.iterdir()):
             raise FileExistsError(
                 f"refusing to write into occupied run directory: {self.root}; "
                 "choose a fresh output directory"
             )
-        with self.events.open("x", encoding="utf-8") as stream:
-            reservation = os.fstat(stream.fileno())
+        reservation = None
         try:
+            with self.events.open("x", encoding="utf-8") as stream:
+                try:
+                    reservation = os.fstat(stream.fileno())
+                except OSError:
+                    # Recover identity only from the still-open descriptor:
+                    # the pathname may already name a competing reservation.
+                    with suppress(OSError):
+                        reservation = os.fstat(stream.fileno())
+                    raise
             yield self.create()
         except BaseException:
             with suppress(OSError):  # Cleanup must not hide the original failure.
-                if (not self.manifest.exists()
-                        and os.path.samestat(reservation, self.events.stat())):
+                if (reservation is not None and reservation.st_ino != 0
+                        and not self.manifest.exists()
+                        and os.path.samestat(reservation, self.events.lstat())):
                     for path in (self.root / "scenario.resolved.json", self.root / "branch.json"):
                         path.unlink(missing_ok=True)
                     for directory in (self.checkpoints, self.metrics):
@@ -71,7 +90,8 @@ class RunPaths:
                             shutil.rmtree(directory)
                     # Release the ledger last; a new reservation then prevents rmdir.
                     self.events.unlink()
-                    self.root.rmdir()
+                    if created_root:
+                        self.root.rmdir()
             raise
 
 
