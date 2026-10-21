@@ -110,16 +110,20 @@ class FileEventStore:
         self._count += 1
         self._last_hash = event.event_hash
 
-    def iter_events(self) -> Iterator[Event]:
+    def iter_events(self, *, reject_blank_records: bool = False) -> Iterator[Event]:
+        """Read events; lenient inspection may skip blanks, verified loads may not."""
         if not self.path.exists():
             return
         with self.path.open(encoding="utf-8") as f:
-            for line in f:
-                if line.strip():
-                    yield Event.model_validate(json.loads(line))
+            for line_number, line in enumerate(f, start=1):
+                if not line.strip():
+                    if reject_blank_records:
+                        raise ChainError(f"blank record at line {line_number}")
+                    continue
+                yield Event.model_validate(json.loads(line))
 
     def load_all(self, verify: bool = True) -> list[Event]:
-        events = list(self.iter_events())
+        events = list(self.iter_events(reject_blank_records=verify))
         if verify:
             verify_chain(events)
         return events
