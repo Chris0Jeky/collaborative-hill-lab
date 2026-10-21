@@ -1,4 +1,79 @@
-# HANDOFF — exact current state (updated 2026-10-17)
+# HANDOFF — exact current state (updated 2026-10-21)
+
+## Repository sweep and seed-audit workflow (2026-10-21)
+
+This section is the current checkpoint. The dated sections below are historical;
+their previous unverified gates and publication states do not describe current main.
+
+- **Original queue:** issues #3, #7, #33, #35 and #42 are closed. PR #44 fixed
+  locked setup, runtime package-version reporting and the two Ruff violations;
+  PR #45 fixed reservation ownership/cleanup; PR #46 corrected the claimed
+  cross-condition common-random-number allocation with a versioned opt-in protocol.
+- **Reviews and integrity:** PR #43 now rejects blank/whitespace ledger records
+  during verified reads, while retaining lenient inspection. Its review is resolved.
+  PR #47 checks parent/event hashes before append can mutate disk or cached state.
+  PR #48 completes #44's late review: the backend is pinned in the lock, installed
+  first, and used with `--no-build-isolation` plus the same runtime constraints.
+  PR #51 completes #46's late review: supplemental run-start metadata is snapshotted
+  and cannot replace any engine-owned field, including seed provenance, before any
+  callbacks or artifact access.
+- **New working tool:** PR #49 adds `chl study audit-seeds`. Stable read-only JSON
+  exposes the protocol, blocks, policy IDs, seed paths and full-width decimal seeds
+  for an actual scheduled replicate/round. Invalid schedules, unknown policies or
+  policy-construction errors, malformed locks and frozen-content drift fail before
+  success output or writes.
+- **Compatibility:** checked-in Study 000 and Study 001 inputs retain their original
+  hashes and legacy seed streams. `paired-policy-v2` requires explicit blocks and a
+  new draft; manifests, sealed start events, replay, branching and reports retain
+  and validate that provenance. The current LLM adapter does not consume the kernel
+  RNG, so the protocol does not couple provider sampling.
+- **Dependency maintenance:** the new Dependabot PR #50 upgrades Pillow to 13.0.0.
+  Fresh setup, all lock pins, reporting and Matplotlib PNG/JPEG/TIFF export checks
+  pass, including RGBA alpha preservation and scalar-image conversion.
+- **Final verification (PR #50 merge, including #51):** `make check test validate` passes:
+  Ruff clean, mypy clean on 41 source files, 260 unit/property tests and 411 full-suite
+  tests. Acceptance scenarios pass 11/11. Fresh setup matches all 38 final locked
+  distributions and `pip check` passes. The backend-lock follow-up was also checked
+  with an offline setup repeat and pip 24.0 installation stages; setup preserved
+  lock bytes. The final combined checks use the fresh environment with Pillow
+  13.0.0. Independent reviews found no blocking findings.
+- **End-to-end demonstration:** generated an unfrozen paired draft, audited it twice
+  with byte-identical JSON, ran all five conditions (one replicate each), replayed
+  all five with matching chains, and generated the study report. Every agent's
+  policy stream matches across the four factorial cells, mechanism streams differ,
+  and the misinformation population has a separate block. All 30 checked-in study
+  files stayed byte-identical. This demonstrates engineering behavior, not a new
+  scientific result or a variance-reduction claim.
+- **Limits:** validation ran on Linux/Python 3.12. Native Windows execution, hosted
+  test CI, forced process termination, power-loss recovery and multiprocess stress
+  were not verified. Windows interpreter/path selection was checked with Make dry
+  runs. Cleanup preserves artifacts when ownership cannot be proven; it cannot run
+  after abrupt process death. T1 and the absence of hosted test CI are unchanged.
+- **Human actions:** `human_todo=null`. No study was frozen, no paid or real-provider run
+  was made, and all owner decisions in the list below remain untouched.
+
+Useful next steps are to inspect proposed blocks with the new audit before any
+preregistration, and to design a separately versioned provider-randomness experiment
+if real-model pairing is needed. Do not infer model reproducibility or reduced
+variance from equal kernel seeds.
+
+Reproduce the exploratory workflow after `make setup` (the output directory must
+be fresh; use `.venv/Scripts/python.exe` on Windows):
+
+```bash
+.venv/bin/python -m collaborative_hill.cli study audit-seeds studies/001-evidence-commons
+.venv/bin/python studies/001-evidence-commons/generate_study.py \
+  --seed-protocol paired-policy-v2 --output artifacts/drafts/study-001-paired-v2
+.venv/bin/python -m collaborative_hill.cli study audit-seeds \
+  artifacts/drafts/study-001-paired-v2 --replicate 0 --round 0
+.venv/bin/python -m collaborative_hill.cli run \
+  artifacts/drafts/study-001-paired-v2 --artifacts artifacts/paired-pilot --replicates 1
+```
+
+Run `.venv/bin/python -m collaborative_hill.cli replay <run-dir>` for each sealed
+run and `.venv/bin/python -m collaborative_hill.cli report <study-artifacts-dir>`
+to inspect the resulting draft. Full evidence and preserved hash literals are
+in the 2026-10-21 BUILD_LOG entry and ADR-0008.
 
 ## Issue 40: read-only reporting and reservation cleanup (2026-10-17)
 
