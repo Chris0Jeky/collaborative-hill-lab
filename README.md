@@ -59,6 +59,23 @@ Direct equivalents (Windows/PowerShell without make):
 `.venv/Scripts/python.exe -m collaborative_hill.cli <doctor|run|replay|report|...>` — see
 `Makefile` for the exact commands behind each target.
 
+### Inspect seed allocation before a run
+
+With the virtual environment active:
+
+```bash
+chl study audit-seeds studies/001-evidence-commons --replicate 0 --round 0
+```
+
+This read-only JSON audit reports the current study hash and protocol, scenario
+blocks, policy identities, and complete kernel stream paths with 64-bit seeds
+encoded as decimal strings. Replicate and round indices start at zero and default
+to zero; the selected round must be scheduled in every condition. Frozen-study
+drift and invalid requests exit with status 2. Matching kernel streams alone do
+not establish scientific comparability, identical actions or outcomes, or reduced
+variance. The current LLM adapter ignores its kernel RNG, so the audit does not
+claim paired provider randomness.
+
 ## Architecture (one screen)
 
 ```

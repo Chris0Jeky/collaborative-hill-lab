@@ -2,6 +2,7 @@
 
     chl scenario validate <scenario.json> --skin <skin.json>
     chl study validate <study-dir>
+    chl study audit-seeds <study-dir> [--replicate N] [--round N]
     chl study freeze <study-dir>          (explicit human step)
     chl run <study-dir> [--artifacts DIR] [--condition ID] [--replicates N]
     chl replay <run-dir>
@@ -53,6 +54,23 @@ def study_validate(study_dir: Path) -> None:
     from collaborative_hill.experiments.study import validate_study
 
     typer.echo(json.dumps(validate_study(study_dir), indent=2))
+
+
+@study_app.command("audit-seeds")
+def study_audit_seeds(
+    study_dir: Path,
+    replicate: int = typer.Option(0, "--replicate", min=0, help="Zero-based study replicate"),
+    round_index: int = typer.Option(0, "--round", min=0, help="Zero-based scheduled round"),
+) -> None:
+    """Print kernel stream identities as JSON, without running or changing the study."""
+    from collaborative_hill.experiments.seed_audit import audit_study_seeds
+
+    try:
+        audit = audit_study_seeds(study_dir, replicate=replicate, round_index=round_index)
+    except (ValueError, OSError) as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(code=2) from exc
+    typer.echo(json.dumps(audit, indent=2, sort_keys=True))
 
 
 @study_app.command("freeze")
