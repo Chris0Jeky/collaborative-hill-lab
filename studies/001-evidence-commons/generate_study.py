@@ -1,10 +1,13 @@
 """Generate Study 001 scenario/skin/study files (validated through the schema).
 
 Kept in the study directory as the canonical record of how the 2x2 (+optional
-misinformer) design was produced. Idempotent: re-running rewrites the same
-content deterministically.
+misinformer) design was produced. Default: reproduce the original independent
+streams specification byte-for-byte. ``--seed-protocol paired-policy-v2``
+requires a fresh ``--output`` directory and creates a new, unfrozen draft.
 """
 
+import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -12,6 +15,10 @@ STUDY_DIR = Path(__file__).parent
 REPO = STUDY_DIR.parent.parent
 sys.path.insert(0, str(REPO / "src"))
 
+from collaborative_hill.engine.seeds import (  # noqa: E402
+    LEGACY_SEED_PROTOCOL,
+    PAIRED_SEED_PROTOCOL,
+)
 from collaborative_hill.experiments.scenario import (  # noqa: E402
     NarrativeSkin,
     ScenarioSpec,
@@ -169,11 +176,32 @@ def build_scenario(cid: str, accountability: str, topology: str,
 
 
 def main() -> None:
-    (STUDY_DIR / "scenarios").mkdir(parents=True, exist_ok=True)
-    (STUDY_DIR / "skins").mkdir(exist_ok=True)
-    (STUDY_DIR / "skins/official-briefing.json").write_text(
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--seed-protocol", choices=(LEGACY_SEED_PROTOCOL, PAIRED_SEED_PROTOCOL),
+                        default=LEGACY_SEED_PROTOCOL)
+    parser.add_argument("--output", type=Path,
+                        help="output directory; paired-policy-v2 requires a fresh directory")
+    args = parser.parse_args()
+    paired = args.seed_protocol == PAIRED_SEED_PROTOCOL
+    output = args.output or STUDY_DIR
+    if paired and (args.output is None or output.resolve() == STUDY_DIR.resolve()):
+        parser.error("paired-policy-v2 requires --output pointing to a new draft directory")
+    if (output / "study.lock.json").exists():
+        parser.error("refusing to overwrite a frozen study; choose a new output directory")
+    if (output / "study.json").exists():
+        existing = json.loads((output / "study.json").read_text(encoding="utf-8"))
+        if existing.get("seed_protocol", LEGACY_SEED_PROTOCOL) != args.seed_protocol:
+            parser.error(
+                "refusing to change seed protocol in an existing study; choose a new output"
+            )
+    if paired and output.exists() and any(output.iterdir()):
+        parser.error("paired-policy-v2 requires an empty or new output directory")
+
+    (output / "scenarios").mkdir(parents=True, exist_ok=True)
+    (output / "skins").mkdir(exist_ok=True)
+    (output / "skins/official-briefing.json").write_text(
         SKIN_A.model_dump_json(indent=2), encoding="utf-8")
-    (STUDY_DIR / "skins/newsroom-desk.json").write_text(
+    (output / "skins/newsroom-desk.json").write_text(
         SKIN_B.model_dump_json(indent=2), encoding="utf-8")
 
     cond_specs = []
@@ -184,23 +212,31 @@ def main() -> None:
         assert resolved_a.mechanism_hash == resolved_b.mechanism_hash, \
             "skins must not change the mechanism hash"
         assert resolved_a.narrative_hash != resolved_b.narrative_hash
-        (STUDY_DIR / f"scenarios/{cid}.json").write_text(
+        (output / f"scenarios/{cid}.json").write_text(
             spec.model_dump_json(indent=2), encoding="utf-8")
         cond_specs.append(ConditionSpec(
             condition_id=cid, scenario=f"scenarios/{cid}.json",
-            skin="skins/official-briefing.json"))
+            skin="skins/official-briefing.json",
+            scenario_block=("misinformation" if cid.endswith("-misinfo") else "factorial")
+            if paired else None))
 
     study = StudySpec(
-        study_id="001-evidence-commons",
+        study_id="001-evidence-commons-paired-v2" if paired else "001-evidence-commons",
         title=("Evidence Commons: accountability x evidence topology "
                "(DRAFT, human approval required)"),
         seed=20260713, replicates=3, checkpoint_every=4,
+        seed_protocol=args.seed_protocol,
         invalid_action_policy="abstain",
         conditions=tuple(cond_specs),
     )
-    (STUDY_DIR / "study.json").write_text(study.model_dump_json(indent=2), encoding="utf-8")
+    excluded = None if paired else {
+        "seed_protocol": True, "conditions": {"__all__": {"scenario_block"}},
+    }
+    (output / "study.json").write_text(
+        study.model_dump_json(indent=2, exclude=excluded), encoding="utf-8")
     print(f"study 001 written: {len(cond_specs)} conditions "
-          f"(mechanism hash equality across skins asserted)")
+          f"(mechanism hash equality across skins asserted); "
+          f"seed_protocol={study.seed_protocol}; unfrozen output={output}")
 
 
 if __name__ == "__main__":

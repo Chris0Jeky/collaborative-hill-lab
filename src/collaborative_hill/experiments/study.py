@@ -14,18 +14,19 @@ hash — that is a new study version, not an edit.
 
 Runs land in artifacts/<study_hash-or-DRAFT>/<condition>/<run_id>/ with a full
 RunManifest, the frozen resolved scenario, the event ledger, and checkpoints.
-Paired seeds: replicate r of every condition shares the same seed path prefix
-(study_seed, condition, r) — and policy streams are keyed by agent id, so
-conditions differing only in institution reuse identical policy randomness.
+Missing seed_protocol means legacy-independent-v1: condition-specific policy
+and mechanism streams. Explicit paired-policy-v2 shares policy streams only
+within the declared (scenario_block, replicate); world streams remain
+condition-specific. See ADR-0008 for compatibility and inference limits.
 """
 
 import json
 import os
 import tempfile
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, Self
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from collaborative_hill.agents.llm import FakeProvider, LLMPolicy
 from collaborative_hill.agents.scripted.ec_policies import build_ec_policy
@@ -33,6 +34,13 @@ from collaborative_hill.agents.scripted.nipd_policies import build_nipd_policy
 from collaborative_hill.agents.scripted.params import coerce_policy_params
 from collaborative_hill.engine.hashing import content_hash
 from collaborative_hill.engine.runner import RunConfig, RunResult, run_episode
+from collaborative_hill.engine.seeds import (
+    LEGACY_SEED_PROTOCOL,
+    PAIRED_SEED_PROTOCOL,
+    SeedProtocol,
+    study_seed_roots,
+    validate_scenario_block,
+)
 from collaborative_hill.engine.store import RunPaths
 from collaborative_hill.experiments.manifests import (
     RunManifest,
@@ -63,6 +71,13 @@ class ConditionSpec(BaseModel):
     condition_id: str
     scenario: str  # path relative to the study directory
     skin: str
+    scenario_block: str | None = None
+
+    @field_validator("scenario_block")
+    @classmethod
+    def valid_scenario_block(cls, block: str | None) -> str | None:
+        validate_scenario_block(block)
+        return block
 
 
 class StudySpec(BaseModel):
@@ -72,6 +87,7 @@ class StudySpec(BaseModel):
     study_id: str
     title: str = ""
     seed: int
+    seed_protocol: SeedProtocol = LEGACY_SEED_PROTOCOL
     replicates: int = Field(default=1, ge=1)
     checkpoint_every: int = 0
     invalid_action_policy: InvalidActionPolicy = "fail"
@@ -86,6 +102,15 @@ class StudySpec(BaseModel):
         if len(ids) != len(set(ids)):
             raise ValueError("condition IDs must be unique")
         return conditions
+
+    @model_validator(mode="after")
+    def explicit_pairing_blocks(self) -> Self:
+        for condition in self.conditions:
+            if self.seed_protocol == PAIRED_SEED_PROTOCOL and condition.scenario_block is None:
+                raise ValueError("paired-policy-v2 requires scenario_block for every condition")
+            if self.seed_protocol == LEGACY_SEED_PROTOCOL and condition.scenario_block is not None:
+                raise ValueError("scenario_block requires seed_protocol=paired-policy-v2")
+        return self
 
 
 def load_study(study_dir: Path) -> tuple[StudySpec, dict[str, ResolvedScenario]]:
@@ -106,7 +131,7 @@ def load_study(study_dir: Path) -> tuple[StudySpec, dict[str, ResolvedScenario]]
 
 
 def study_hash(spec: StudySpec, resolved: dict[str, ResolvedScenario]) -> str:
-    return content_hash({
+    payload: dict[str, Any] = {
         "domain": "chl.study.v1",
         "study_id": spec.study_id,
         "seed": spec.seed,
@@ -116,7 +141,15 @@ def study_hash(spec: StudySpec, resolved: dict[str, ResolvedScenario]) -> str:
         "conditions": {
             c.condition_id: resolved[c.condition_id].scenario_hash for c in spec.conditions
         },
-    })
+    }
+    if spec.seed_protocol == PAIRED_SEED_PROTOCOL:
+        payload.update({
+            "domain": "chl.study.v2",
+            "seed_protocol": spec.seed_protocol,
+            "scenario_blocks": {c.condition_id: c.scenario_block for c in spec.conditions},
+        })
+    # Omitted/explicit legacy protocol retains the EXACT original hash payload.
+    return content_hash(payload)
 
 
 def validate_study(study_dir: Path) -> dict[str, Any]:
@@ -124,6 +157,8 @@ def validate_study(study_dir: Path) -> dict[str, Any]:
     return {
         "study_id": spec.study_id,
         "study_hash": study_hash(spec, resolved),
+        "seed_protocol": spec.seed_protocol,
+        "scenario_blocks": {c.condition_id: c.scenario_block for c in spec.conditions},
         "conditions": {
             cid: {
                 "scenario_hash": r.scenario_hash,
@@ -296,6 +331,10 @@ def run_study(
         scenario = resolved[cond.condition_id]
         for r in range(replicates):
             run_id = f"{cond.condition_id}-r{r:03d}"
+            seed_root, policy_seed_root = study_seed_roots(
+                spec.seed, cond.condition_id, r,
+                protocol=spec.seed_protocol, scenario_block=cond.scenario_block,
+            )
             run_dir = (Path(artifacts_root) / (locked or "DRAFT-" + h[:12])
                        / cond.condition_id / run_id)
             with RunPaths(run_dir).reserve() as paths:
@@ -326,7 +365,10 @@ def run_study(
                     prompt_template_hashes={a: p.prompt_template_hash
                                             for a, p in sorted(policies.items())
                                             if isinstance(p, LLMPolicy)},
-                    seed_root=[spec.seed, cond.condition_id, r],
+                    seed_root=list(seed_root),
+                    seed_protocol=spec.seed_protocol,
+                    policy_seed_root=list(policy_seed_root) if policy_seed_root else None,
+                    scenario_block=cond.scenario_block,
                     checkpoint_every=spec.checkpoint_every,
                     invalid_action_policy=spec.invalid_action_policy,
                     scorer_versions=_scorer_versions(),
@@ -337,7 +379,10 @@ def run_study(
             config = RunConfig(
                 study_id=spec.study_id,
                 run_id=run_id,
-                seed_root=(spec.seed, cond.condition_id, r),
+                seed_root=seed_root,
+                seed_protocol=spec.seed_protocol,
+                policy_seed_root=policy_seed_root,
+                scenario_block=cond.scenario_block,
                 checkpoint_every=spec.checkpoint_every,
                 invalid_action_policy=spec.invalid_action_policy,
             )

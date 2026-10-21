@@ -10,11 +10,16 @@ import subprocess
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, Self
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from collaborative_hill.engine.hashing import sha256_hex
+from collaborative_hill.engine.seeds import (
+    LEGACY_SEED_PROTOCOL,
+    SeedProtocol,
+    validate_seed_metadata,
+)
 
 InvalidActionPolicy = Literal["fail", "abstain"]
 
@@ -22,7 +27,7 @@ InvalidActionPolicy = Literal["fail", "abstain"]
 class RunManifest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    schema_version: int = 1
+    schema_version: int = 2
     study_id: str
     study_hash: str | None = None
     study_frozen: bool = False
@@ -48,6 +53,9 @@ class RunManifest(BaseModel):
     sampling: dict[str, dict[str, Any]] = Field(default_factory=dict)
 
     seed_root: list[str | int] = Field(default_factory=list)
+    seed_protocol: SeedProtocol = LEGACY_SEED_PROTOCOL
+    policy_seed_root: list[str | int] | None = None
+    scenario_block: str | None = None
     checkpoint_every: int = 0
     invalid_action_policy: InvalidActionPolicy = "fail"
     scorer_versions: dict[str, str] = Field(default_factory=dict)
@@ -68,6 +76,11 @@ class RunManifest(BaseModel):
     failure_reason: str | None = None
     event_count: int | None = None
     final_event_hash: str | None = None
+
+    @model_validator(mode="after")
+    def consistent_seed_metadata(self) -> Self:
+        validate_seed_metadata(self.seed_protocol, self.policy_seed_root, self.scenario_block)
+        return self
 
 
 def utc_now_iso() -> str:

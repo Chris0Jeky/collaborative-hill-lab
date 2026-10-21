@@ -2,6 +2,12 @@
 
 Status: **accepted** (2026-07-13)
 
+**Correction (ADR-0008):** the cross-condition pairing claim below was incorrect:
+`condition_id` is part of the policy path too. These legacy paths are retained as
+`legacy-independent-v1` for reproducibility. Explicit `paired-policy-v2` uses a shared
+scenario-block policy root; see [ADR-0008](0008-versioned-policy-pairing.md). The original
+decision text remains below as the historical record; it does not describe v2 pairing.
+
 ## Context
 
 The legacy code used process-global RNG (or none at all in the figure-generating scripts).

@@ -58,9 +58,17 @@ of interest (HUMAN DECISION: define it, e.g. 1.0 briefing-quality points) with H
 
 ## 7. Randomisation
 
-Paired scenario seeds: replicate r shares `seed_root=(study_seed, condition, r)` structure
-across conditions; condition execution order randomised per replicate block; agent-name and
-skin assignment balanced.
+The checked-in original study uses `legacy-independent-v1`: its condition-specific policy
+roots do not implement CRN. For a future paired draft, explicitly select `paired-policy-v2`
+and declare each condition's `scenario_block` (README and ADR-0008). Policy randomness then
+shares a root within `(scenario_block, replicate)`; mechanism streams remain condition-specific.
+This draft's final block assignments and the randomness actually consumed must be reviewed
+before freeze. The current LLM adapter ignores the kernel RNG, so provider-sampling pairing
+is not established by this setting.
+
+Condition execution order randomisation and balanced agent-name/skin assignment remain
+intended design requirements. The seed-protocol change does not implement them; they must
+be implemented and verified before relying on them in provider experiments.
 
 ## 8. Exclusions and failure handling (predeclared)
 
@@ -73,8 +81,8 @@ skin assignment balanced.
 
 ## 9. Analysis
 
-Per STATISTICAL_ANALYSIS_PLAN.md: episode-level outcomes; paired contrasts over shared
-replicate seeds; bootstrap-over-episodes CIs; Holm over the confirmatory family {H1 main
+Per STATISTICAL_ANALYSIS_PLAN.md: episode-level outcomes; paired contrasts only after the
+pairing requirements in §7 and SAP §3 are met; bootstrap-over-episodes CIs; Holm over the confirmatory family {H1 main
 effect, H2 main effect}; H3 exploratory. Effect sizes with intervals, distributions plotted;
 no single leaderboard score.
 

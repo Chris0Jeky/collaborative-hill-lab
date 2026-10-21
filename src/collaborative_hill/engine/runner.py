@@ -6,8 +6,9 @@ Per round (all deterministic given policies' recorded outputs; ADR-0001):
                     observation is in the payload, so hidden-truth leak tests
                     can scan sealed ledgers directly.
   2. propose      - each policy gets its own derived rng stream
-                    (study_seed, condition, replicate, "agent", id, "round", t)
-                    and returns a typed ActionProposal -> ActionProposed event.
+                    (*policy_seed_root, "agent", id, "round", t); legacy runs
+                    use the condition-specific seed_root instead (ADR-0008).
+                    It returns a typed ActionProposal -> ActionProposed event.
   3. validate     - mechanism legality check. Invalid actions become
                     ActionRejected plus the configured fallback: "fail" aborts
                     the run (RunFailed), "abstain" substitutes an explicit
@@ -22,9 +23,9 @@ Per round (all deterministic given policies' recorded outputs; ADR-0001):
 Wall-clock time and other environment facts go only into unhashed event meta.
 """
 
-from typing import Any, Literal
+from typing import Any, Literal, Self
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, model_validator
 
 from collaborative_hill.domain.actions import AbstainAction, ActionProposal
 from collaborative_hill.engine.events import (
@@ -35,7 +36,14 @@ from collaborative_hill.engine.events import (
 )
 from collaborative_hill.engine.hashing import GENESIS_HASH, content_hash
 from collaborative_hill.engine.interfaces import MechanismEngine
-from collaborative_hill.engine.seeds import rng_for
+from collaborative_hill.engine.seeds import (
+    LEGACY_SEED_PROTOCOL,
+    PAIRED_SEED_PROTOCOL,
+    SeedPath,
+    SeedProtocol,
+    rng_for,
+    validate_seed_metadata,
+)
 from collaborative_hill.engine.store import FileCheckpointStore, FileEventStore, RunPaths
 
 InvalidActionPolicy = Literal["fail", "abstain"]
@@ -46,9 +54,17 @@ class RunConfig(BaseModel):
 
     study_id: str
     run_id: str
-    seed_root: tuple[str | int, ...]
+    seed_root: SeedPath
+    seed_protocol: SeedProtocol = LEGACY_SEED_PROTOCOL
+    policy_seed_root: SeedPath | None = None
+    scenario_block: str | None = None
     checkpoint_every: int = 0  # rounds; 0 = final checkpoint only
     invalid_action_policy: InvalidActionPolicy = "fail"
+
+    @model_validator(mode="after")
+    def consistent_seed_metadata(self) -> Self:
+        validate_seed_metadata(self.seed_protocol, self.policy_seed_root, self.scenario_block)
+        return self
 
 
 class _Emitter:
@@ -120,6 +136,16 @@ def run_episode(
 
     state = start_state if start_state is not None else mechanism.initial_state()
     if start_state is None:
+        # Do not retrofit new fields into legacy hashed payloads: old sealed
+        # ledgers must replay byte-for-byte. New manifests label legacy runs.
+        seed_meta = {}
+        if config.seed_protocol == PAIRED_SEED_PROTOCOL:
+            assert config.policy_seed_root is not None  # validated by RunConfig
+            seed_meta = {
+                "seed_protocol": config.seed_protocol,
+                "policy_seed_root": [str(c) for c in config.policy_seed_root],
+                "scenario_block": config.scenario_block,
+            }
         emitter.emit(
             logical_time=0,
             actor=ENGINE_ACTOR,
@@ -128,6 +154,7 @@ def run_episode(
                 "agents": sorted(agent_ids),
                 "policies": {a: getattr(policies[a], "policy_id", "?") for a in sorted(policies)},
                 "seed_root": [str(c) for c in config.seed_root],
+                **seed_meta,
                 "invalid_action_policy": config.invalid_action_policy,
                 **(start_meta or {}),
             },
@@ -149,7 +176,8 @@ def run_episode(
 
         accepted: dict[str, Any] = {}
         for agent in sorted(agent_ids):
-            rng = rng_for(*config.seed_root, "agent", agent, "round", t)
+            policy_root = config.policy_seed_root or config.seed_root
+            rng = rng_for(*policy_root, "agent", agent, "round", t)
             try:
                 proposal: ActionProposal = policies[agent].propose(observations[agent], rng)
             except Exception as exc:  # provider outages etc. seal the run as failed

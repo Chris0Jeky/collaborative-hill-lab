@@ -24,6 +24,7 @@ from pydantic import BaseModel, ConfigDict
 
 from collaborative_hill.agents.replay import policy_ids_from_events
 from collaborative_hill.engine.runner import RunConfig, RunResult, run_episode
+from collaborative_hill.engine.seeds import LEGACY_SEED_PROTOCOL, validate_recorded_seed_metadata
 from collaborative_hill.engine.store import FileCheckpointStore, FileEventStore, RunPaths
 from collaborative_hill.experiments.scenario import ResolvedScenario
 
@@ -68,6 +69,9 @@ def branch_run(
 
     parent_events = FileEventStore(parent_paths.events).load_all(verify=True)
     manifest = json.loads(parent_paths.manifest.read_text(encoding="utf-8"))
+    manifest.setdefault("seed_protocol", LEGACY_SEED_PROTOCOL)
+    if parent_events:
+        validate_recorded_seed_metadata(manifest, parent_events[0].payload)
     resolved = ResolvedScenario.model_validate_json(
         (parent_dir / "scenario.resolved.json").read_text(encoding="utf-8")
     )
@@ -97,6 +101,9 @@ def branch_run(
             study_id=manifest["study_id"],
             run_id=child_run_id,
             seed_root=tuple(manifest["seed_root"]),
+            seed_protocol=manifest["seed_protocol"],
+            policy_seed_root=manifest.get("policy_seed_root"),
+            scenario_block=manifest.get("scenario_block"),
             checkpoint_every=manifest["checkpoint_every"],
             invalid_action_policy=manifest["invalid_action_policy"],
         )

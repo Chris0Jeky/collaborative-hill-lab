@@ -65,7 +65,8 @@ FWER-controlled confirmatory family; they are supporting/exploratory.
 One row per episode:
 
 ```
-study_hash, condition_id (A×T), replicate, seed_root,
+study_hash, condition_id (A×T), replicate, seed_protocol, scenario_block,
+seed_root, policy_seed_root,
 briefing_quality, accepted_correct, accepted_incorrect, slots_filled,
 contribution_rate, verify_supported, free_rider_advantage, payoff_gini,
 n_agents, invalid_action_count, run_status, provider/model_id, prompt_template_hash,
@@ -82,17 +83,31 @@ episode (§4.2).
 
 ## 3. Blocking and pairing (CRN)
 
-Study 001 uses **common random numbers**: replicate `r` shares
-`seed_root = (study_seed, condition_id, r)` across all four cells, and policy streams are
-agent-keyed and condition-independent (METHODOLOGY §3). Therefore **replicate `r` is a
-matched block across the four conditions** — the same scenario randomness underlies cell
-`(aggregate,private)`-r and cell `(attributable,private)`-r, etc.
+The **intended future paired design** requires an explicit `paired-policy-v2` study
+(ADR-0008). The checked-in original Study 001 JSON and all old runs lacking a protocol field
+use `legacy-independent-v1`: their policy paths include the condition, so equal replicate
+numbers do **not** imply common random numbers. They must not be presented as CRN-paired.
 
-Consequences for analysis:
+For the opted-in draft, each condition declares a `scenario_block`. Conditions in the same
+block share `policy_seed_root = (study_seed, "paired-policy-v2", "block", scenario_block,
+"replicate", r)`. Policy paths append agent ID and round. The mechanism root is separate
+and condition-specific; not all world randomness is coupled. The protocol and mapping are
+bound into the new study hash, and manifests record them explicitly.
 
-- The primary contrasts are **paired/blocked on replicate**, which is where CRN's variance
-  reduction becomes power.
-- `replicate` (equivalently `scenario_block`) enters every model as a blocking factor.
+For a study using policies that consume these matching kernel streams, the block key is
+**`(scenario_block, replicate)`** within that study. Equal draws can still lead to different
+actions because observations differ, and observation-dependent draw consumption can affect
+within-round alignment. CRN does not guarantee lower outcome variance; the pilot must
+measure it. Deterministic scripted personas remain deterministic under either protocol.
+
+**LLM limitation:** the current `LLMPolicy` discards the kernel RNG. This seed protocol does
+not establish shared provider randomness or justify paired LLM inference. Provider coupling
+needs supported controls and empirical validation before the paired design is used.
+
+The paired models below apply only after this design has been explicitly selected and the
+relevant randomness verified. The original independent outputs are not silently migrated or
+assigned a pairing that was never implemented. Generating a new draft does not freeze this
+SAP or resolve any human-owned design choices.
 
 ---
 

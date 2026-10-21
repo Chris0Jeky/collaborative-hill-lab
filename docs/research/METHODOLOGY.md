@@ -91,36 +91,47 @@ specifically to detect and *report* this rather than emit a false-tight interval
 
 ## 3. Paired scenario seeds across conditions (common random numbers)
 
-The lab implements **common random numbers (CRN)** so that between-condition contrasts are
-*within-scenario* differences, dramatically reducing variance and enabling paired analysis.
+The lab supports **common random numbers (CRN) for kernel policy streams** through explicit
+`paired-policy-v2` studies (ADR-0008). The checked-in Study 000 and original Study 001 use
+`legacy-independent-v1`; they do not have cross-condition CRN. Missing protocol metadata
+always means legacy independent, never inferred pairing from equal replicate numbers.
 
 ### How the seed scheme implements CRN
 
-All randomness derives from a hierarchical path via `engine/seeds.py`
-(`derive_seed` = SHA-256 over a version-tagged, unit-separated path; **no global RNG state
-exists anywhere**). For a study run (`experiments/study.py`):
+Kernel randomness derives from explicit paths via `engine/seeds.py`; there is no global RNG
+state. The SHA-256 derivation primitive remains unchanged. `study_seed_roots` allocates paths
+under the study's recorded protocol:
 
-- `seed_root = (study_seed, condition_id, replicate)` — see `RunConfig.seed_root` and the
-  manifest's `seed_root` field.
-- Each policy draws from an **agent-keyed** stream:
-  `rng_for(*seed_root, "agent", agent_id, "round", t)` (`runner.py` propose loop).
-- The mechanism draws from `rng_for(*seed_root, "mechanism", "round", t)`.
+| Protocol | Policy root | Mechanism root (`seed_root`) |
+|---|---|---|
+| `legacy-independent-v1` | `(seed, condition, r)` | `(seed, condition, r)` |
+| `paired-policy-v2` | `(seed, "paired-policy-v2", "block", scenario_block, "replicate", r)` | `(seed, "paired-policy-v2", "condition", condition, "replicate", r)` |
 
-The CRN property falls out of two facts: (a) the same `replicate` index `r` is reused across
-**every** condition, and (b) policy streams are keyed by **agent id and round, not by
-condition**. Therefore two conditions that differ **only in the institution** (e.g.
-`aggregate` vs `attributable`, holding scenario and replicate fixed) receive **identical
-policy randomness** for the same agent at the same round. Any behavioural difference between
-them is attributable to the institution, not to which random draws happened. This is the one
-genuinely good instinct in the legacy `npdl` runner (`seed = run_number`, shared across
-scenarios), now formalised, collision-resistant (SHA-256, reserved separator), and
-substream-safe (adding a new random consumer cannot shift an existing stream).
+The runner appends `("agent", agent_id, "round", t)` for policy randomness and
+`("mechanism", "round", t)` for world randomness. Every v2 condition must explicitly name
+its `scenario_block`; both the protocol and the block mapping enter the study hash.
+Manifests and the new protocol's `RunStarted` payload record both roots and the block.
+Legacy study hashes, streams, and sealed ledger payloads remain unchanged.
+
+Within a v2 block and replicate, the same agent/round gets the same initial PRNG stream
+across conditions. Matching sequences of RNG calls yield matching draws. Different
+observations or within-round draw consumption can still produce different actions. EC
+observations already differ by accountability/topology, so institution-only comparisons do
+not guarantee identical observations or behaviour. Mechanism randomness stays
+condition-specific. Adding a consumer in a separate agent/round/purpose path cannot shift
+the existing streams.
+
+`LLMPolicy` currently discards its supplied kernel RNG; provider sampling is separate and
+is **not coupled** by v2. Recorded-action replay is not evidence of provider CRN. Before a
+paired LLM analysis, the provider controls and the actual coupling must be established.
 
 ### Consequence for analysis
 
-Because conditions are paired at the replicate level, the primary contrasts are **paired
-contrasts over shared replicate seeds** (SAP §4). Paired analysis is what turns CRN's
-variance reduction into power.
+Paired contrasts require a declared block design and verified coupling for the randomness
+actually consumed. Record `(scenario_block, replicate)` as the block key within a study.
+CRN may reduce or increase contrast variance depending on outcome covariance; measure the
+paired variance in the pilot. Never retrofit paired inference to legacy runs solely because
+their replicate numbers match. See SAP §3 for the intended future paired Study 001 design.
 
 ---
 
@@ -153,10 +164,10 @@ Every confirmatory study follows a three-phase procedure:
    deviation** of the primary outcome and to shake out operational failures (parse rates,
    refusal rates, cost per episode). **Pilot p-values are never read** and pilot episodes are
    discarded from the confirmatory corpus.
-2. **Power.** From the pilot SD (using the **paired** SD, since CRN pairing is the design),
+2. **Power.** From the pilot SD (using the **paired** SD when verified CRN is the design),
    compute N/cell to detect the pre-declared minimum effect of interest at the target power
-   (e.g. 80–90%) and Holm-adjusted α. Because CRN reduces the paired variance, power the
-   paired contrast, not the between-cell marginal.
+   (e.g. 80–90%) and Holm-adjusted α. For a paired design, use the measured variance of
+   the paired contrast, rather than assuming a reduction from the between-cell marginal.
 3. **Confirm.** Freeze N (the stopping rule, §12), run the confirmatory batch, analyse per
    the frozen SAP.
 
@@ -318,7 +329,7 @@ preregistered contrast is a first-class result of the study.
 | Method rule | Implemented by |
 |---|---|
 | Episode as unit | `runner.run_episode` (one sealed ledger); `metrics/cooperation.py` collapses to one scalar/episode |
-| CRN / paired seeds | `engine/seeds.derive_seed`; `seed_root=(study_seed, condition, replicate)`; agent-keyed streams in `runner.py` |
+| CRN / paired seeds | Explicit `paired-policy-v2`; `engine/seeds.study_seed_roots`; shared `(scenario_block, replicate)` policy root; legacy/default streams remain independent (ADR-0008) |
 | No global RNG | `engine/seeds.py` (every stream derived from an explicit path) |
 | Provenance / drift log | `experiments/manifests.RunManifest`, written by `run_study` |
 | Freeze before confirm | `study.freeze_study` → `study.lock.json`; `run_study` rejects post-freeze drift |
