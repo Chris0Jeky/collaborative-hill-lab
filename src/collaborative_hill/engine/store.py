@@ -27,7 +27,7 @@ from pathlib import Path
 from typing import Any
 
 from collaborative_hill.engine.events import ChainError, Event, verify_chain
-from collaborative_hill.engine.hashing import content_hash
+from collaborative_hill.engine.hashing import GENESIS_HASH, content_hash
 
 
 class RunPaths:
@@ -125,6 +125,10 @@ class FileEventStore:
     def append(self, event: Event) -> None:
         if event.seq != self._count:
             raise ChainError(f"append out of order: expected seq {self._count}, got {event.seq}")
+        if event.parent_hash != (self._last_hash or GENESIS_HASH):
+            raise ChainError(f"broken parent link at seq {event.seq}")
+        if event.compute_hash() != event.event_hash:
+            raise ChainError(f"hash mismatch at seq {event.seq}: stored {event.event_hash[:12]}…")
         with self.path.open("a", encoding="utf-8", newline="\n") as f:
             f.write(_event_line(event) + "\n")
         self._count += 1
