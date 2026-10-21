@@ -314,3 +314,135 @@ Manifested incomplete runs stay preserved and fail seal validation. Hard-link
 publication still requires filesystem support; there is no unsafe overwrite
 fallback. The mkstemp permission LOW is skipped pending a POSIX sharing policy.
 human_todo=null; HANDOFF.md retains all owner decisions. Driver owns commit/PR.
+
+## Open-issue sweep, paired-stream audit and review follow-ups — 2026-10-21
+
+Started from authoritative GitHub main `845957e0eabcd93d7fdf4b4c797a0696fcc8fd60`.
+The uploaded source snapshot matched all 174 remote file blobs and tree
+`5cb23861efd5a79838c640e47e990b15a5c9225f`. GitHub remained authoritative for
+issues, reviews, branches and publication. Changes were tested in isolated local
+worktrees and published through draft PRs; each published tree SHA was compared
+with the corresponding locally verified tree before becoming ready and merging.
+No force pushes or hosted test workflow were introduced.
+
+### Changes and regressions
+
+| Work | Published change | Evidence |
+|---|---|---|
+| #3 setup and agent guide | #44, backend follow-up #48 | Lock-preserving setup; correct interpreter selection/quoting; all 38 installed pins exact; backend isolated-build subprocess reproduced then removed |
+| #7 runtime version | #44 | Installed metadata supplies version 0.1.1; explicit `0+unknown` fallback when metadata is absent |
+| #33 lint | #44 | Two checkpoint fixture writes wrapped; repository Ruff gate now passes |
+| #43 review | #43 | Nine blank/space/tab record cases failed before the strict verified-read fix; lenient inspection remains available |
+| #42 reservation cleanup | #45 | Ownership/fstat/inode-zero/symlink regressions, real child-checkpoint failure and retry; existing empty roots and foreign artifacts preserved |
+| #35 false cross-condition CRN claim | #46 | Real study pipeline records distinct legacy draws; new explicit blocks share policy streams, separate mechanism streams, and preserve historical hashes |
+| Invalid ledger appends | #47 | Parent/self hash checks precede mutation; nine bad-append cases failed before the fix; valid metadata and branched run-ID suffixes still append |
+| Read-only seed audit | #49 | 38 integration cases cover allocation, full-width JSON seeds, no provider calls/writes, schedules, malformed locks and freeze drift |
+| #46 late metadata review | #51 | 34 of 38 new direct-API cases failed against the old runner; all pass with a validated entry snapshot and seven reserved keys; independent review reproduced the failures |
+| New Dependabot Pillow update | #50 | Fresh setup; all 38 pins exact; reporting and Matplotlib PNG/JPEG/TIFF, RGBA-alpha and scalar-image compatibility checks pass |
+
+The backend fix pins `setuptools==84.0.0` in the existing lock, installs the lock
+first, then builds editable with `--no-build-isolation` and `-c requirements-lock.txt`,
+and runs `pip check`. Its hook reports no extra editable-build dependencies; a
+standalone wheel package is not needed. Fresh setup, offline repeated setup with
+`PIP_NO_INDEX=1`, and the same stages under pip 24.0 all succeeded. Both checked
+environments had exactly the 38 lock entries plus pip and the editable project.
+Verbose logs showed no isolated build environment or backend install subprocess.
+The backend-follow-up lock SHA256 was
+`05844aa96e5c68ffcaa8d1283e27fa9ea0580d8b87c7ad87077904979969ce7b`; setup preserved
+those bytes and the manifest lock hash matched them.
+
+The audit's malformed-lock review was an error-classification correction, not a
+reproduced traceback: the existing lifecycle helper stringifies hash values. The
+new audit validates raw JSON locally so malformed locks are distinguished from
+well-formed commitments whose study content drifted. Lifecycle parsing is unchanged.
+
+### Integrated verification
+
+Linux, Python 3.12.14. Commands below select the integrated worktree's source while
+using the fresh, fully pinned environment built for the setup follow-up:
+
+```bash
+PYTHONPATH=src PYTEST_ADDOPTS='-o addopts=--strict-markers' make check test validate \
+  PY=/workspace/scratch/5eae6eaffb3e/work-build-lock/.venv/bin/python
+PYTHONPATH=src /workspace/scratch/5eae6eaffb3e/work-build-lock/.venv/bin/python \
+  scripts/acceptance.py
+git diff --check
+```
+
+On integrated source commit `b369387`: Ruff passed; mypy passed on 41 source files;
+260 unit/property tests passed in 3.25s; all 411 tests passed in 13.44s; both study
+validations passed; all 11 acceptance scenarios passed. Independent reviewers
+checked each implementation and the two late review follow-ups. For the metadata
+guard, the reviewer independently ran 50 focused tests including legacy chains,
+replay and branch-prefix compatibility, and reproduced the 34 original failures.
+
+The final source tree for this checkpoint is
+`9a9289f4fa57ca24ff13317d156ebabcef9c8906`. The source changes are distinct from this
+documentation update. Counts refer to tests actually executed; no hosted CI pass is
+claimed in this T1 repository.
+
+PR #50 appeared during the final sweep and changes only `pillow==12.3.0` to
+`pillow==13.0.0`. Its original head was
+`ff90643d456b0a1e395b37378cf32bcdd5928e1e`. A separate fresh environment matched all
+38 pins and passed `pip check`. Independent source review found no use of the
+removed Pillow interfaces in this project's reporting/Matplotlib path. PNG, JPEG
+and TIFF save/decode checks passed; RGBA PNG preserved exact colors and alpha;
+int32 scalar-image export normalized correctly to RGBA. No universal image-byte
+equality or untested GUI/platform compatibility is claimed.
+
+After incorporating #51 and the exact dependency change, final commands were:
+
+```bash
+PYTHONPATH=src PYTEST_ADDOPTS='-o addopts=--strict-markers' make check test validate \
+  PY=/workspace/scratch/5eae6eaffb3e/work-pillow/.venv/bin/python
+PYTHONPATH=src /workspace/scratch/5eae6eaffb3e/work-pillow/.venv/bin/python \
+  scripts/acceptance.py
+```
+
+On integrated commit `b966fe7`, Ruff and mypy (41 source files) passed, 260
+unit/property tests passed in 2.92s, all 411 tests passed in 12.39s, both study
+validations passed, and acceptance passed 11/11. The resulting source tree
+`1082a55bf8c982d38fc61b3ac466e2140ca65c8e` exactly matches GitHub main after merge
+`be80493de0dd743a452a006fc8e1da0094ce4f0c`. The final lock SHA256 is
+`251442ef8afd963d329a0340eedcaeaffc566f333ee9b096ef774bfa330b5f79`.
+
+Historical commitments remain exact:
+
+| Artifact | Preserved hash |
+|---|---|
+| Study 000 | `5dcde1a9b6c98c576ca71bc03ea65dcc96175b6d8803c4db89e6c56ac8a15e9f` |
+| Study 001 | `a3bffdfcf1715ebd65aa45b469f3e32c720d22633cfc80769b11020bcbd37bbe` |
+| Study 000 `pw-3tft` legacy chain (656 events) | `93993cc6f74f7aa2d936f94859193490a2ebaca009646e15c5a5526ca2914ec6` |
+| Study 001 `attr-ledger` legacy chain (148 events) | `eea9a355b8562246e4e439f7f04f0a59c580a27d373c9508844c215744b31c48` |
+
+### Completed exploratory workflow
+
+Executed the paired generator with `--seed-protocol paired-policy-v2 --output`
+pointing to a fresh temporary draft, then the real CLI `study audit-seeds`, `run
+--replicates 1`, `replay` for each of the five run directories, and `report` for the
+study artifact directory. The draft ID was `001-evidence-commons-paired-v2`, hash
+`2f4e3dc087dd24eae9d376fc12ce319b916e9c22d3d5d314bc85c183ad4bec37`.
+
+The two audit outputs were byte-identical. All three agents had matching policy
+stream seeds across the four factorial cells; the mechanism seeds differed and the
+misinformation population used a separate block. The four factorial runs completed
+with 148 events each, the misinformation run with 150; all played 12 rounds. All
+five replays matched their sealed chains and the report carried `paired-policy-v2`.
+All 30 checked-in study files retained their bytes. No draft was frozen and no
+real provider was called. These are operational checks, not scientific findings;
+scripted personas are deterministic and provider sampling is not coupled by the
+kernel protocol. ADR-0008 documents the scope and required opt-in.
+
+### Boundaries and handoff
+
+Native Windows execution, hosted test CI, multiprocess stress, forced termination
+and power-loss recovery were not verified. Windows Make interpreter selection and
+quoted paths were inspected via dry runs. Ownership that cannot be established
+causes reservation artifacts to be preserved; abrupt process death cannot execute
+cleanup. Full replay of mixed parent/child branched histories was not expanded by
+this work; branch prefix and continuation-stream guarantees were tested.
+
+All five originally open issues are closed. The handoff now identifies the current
+state rather than leaving older verification limitations at the top. The agent
+guide lists ADR-0008 and the new audit command. `human_todo=null`; owner decisions,
+scientific freeze approval, provider choices and paid-run authorization are untouched.

@@ -34,7 +34,7 @@ Scenario (5 planes) → compiler (content hashes; mechanism ≠ narrative) → d
 MechanismEngine → runner (observe → propose typed action → validate → resolve → checkpoint
 → seal) → hash-linked `events.jsonl` → replay/branch → metrics → reports. LLMs act only
 through the typed-action gate; they never resolve or score world state. Decisions:
-`docs/adr/0001…0007`; synthesis: `docs/FOUNDATION_REVIEW.md`.
+`docs/adr/0001…0008`; synthesis: `docs/FOUNDATION_REVIEW.md`.
 
 ## 4. Repository map
 
@@ -74,7 +74,7 @@ through the typed-action gate; they never resolve or score world state. Decision
 
 `make doctor | setup | check | test | validate | study-000 | study-001-smoke |
 replay-smoke | report | clean-generated`; CLI: `chl scenario validate`, `chl study
-validate|freeze`, `chl run`, `chl replay`, `chl branch`, `chl report`, `chl doctor`.
+validate|audit-seeds|freeze`, `chl run`, `chl replay`, `chl branch`, `chl report`, `chl doctor`.
 Venv python: `.venv/bin/python` on POSIX, `.venv/Scripts/python.exe` on Windows.
 Quote all paths (spaces).
 
