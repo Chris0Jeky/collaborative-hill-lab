@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from collaborative_hill.engine.events import ChainError, Event, EventType
+from collaborative_hill.engine.seeds import LEGACY_SEED_PROTOCOL, validate_recorded_seed_metadata
 from collaborative_hill.engine.store import FileEventStore, RunPaths
 from collaborative_hill.metrics import (
     METRIC_VERSIONS,
@@ -54,6 +55,10 @@ def _load_sealed_run(run_dir: Path) -> tuple[list[Event], dict[str, Any]]:
     for field, actual in (("event_count", len(events)), ("final_event_hash", terminal.event_hash)):
         if manifest.get(field) is not None and manifest[field] != actual:
             raise ChainError(f"manifest {field} does not match the sealed ledger")
+    try:
+        validate_recorded_seed_metadata(manifest, events[0].payload)
+    except ValueError as exc:
+        raise ChainError(str(exc)) from exc
     return events, manifest
 
 
@@ -106,6 +111,9 @@ def run_report(run_dir: Path) -> Path:
         f" (dirty: {manifest.get('worktree_dirty')})",
         f"- policies: {manifest['policies']}",
         f"- seed root: {manifest['seed_root']} | status: **{manifest['status']}**",
+        f"- kernel seed protocol: `{manifest.get('seed_protocol', LEGACY_SEED_PROTOCOL)}`"
+        f" | scenario block: {manifest.get('scenario_block')}",
+        f"- policy seed root: {manifest.get('policy_seed_root')}",
         f"- metric versions: {metrics['metric_versions']}",
         "",
     ]
@@ -186,6 +194,8 @@ def study_report(artifacts_study_dir: Path) -> Path:
             "run": manifest["run_id"],
             "replicate": manifest["replicate"],
             "status": manifest["status"],
+            "seed_protocol": manifest.get("seed_protocol", LEGACY_SEED_PROTOCOL),
+            "scenario_block": manifest.get("scenario_block"),
         }
         if manifest["status"] != "completed":
             rows.append(row)

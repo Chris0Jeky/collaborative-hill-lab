@@ -24,6 +24,7 @@ from collaborative_hill.agents.replay import (
 )
 from collaborative_hill.engine.events import Event
 from collaborative_hill.engine.runner import RunConfig, run_episode
+from collaborative_hill.engine.seeds import LEGACY_SEED_PROTOCOL, validate_recorded_seed_metadata
 from collaborative_hill.engine.store import FileEventStore, RunPaths
 from collaborative_hill.experiments.scenario import ResolvedScenario
 
@@ -49,6 +50,10 @@ def load_run(run_dir: Path) -> tuple[list[Event], ResolvedScenario, dict[str, An
         (run_dir / "scenario.resolved.json").read_text(encoding="utf-8")
     )
     manifest = json.loads(paths.manifest.read_text(encoding="utf-8"))
+    # Label old manifests in memory; never rewrite sealed provenance on disk.
+    manifest.setdefault("seed_protocol", LEGACY_SEED_PROTOCOL)
+    if events:
+        validate_recorded_seed_metadata(manifest, events[0].payload)
     return events, resolved, manifest
 
 
@@ -65,6 +70,9 @@ def replay_run(run_dir: Path, keep_dir: Path | None = None) -> ReplayReport:
         study_id=manifest["study_id"],
         run_id=manifest["run_id"],
         seed_root=tuple(manifest["seed_root"]),
+        seed_protocol=manifest["seed_protocol"],
+        policy_seed_root=manifest.get("policy_seed_root"),
+        scenario_block=manifest.get("scenario_block"),
         checkpoint_every=manifest["checkpoint_every"],
         invalid_action_policy=manifest["invalid_action_policy"],
     )

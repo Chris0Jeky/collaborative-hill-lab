@@ -19,6 +19,40 @@ core research question (see `docs/research/RESEARCH_CHARTER.md`).
 - `PREREGISTRATION.md` — DRAFT; every open item marked `HUMAN DECISION`.
 - `COST_WORKSHEET.md` — measured prompt sizes + formulas; no prices assumed.
 
+## Seed protocols and an explicitly paired draft
+
+**The checked-in `study.json` uses legacy independent streams.** Its missing protocol field
+means `legacy-independent-v1`: policy randomness includes the condition ID, so matching
+replicate numbers do not create common random numbers (CRN). Earlier claims otherwise were
+incorrect (see `docs/adr/0008-versioned-policy-pairing.md`). Its existing hashes, streams,
+and sealed-run replay remain compatible. The deterministic personas do not consume their
+RNG, so switching protocols alone does not add stochastic replication.
+
+To create and smoke-run a **new, unfrozen** paired draft from the repository root:
+
+```bash
+python studies/001-evidence-commons/generate_study.py --seed-protocol paired-policy-v2 --output artifacts/drafts/study-001-paired-v2
+python -m collaborative_hill.cli study validate artifacts/drafts/study-001-paired-v2
+python -m collaborative_hill.cli run artifacts/drafts/study-001-paired-v2 --artifacts artifacts/paired-smoke --replicates 1
+```
+
+Use the project's Python environment. The output directory must be new or empty; the
+generator refuses to overwrite the original study or a frozen output. Running the generator
+without the protocol flag reproduces the original independent-stream JSON. No command above
+freezes a study or changes hypotheses, providers, weights, sample-size decisions, or costs.
+
+The paired draft has study ID `001-evidence-commons-paired-v2`, an explicit protocol field,
+and explicit `scenario_block` on every condition. The four 2×2 cells share block `factorial`;
+the optional arm with a different policy population has block `misinformation`. Within a
+block/replicate, agent/round policy streams match across conditions; mechanism streams stay
+condition-specific. The block mapping is part of the new study hash. It is an exploratory
+configuration to review before preregistration, not an automatic scientific equivalence test.
+
+Matching draws do not guarantee matching actions: accountability/topology change what an
+agent observes, and policies may consume draws differently. `LLMPolicy` currently ignores
+the kernel RNG, so this option provides **no provider-sampling CRN guarantee**. The SAP's
+paired models require a verified pairing design for the randomness actually used.
+
 ## Environment details
 
 - 4 briefing slots, 2 candidate propositions each (finite, typed — no free-text claims).
