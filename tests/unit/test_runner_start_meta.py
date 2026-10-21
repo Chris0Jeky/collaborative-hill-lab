@@ -1,5 +1,9 @@
 """Supplemental RunStarted metadata cannot change the engine's recorded facts."""
 
+import hashlib
+from fractions import Fraction
+from threading import Lock
+
 import pytest
 from _fixtures import AGENTS, nipd
 
@@ -42,6 +46,17 @@ def _expected_start(paired):
             "scenario_block": "shared",
         })
     return expected
+
+
+def _nested_start_metadata():
+    return {
+        "notes": {
+            "mapping": {"label": "entry-dict"},
+            "sequence": ["entry-list", {"label": "entry-nested"}],
+            "tuple": ({"label": "entry-tuple"}, ["entry-tuple-list"]),
+        },
+        "scalars": [None, True, False, 2**80, "λ"],
+    }
 
 
 @pytest.mark.parametrize("paired", [False, True], ids=["legacy", "paired"])
@@ -132,3 +147,68 @@ def test_none_and_empty_start_metadata_produce_identical_ledgers(tmp_path, paire
     run_episode(**inputs, paths=omitted)
     run_episode(**inputs, paths=empty, start_meta={})
     assert omitted.events.read_bytes() == empty.events.read_bytes()
+
+
+@pytest.mark.parametrize("paired", [False, True], ids=["legacy", "paired"])
+def test_nested_start_metadata_is_detached_before_callbacks(tmp_path, monkeypatch, paired):
+    inputs = _inputs(paired)
+    paths = RunPaths(tmp_path / "run").create()
+    supplemental = _nested_start_metadata()
+    notes = supplemental["notes"]
+    original_agent_ids = inputs["mechanism"].agent_ids
+
+    def mutate_nested_aliases():
+        notes["mapping"]["label"] = "mutated-dict"
+        notes["sequence"][1]["label"] = "mutated-nested"
+        notes["sequence"].append("late-list-entry")
+        notes["tuple"][0]["label"] = "mutated-tuple-dict"
+        notes["tuple"][1].append("late-tuple-list-entry")
+        return original_agent_ids()
+
+    monkeypatch.setattr(inputs["mechanism"], "agent_ids", mutate_nested_aliases)
+    result = run_episode(**inputs, paths=paths, start_meta=supplemental)
+    assert result.status == "completed"
+    assert notes["mapping"]["label"] == "mutated-dict"  # the callback ran
+    assert isinstance(notes["tuple"], tuple)
+    started = FileEventStore(paths.events).load_all(verify=True)[0]
+    assert started.payload == {
+        **_expected_start(paired),
+        "notes": {
+            "mapping": {"label": "entry-dict"},
+            "sequence": ["entry-list", {"label": "entry-nested"}],
+            "tuple": [{"label": "entry-tuple"}, ["entry-tuple-list"]],
+        },
+        "scalars": [None, True, False, 2**80, "λ"],
+    }
+
+
+@pytest.mark.parametrize(("paired", "ledger_sha256"), [
+    (False, "d4f46a56074148dd77577a03d97ba37886de9207c9f941c2c569d705d172225e"),
+    (True, "cc23bec768cfdefbfd75965a8f7ab896b53cb282ad3529f3d16089340b5c1efa"),
+], ids=["legacy", "paired"])
+def test_valid_nested_start_metadata_preserves_existing_ledger_bytes(
+    tmp_path, paired, ledger_sha256,
+):
+    inputs = _inputs(paired)
+    paths = RunPaths(tmp_path / "run").create()
+    result = run_episode(**inputs, paths=paths, start_meta=_nested_start_metadata())
+    # Full serialized-ledger digests recorded on the unmodified 31a6482 runner.
+    assert result.event_count == 15
+    assert hashlib.sha256(paths.events.read_bytes()).hexdigest() == ledger_sha256
+
+
+@pytest.mark.parametrize("paired", [False, True], ids=["legacy", "paired"])
+def test_continuation_keeps_ignoring_supplemental_values(tmp_path, paired):
+    inputs = _inputs(paired)
+    parent = RunPaths(tmp_path / "parent").create()
+    run_episode(**inputs, paths=parent)
+    started = FileEventStore(parent.events).load_all(verify=True)[0]
+    continued = RunPaths(tmp_path / "continued").create()
+    FileEventStore(continued.events).append(started)
+    # These values are neither canonical JSON nor all deepcopy-compatible, but
+    # continuations emit no RunStarted and have always ignored supplemental values.
+    ignored = {"notes": [1.25, Fraction(1, 2), Lock()]}
+    result = run_episode(**inputs, paths=continued,
+                         start_state=inputs["mechanism"].initial_state(), start_meta=ignored)
+    assert result.status == "completed"
+    assert continued.events.read_bytes() == parent.events.read_bytes()

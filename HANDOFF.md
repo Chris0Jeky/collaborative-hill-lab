@@ -16,7 +16,8 @@ their previous unverified gates and publication states do not describe current m
   first, and used with `--no-build-isolation` plus the same runtime constraints.
   PR #51 completes #46's late review: supplemental run-start metadata is snapshotted
   and cannot replace any engine-owned field, including seed provenance, before any
-  callbacks or artifact access.
+  callbacks or artifact access. Its follow-up detaches nested values as well, while
+  keeping continuation runs' ignored supplemental metadata behavior compatible.
 - **New working tool:** PR #49 adds `chl study audit-seeds`. Stable read-only JSON
   exposes the protocol, blocks, policy IDs, seed paths and full-width decimal seeds
   for an actual scheduled replicate/round. Invalid schedules, unknown policies or
@@ -30,8 +31,8 @@ their previous unverified gates and publication states do not describe current m
 - **Dependency maintenance:** the new Dependabot PR #50 upgrades Pillow to 13.0.0.
   Fresh setup, all lock pins, reporting and Matplotlib PNG/JPEG/TIFF export checks
   pass, including RGBA alpha preservation and scalar-image conversion.
-- **Final verification (PR #50 merge, including #51):** `make check test validate` passes:
-  Ruff clean, mypy clean on 41 source files, 260 unit/property tests and 411 full-suite
+- **Final verification (including the nested-metadata follow-up):** all repository gates pass:
+  Ruff clean, mypy clean on 41 source files, 266 unit/property tests and 417 full-suite
   tests. Acceptance scenarios pass 11/11. Fresh setup matches all 38 final locked
   distributions and `pip check` passes. The backend-lock follow-up was also checked
   with an offline setup repeat and pip 24.0 installation stages; setup preserved
