@@ -337,7 +337,7 @@ No force pushes or hosted test workflow were introduced.
 | #35 false cross-condition CRN claim | #46 | Real study pipeline records distinct legacy draws; new explicit blocks share policy streams, separate mechanism streams, and preserve historical hashes |
 | Invalid ledger appends | #47 | Parent/self hash checks precede mutation; nine bad-append cases failed before the fix; valid metadata and branched run-ID suffixes still append |
 | Read-only seed audit | #49 | 38 integration cases cover allocation, full-width JSON seeds, no provider calls/writes, schedules, malformed locks and freeze drift |
-| #46 late metadata review | #51 | 34 of 38 new direct-API cases failed against the old runner; all pass with a validated entry snapshot and seven reserved keys; independent review reproduced the failures |
+| #46 late metadata review | #51 and its nested-value follow-up | 34 of 38 new direct-API cases failed against the old runner; seven reserved keys protected; two further nested-mutation failures reproduced and fixed with continuation compatibility preserved |
 | New Dependabot Pillow update | #50 | Fresh setup; all 38 pins exact; reporting and Matplotlib PNG/JPEG/TIFF, RGBA-alpha and scalar-image compatibility checks pass |
 
 The backend fix pins `setuptools==84.0.0` in the existing lock, installs the lock
@@ -432,6 +432,42 @@ All 30 checked-in study files retained their bytes. No draft was frozen and no
 real provider was called. These are operational checks, not scientific findings;
 scripted personas are deterministic and provider sampling is not coupled by the
 kernel protocol. ADR-0008 documents the scope and required opt-in.
+
+### Final nested-metadata review follow-up
+
+A late review of #51 identified that its outer-dictionary snapshot still shared
+nested mutable values with the caller. The follow-up adds a five-line source change:
+deep-copy supplemental values for new episodes after the reserved-key guard and
+before callbacks. Continuations emit no new start event, so their ignored metadata
+retains existing behavior, including uncopyable values. No new canonical-validation
+policy is introduced.
+
+Six new regression cases cover nested dict/list/tuple alias mutation under both
+protocols, exact pre-fix ledger-byte digests for valid nested metadata, and
+continuation from a real start-event prefix with ignored float/Fraction/Lock values.
+Before the fix, the metadata module had 2 failures and 42 passes; both the author
+and independent reviewer reproduced this. After the fix, all 44 metadata cases and
+the two historical chain cases pass. The independent reviewer found no blockers.
+
+Final tested tree `44a6e9b1b31a3ebdd2db0c21d9392db6fafbdef3` was produced on the same
+base as the integration checkout; cherry-picking produced that identical tree.
+With the final Pillow environment, `make check` passed (Ruff, mypy 41 source files,
+266 unit/property tests), the complete suite passed **417 tests in 14.30s**, both
+study validations retained their original hashes, and acceptance passed **11/11**.
+The exact committed tree also passed 46 focused tests in 0.93s. The full suite was
+not duplicated after identical-tree integration; this final prose update changes
+no executable source or dependency pins and passes `git diff --check`.
+
+The complete-suite command was:
+
+```bash
+PYTHONPATH="$PWD/src" /workspace/scratch/5eae6eaffb3e/work-pillow/.venv/bin/python \
+  -m pytest tests/ -q -o addopts=--strict-markers
+```
+
+The check, validation and acceptance commands use the same interpreter and source
+selection as the preceding checkpoint. Both metadata review threads are addressed
+by separate follow-up PRs, preserving the earlier safe merges and their audit trail.
 
 ### Boundaries and handoff
 

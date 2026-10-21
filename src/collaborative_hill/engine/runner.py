@@ -23,6 +23,7 @@ Per round (all deterministic given policies' recorded outputs; ADR-0001):
 Wall-clock time and other environment facts go only into unhashed event meta.
 """
 
+from copy import deepcopy
 from typing import Any, Literal, Self
 
 from pydantic import BaseModel, ConfigDict, model_validator
@@ -145,6 +146,10 @@ def run_episode(
         raise ValueError(
             f"start_meta contains reserved RunStarted keys: {', '.join(sorted(reserved))}"
         )
+    if start_state is None:
+        # Detach nested values before callbacks can change them. Continuations
+        # emit no RunStarted and retain their existing ignored-value behavior.
+        start_metadata = deepcopy(start_metadata)
 
     agent_ids = mechanism.agent_ids()
     if set(policies) != set(agent_ids):
