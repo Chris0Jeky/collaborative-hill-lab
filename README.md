@@ -47,10 +47,13 @@ make replay-smoke   # re-execute sealed runs, verify identical hash chains
 make report         # per-run + per-study markdown reports
 ```
 
-`make setup` installs the committed `requirements-lock.txt` together with the editable
-package, without rewriting the lock. It selects `.venv/bin/python` on POSIX and
-`.venv/Scripts/python.exe` on Windows (run make from Git Bash). Use
-`make setup PYTHON="/path/to/python"` if Python >= 3.12 is not your default `python`.
+`make setup` first installs the committed `requirements-lock.txt`, including the pinned
+build backend and runtime, test, and analysis dependencies. It then builds the editable
+package with `--no-build-isolation`, constrains its dependencies with the same lock, and
+runs `pip check`. The editable build uses the installed, pinned backend, and setup never
+rewrites the lock. It selects `.venv/bin/python` on POSIX and `.venv/Scripts/python.exe`
+on Windows (run make from Git Bash). Use `make setup PYTHON="/path/to/python"` if
+Python >= 3.12 is not your default `python`.
 
 Direct equivalents (Windows/PowerShell without make):
 `.venv/Scripts/python.exe -m collaborative_hill.cli <doctor|run|replay|report|...>` — see

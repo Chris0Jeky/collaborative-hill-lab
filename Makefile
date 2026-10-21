@@ -17,7 +17,9 @@ doctor:
 
 setup:
 	"$(PYTHON)" -m venv .venv
-	"$(PY)" -m pip install --disable-pip-version-check -r requirements-lock.txt -e ".[dev,analysis]"
+	"$(PY)" -m pip install --disable-pip-version-check -r requirements-lock.txt
+	"$(PY)" -m pip install --disable-pip-version-check --no-build-isolation -c requirements-lock.txt -e ".[dev,analysis]"
+	"$(PY)" -m pip check
 
 check:
 	"$(PY)" -m ruff check src tests studies scripts
