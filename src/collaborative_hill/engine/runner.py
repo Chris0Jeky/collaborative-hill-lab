@@ -48,6 +48,13 @@ from collaborative_hill.engine.store import FileCheckpointStore, FileEventStore,
 
 InvalidActionPolicy = Literal["fail", "abstain"]
 
+# Reserved even when omitted from legacy payloads: supplemental metadata cannot
+# add a different account of the seed protocol or other engine-owned facts.
+_RUN_STARTED_RESERVED_KEYS = frozenset({
+    "agents", "policies", "seed_root", "invalid_action_policy",
+    "seed_protocol", "policy_seed_root", "scenario_block",
+})
+
 
 class RunConfig(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
@@ -125,7 +132,20 @@ def run_episode(
     start_state: dict[str, Any] | None = None,
     start_meta: dict[str, Any] | None = None,
 ) -> RunResult:
-    """Execute one episode (or continue a branched one from ``start_state``)."""
+    """Execute one episode (or continue a branched one from ``start_state``).
+
+    ``start_meta`` supplies supplemental hashed RunStarted fields. Engine-owned
+    keys are rejected before callbacks or artifact access, including continuations.
+    """
+    # Validate the same snapshot we emit; callbacks must not be able to inject
+    # reserved keys by changing the caller's dictionary after this check.
+    start_metadata = dict(start_meta) if start_meta is not None else {}
+    reserved = _RUN_STARTED_RESERVED_KEYS.intersection(start_metadata)
+    if reserved:
+        raise ValueError(
+            f"start_meta contains reserved RunStarted keys: {', '.join(sorted(reserved))}"
+        )
+
     agent_ids = mechanism.agent_ids()
     if set(policies) != set(agent_ids):
         raise ValueError("policies must cover exactly the mechanism's agents")
@@ -156,7 +176,7 @@ def run_episode(
                 "seed_root": [str(c) for c in config.seed_root],
                 **seed_meta,
                 "invalid_action_policy": config.invalid_action_policy,
-                **(start_meta or {}),
+                **start_metadata,
             },
         )
 
