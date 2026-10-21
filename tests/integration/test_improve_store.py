@@ -81,16 +81,26 @@ def test_reopened_store_resumes_count_and_hash(tmp_path: Path) -> None:
     assert reopened.last_hash == third.event_hash
 
 
-def test_iter_skips_blank_lines(tmp_path: Path) -> None:
+@pytest.mark.parametrize("blank", ["\n", "   \n", "\t\n"])
+@pytest.mark.parametrize("position", [0, 1, 2])
+def test_verified_load_rejects_blank_records(
+    tmp_path: Path, blank: str, position: int,
+) -> None:
     ledger = tmp_path / "events.jsonl"
     events = _chain(2)
     store = FileEventStore(ledger)
     for ev in events:
         store.append(ev)
-    with ledger.open("a", encoding="utf-8", newline="\n") as f:
-        f.write("\n   \n\t\n")
+    lines = ledger.read_text(encoding="utf-8").splitlines(keepends=True)
+    lines.insert(position, blank)
+    ledger.write_text("".join(lines), encoding="utf-8", newline="\n")
+    # Lenient inspection remains available, but cannot certify ledger integrity.
     assert [e.seq for e in store.iter_events()] == [0, 1]
-    assert [e.seq for e in store.load_all(verify=True)] == [0, 1]
+    assert [e.seq for e in store.load_all(verify=False)] == [0, 1]
+    with pytest.raises(ChainError, match=f"blank record at line {position + 1}"):
+        store.load_all(verify=True)
+    with pytest.raises(ChainError, match="blank record"):
+        FileEventStore(ledger)
 
 
 def test_load_verify_flag_on_tampered_ledger(tmp_path: Path) -> None:
