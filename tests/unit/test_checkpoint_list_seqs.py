@@ -12,8 +12,12 @@ def _save(store: FileCheckpointStore, seq: int) -> None:
 def test_list_seqs_ignores_stray_names(tmp_path):
     store = FileCheckpointStore(tmp_path / "checkpoints")
     _save(store, 10)
-    (store.directory / "ckpt-manual.json").write_text(json.dumps({"note": "manual"}), encoding="utf-8")
-    (store.directory / "ckpt-backup.json").write_text(json.dumps({"note": "backup"}), encoding="utf-8")
+    (store.directory / "ckpt-manual.json").write_text(
+        json.dumps({"note": "manual"}), encoding="utf-8"
+    )
+    (store.directory / "ckpt-backup.json").write_text(
+        json.dumps({"note": "backup"}), encoding="utf-8"
+    )
     assert store.list_seqs() == [10]
 
 

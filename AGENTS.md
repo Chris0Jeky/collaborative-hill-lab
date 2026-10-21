@@ -60,8 +60,10 @@ through the typed-action gate; they never resolve or score world state. Decision
 4. Hidden truth fields (`true_propositions`, `truth_aligned`) never appear in observations
    or ledgers (leak tests scan whole ledgers).
 5. Skins carry wording only; `mechanism_hash` must be skin-invariant (metamorphic test).
-6. Invalid agent output is recorded (`ActionRejected`) and falls back to explicit
-   abstention or run failure — never silently repaired.
+6. Invalid agent output is never silently repaired: unparsable/schema-invalid output
+   abstains (`invalid_llm_output`) after bounded retries; provider errors seal the run
+   `RunFailed`; only a schema-valid illegal action is `ActionRejected` and follows
+   `invalid_action_policy` (`fail` default | `abstain`).
 7. Ledgers are append-only and hash-linked; replay must reproduce chains; branch prefixes
    are byte-identical copies.
 8. Manifests never fabricate: unmeasured tokens/cost are `None`.
@@ -73,7 +75,8 @@ through the typed-action gate; they never resolve or score world state. Decision
 `make doctor | setup | check | test | validate | study-000 | study-001-smoke |
 replay-smoke | report | clean-generated`; CLI: `chl scenario validate`, `chl study
 validate|freeze`, `chl run`, `chl replay`, `chl branch`, `chl report`, `chl doctor`.
-Venv python: `.venv/Scripts/python.exe`. Quote all paths (spaces).
+Venv python: `.venv/bin/python` on POSIX, `.venv/Scripts/python.exe` on Windows.
+Quote all paths (spaces).
 
 ## 7. How to add things
 
