@@ -1,375 +1,105 @@
-# HANDOFF — exact current state (updated 2026-10-21)
+# HANDOFF — current checkpoint, 2026-10-22
 
-## Repository sweep and seed-audit workflow (2026-10-21)
+The previous handoff is preserved byte-for-byte in
+[the historical checkpoint](docs/history/HANDOFF-through-2026-10-21.md).
+Its dated counts, paths and publication states are historical, not current status.
+The operating rules remain in `CLAUDE.md` and `AGENTS.md`; the repository remains T1.
 
-This section is the current checkpoint. The dated sections below are historical;
-their previous unverified gates and publication states do not describe current main.
+## Landed in this pass
 
-- **Original queue:** issues #3, #7, #33, #35 and #42 are closed. PR #44 fixed
-  locked setup, runtime package-version reporting and the two Ruff violations;
-  PR #45 fixed reservation ownership/cleanup; PR #46 corrected the claimed
-  cross-condition common-random-number allocation with a versioned opt-in protocol.
-- **Reviews and integrity:** PR #43 now rejects blank/whitespace ledger records
-  during verified reads, while retaining lenient inspection. Its review is resolved.
-  PR #47 checks parent/event hashes before append can mutate disk or cached state.
-  PR #48 completes #44's late review: the backend is pinned in the lock, installed
-  first, and used with `--no-build-isolation` plus the same runtime constraints.
-  PR #51 completes #46's late review: supplemental run-start metadata is snapshotted
-  and cannot replace any engine-owned field, including seed provenance, before any
-  callbacks or artifact access. Its follow-up detaches nested values as well, while
-  keeping continuation runs' ignored supplemental metadata behavior compatible.
-- **New working tool:** PR #49 adds `chl study audit-seeds`. Stable read-only JSON
-  exposes the protocol, blocks, policy IDs, seed paths and full-width decimal seeds
-  for an actual scheduled replicate/round. Invalid schedules, unknown policies or
-  policy-construction errors, malformed locks and frozen-content drift fail before
-  success output or writes.
-- **Compatibility:** checked-in Study 000 and Study 001 inputs retain their original
-  hashes and legacy seed streams. `paired-policy-v2` requires explicit blocks and a
-  new draft; manifests, sealed start events, replay, branching and reports retain
-  and validate that provenance. The current LLM adapter does not consume the kernel
-  RNG, so the protocol does not couple provider sampling.
-- **Dependency maintenance:** the new Dependabot PR #50 upgrades Pillow to 13.0.0.
-  Fresh setup, all lock pins, reporting and Matplotlib PNG/JPEG/TIFF export checks
-  pass, including RGBA alpha preservation and scalar-image conversion.
-- **Final verification (including the nested-metadata follow-up):** all repository gates pass:
-  Ruff clean, mypy clean on 41 source files, 266 unit/property tests and 417 full-suite
-  tests. Acceptance scenarios pass 11/11. Fresh setup matches all 38 final locked
-  distributions and `pip check` passes. The backend-lock follow-up was also checked
-  with an offline setup repeat and pip 24.0 installation stages; setup preserved
-  lock bytes. The final combined checks use the fresh environment with Pillow
-  13.0.0. Independent reviews found no blocking findings.
-- **End-to-end demonstration:** generated an unfrozen paired draft, audited it twice
-  with byte-identical JSON, ran all five conditions (one replicate each), replayed
-  all five with matching chains, and generated the study report. Every agent's
-  policy stream matches across the four factorial cells, mechanism streams differ,
-  and the misinformation population has a separate block. All 30 checked-in study
-  files stayed byte-identical. This demonstrates engineering behavior, not a new
-  scientific result or a variance-reduction claim.
-- **Limits:** validation ran on Linux/Python 3.12. Native Windows execution, hosted
-  test CI, forced process termination, power-loss recovery and multiprocess stress
-  were not verified. Windows interpreter/path selection was checked with Make dry
-  runs. Cleanup preserves artifacts when ownership cannot be proven; it cannot run
-  after abrupt process death. T1 and the absence of hosted test CI are unchanged.
-- **Human actions:** `human_todo=null`. No study was frozen, no paid or real-provider run
-  was made, and all owner decisions in the list below remain untouched.
+PR #54 (`e0428cf00bcf6ac423ab1dadd5a82090fb75babb`) repairs counterfactual replay:
+all ancestral run-ID segments are re-executed from recorded proposals and
+recomputed state, without following parent directories or trusting input checkpoints.
+Branch checkpoints must match sealed boundaries. Reused ancestor IDs and silently
+reset inherited policy overrides are refused before writing child artifacts.
+Child manifests carry effective policy labels; unmeasured child usage/cost is null.
+An automated-review finding about nested terminal forks was reproduced and fixed:
+inherited checkpoints with no direct-parent prefix segment are rejected before writes.
 
-Useful next steps are to inspect proposed blocks with the new audit before any
-preregistration, and to design a separately versioned provider-randomness experiment
-if real-model pairing is needed. Do not infer model reproducibility or reduced
-variance from equal kernel seeds.
+PR #55 (`e754a961b2ef3df438adb0b8bc7925c9b35a0867`) adds `chl compare` and a complete
+offline tutorial. Comparisons validate inputs, recompute metrics in memory, show
+exact rational utility differences and the first changed action, and optionally
+replay both ledgers. Failed runs retain operational metrics but no outcome delta.
+The tutorial runs parent, child and grandchild for N-IPD and Evidence Commons.
+All six replay; the second fork retaining its inherited policy preserves actions
+and utilities even though run IDs and hashes differ.
 
-Reproduce the exploratory workflow after `make setup` (the output directory must
-be fresh; use `.venv/Scripts/python.exe` on Windows):
+Read [the workflow guide](docs/COUNTERFACTUAL_WORKFLOW.md) and
+[ADR-0009](docs/adr/0009-counterfactual-replay.md) before extending this behavior.
+The prior paired-policy seed protocol and read-only seed audit remain available.
+Neither shipped study's inputs or content hash changed.
+
+## Reproduce
 
 ```bash
-.venv/bin/python -m collaborative_hill.cli study audit-seeds studies/001-evidence-commons
-.venv/bin/python studies/001-evidence-commons/generate_study.py \
-  --seed-protocol paired-policy-v2 --output artifacts/drafts/study-001-paired-v2
-.venv/bin/python -m collaborative_hill.cli study audit-seeds \
-  artifacts/drafts/study-001-paired-v2 --replicate 0 --round 0
-.venv/bin/python -m collaborative_hill.cli run \
-  artifacts/drafts/study-001-paired-v2 --artifacts artifacts/paired-pilot --replicates 1
+make setup
+make check test validate
+.venv/bin/python scripts/acceptance.py
+.venv/bin/python scripts/counterfactual_demo.py --out artifacts/counterfactual-demo
+.venv/bin/python -m collaborative_hill.cli compare LEFT_RUN RIGHT_RUN --verify-replay
 ```
 
-Run `.venv/bin/python -m collaborative_hill.cli replay <run-dir>` for each sealed
-run and `.venv/bin/python -m collaborative_hill.cli report <study-artifacts-dir>`
-to inspect the resulting draft. Full evidence and preserved hash literals are
-in the 2026-10-21 BUILD_LOG entry and ADR-0008.
+On Windows substitute `.venv/Scripts/python.exe` for `.venv/bin/python`.
+The tutorial output directory must not already exist. Its `README.md` and
+`summary.json` contain the comparisons and replay reports. Failed attempts retain
+partial artifacts for diagnosis; use a new output directory for a retry.
 
-## Issue 40: read-only reporting and reservation cleanup (2026-10-17)
+## Exact verification
 
-- Changed: study reports validate every seal before reading cached metrics;
-  missing metrics are computed in memory. No per-run JSON/parquet is written.
-  Run/branch reservations clean up pre-manifest exceptions, including Ctrl-C,
-  only while the ledger still identifies this writer. Manifests and replaced
-  reservations are preserved. Freeze errors now have clean CLI messages, and
-  failed hard-link publication explains its fail-closed requirement.
-- Verified: the new defect regressions failed before the source fixes.
-  The five touched test modules pass (62 tests); Ruff on touched source/tests,
-  mypy on five source files, and diff whitespace checks pass. Exact commands
-  and test-to-issue mapping are in BUILD_LOG.md.
-- NOT verified: full suites/gates, forced process termination/power loss,
-  multiprocess stress, POSIX permissions or GitHub. The driver requested edits
-  only and focused checks. No Git writes, shipped study freezes or paid runs.
-- Residual risk: cleanup is best effort on filesystem errors; abrupt process
-  death cannot execute it. Runs with manifests remain preserved and unsealed
-  runs remain rejected by reporting. The 0600 mkstemp mode is deliberately
-  unchanged: widening access needs a POSIX archive-sharing policy and proof.
-- Commit boundaries: reporting/report.py + test_reporting_seal.py are item 1;
-  engine/store.py + engine/branching.py + run_study's reservation hunk in
-  experiments/study.py + test_study_rerun_guard.py + test_branch_out_guard.py
-  + test_run_reservation.py are item 2. cli.py + the freeze_study exception
-  hunk in study.py + test_study_freeze_guard.py are the two error-message LOWs.
-  This section and BUILD_LOG.md cover all changes and correct the stale #39
-  publication wording below. Work remains as edits for the driver to commit.
-- Human actions: human_todo=null; the ten owner decisions below are untouched.
+The combined product tree `5b5f7a480f621044f17cd825bf49962e1667d7f0` passed fresh
+committed-lock installation, pip check, Ruff, strict mypy (43 source files),
+266 unit/property tests, **521 full-suite tests**, both study validations, and
+**11/11 acceptance scenarios**. The separate tutorial execution also passed.
+Evidence: [Actions run 39783806030](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/39783806030),
+verification commit `24fd01f63a01e7673ba9499f30b9a29119ae1fde`.
+The verification branch differs only by a temporary workflow; source, test and
+script subtrees were checked against the product tree. This documentation update
+does not alter executable source, tests, configuration, dependencies or studies.
+See `BUILD_LOG.md` for the earlier review-fix evidence and exact subtree hashes.
 
-## Integrity guards for issues 36, 37 and 13 (2026-10-17, landed in PR #39)
+Verification used Ubuntu and Python 3.12.15 with the committed 38-pin lock.
+Local focused tests used partially installed Python 3.13 dependencies; some
+combined local reruns exceeded their execution limit and are not passing evidence.
+Native Windows/macOS execution, multiprocess stress and power-loss recovery were
+not verified. No independent human review is claimed. The temporary verification
+workflow was not merged into main; there is still no persistent main-branch CI.
 
-- Changed (#36): metrics/run/study reporting requires a nonempty, hash-valid
-  ledger with exactly one final terminal event matching manifest status and
-  study/run identity. New run and branch manifests pin event count and final
-  hash. Study reports revalidate cached inputs and omit failed-run outcomes
-  while retaining explicit failed status.
-- Changed (#37): freeze publishes a flushed temporary lock with an exclusive
-  hard link. An identical freeze returns the existing hash without rewriting
-  bytes/timestamp; a different commitment is refused without replacing it.
-- Changed (#13): run/branch output is reserved by exclusive ledger creation
-  before other artifacts. Nonempty directories, including stale checkpoints,
-  are refused; empty precreated directories still work. Duplicate condition
-  IDs fail validation; run/branch CLI collisions produce error/exit 2.
-- Verified: defect regressions failed before the fixes; the final five focused
-  test files pass (57 tests), and five directly affected caller/compatibility
-  test files pass (15 tests). Changed-file Ruff and mypy (six source files)
-  pass; `git diff --check` passes. Exact commands are in BUILD_LOG.md.
-- NOT verified: full suites, make check/test/validate, long acceptance builds,
-  mutation testing, multiprocess stress or power-loss recovery. The driver
-  explicitly limited verification to focused tests; no GitHub calls or Git
-  writes were made. No frozen inputs, locks or scientific results were edited.
-- Residual risk: legacy manifests without pins still require a valid terminal
-  seal but lack an independent historical count/hash. Atomic freeze publication
-  needs filesystem hard-link support and fails closed when unavailable.
-  Existing generated reports are preserved on validation failure.
-- Shared-file commit boundaries: study.py final manifest fields and branching.py
-  final manifest fields belong to #36; study.py os/tempfile imports + freeze
-  function belong to #37; study.py validator/preflight/reserve, branching.py
-  output guard/reserve, store.py and cli.py belong to #13. The new reporting
-  and freeze test modules belong to #36 and #37 respectively; the other three
-  changed test files belong to #13. This section and BUILD_LOG.md cover all three.
-- Human actions: `human_todo=null`; all ten owner decisions below remain open
-  and untouched. New scientific version creation/lineage authoring is outside
-  this guard repair. These guards landed in PR #39 at e6c6033.
+## Boundaries and remaining engineering directions
 
-## Distribution metric publication checkpoint (2026-10-06)
+Replay verifies deterministic engine transitions given recorded actions, not
+provider sampling or arbitrary provider exceptions. Policy labels are not a
+serialization of executable policy objects or an authentication scheme. Nested
+branches require explicit resupply of inherited non-original policies. A terminal
+branch can replay, but its inherited terminal checkpoint cannot be forked again
+without an explicit representation for a zero-length parent segment.
 
-- Changed: negative utilities are shifted before testing the total for zero.
-  The sealed utility pair [-1, 1] now yields payoff Gini 0.5 instead of 0.0.
-  The Gini formula is unchanged; distribution output and METRIC_VERSIONS
-  advance to version 2. Muse supplied the regression test; the coordinator
-  supplied the minimal fix and required version synchronization.
-- Verified: the new test fails on the original implementation and passes on
-  the corrected implementation. Both sensitivity probes fail as expected:
-  removing the shift and reversing free-rider advantage. The full test suite,
-  unit/property suite, mypy, changed-file Ruff, and both study validations pass.
-  Checks run in this worktree with its src on PYTHONPATH; locked tools use the
-  primary checkout's venv interpreter without modifying that checkout.
-- NOT verified: the complete make check gate is not green. Repository-wide
-  Ruff reports two pre-existing E501 errors in test_checkpoint_list_seqs.py
-  (lines 15 and 16), also present in the base commit. Hosted CI, generated
-  scientific reports and merge eligibility are not claimed.
-- Residual risk: corrected derived metrics differ from version 1 for mixed
-  negative utilities with zero total. Publication is a ready PR only; the
-  later land turn must reconcile the pre-existing lint failures before merge.
-  The host retains this worktree; ignored files are disposable test/tool
-  caches only, with no survivor copied out.
-- Human actions: human_todo is null; the owner decisions below remain untouched.
+Comparisons require the same mechanism hash and report full-episode totals,
+including shared pre-fork history. Two episodes are not statistical evidence of
+a treatment effect. Equal kernel streams do not imply paired provider randomness,
+equal draw consumption or reduced variance. Hash links check consistency relative
+to a retained commitment, not authenticity against a writer who can replace every
+artifact. Existing best-effort cleanup and filesystem hard-link limitations remain.
 
-## Estate-night publication checkpoint (2026-10-05)
+Useful next independent increments are a declared multi-replicate contrast design,
+serializable policy-override specifications, and explicit replay support for
+recorded provider failures. Real providers, condition-order randomisation for paid
+pilots, and scientific preregistration still need the separate decisions below.
+No unfinished prototype from this pass is required to run the new workflow.
 
-- Changed: Continue reporting later studies after a run/study reporting error, return nonzero, and skip aggregate generation for any study whose run report failed. Coordinator reproduced cached-metrics reuse and added a real corrupt-ledger regression.
-- Verified: the new regression module fails against pre-worker code and passes
-  against this branch. Direct equivalents of `make check`, `make test`, and
-  `make validate` passed using the primary checkout's locked venv interpreter
-  with this worktree's `src` on `PYTHONPATH`; `scripts/acceptance.py` passed 11/11.
-  The narrow command is `py -3 -m pytest tests/unit/test_report_all.py -q`
-  with this worktree's `src` on `PYTHONPATH`.
-- Review triage: The team HIGH claim was reproduced with a corrupt ledger and cached metrics and fixed by skipping that study's aggregate. The stub-only coverage concern is resolved by a real-ledger regression. Broad Exception handling is intentional for the contracted batch failure isolation; programming errors are logged and return nonzero. The error-text notice is informational on this synthetic-only surface.
-- NOT verified: hosted CI, a full-size generated study campaign, and publication
-  readiness of any scientific result. Publication is a ready PR, never a merge.
-- Residual risk: later base integration and merge review remain with the land turn.
-  Existing generated reports are preserved on failure; stderr and the nonzero exit
-  status remain authoritative. Worktree stays for the host; ignored contents are
-  disposable Python/test caches only, with no survivor copied out.
-- Human actions: no human-action file (`human_todo=null`); all ten owner decisions
-  in this file remain open and untouched. The older main-state snapshot below is
-  historical; this branch's product work is pending publication and merge.
-
-## Estate-night publication checkpoint (2026-10-05)
-
-- Changed: Reject unknown invalid_action_policy values in RunConfig, StudySpec and RunManifest; preserve exact fail/abstain behavior. Coordinator corrected Ruff import spacing.
-- Verified: the new regression module fails against pre-worker code and passes
-  against this branch. Direct equivalents of `make check`, `make test`, and
-  `make validate` passed using the primary checkout's locked venv interpreter
-  with this worktree's `src` on `PYTHONPATH`; `scripts/acceptance.py` passed 11/11.
-  The narrow command is `py -3 -m pytest tests/unit/test_runner_invalid_policy.py -q`
-  with this worktree's `src` on `PYTHONPATH`.
-- Review triage: The team verification blocker is resolved by executed regression and repository checks. The three identical Literal aliases are retained: consolidation is a non-blocking future-maintenance suggestion, with no current behavioral mismatch.
-- NOT verified: hosted CI, a full-size generated study campaign, and publication
-  readiness of any scientific result. Publication is a ready PR, never a merge.
-- Residual risk: later base integration and merge review remain with the land turn.
-  Previously accepted typo-valued manifests now fail validation deliberately.
-  Worktree stays for the host; ignored contents are
-  disposable Python/test caches only, with no survivor copied out.
-- Human actions: no human-action file (`human_todo=null`); all ten owner decisions
-  in this file remain open and untouched. The older main-state snapshot below is
-  historical; this branch's product work is pending publication and merge.
-
-**Licence decision (2026-08-12):** current and future owner-authored software is
-`GPL-3.0-only`. Earlier MIT releases retain their historical grant. See
-`LICENSE`, `RELICENSING.md`, and `LICENSES/MIT.txt`.
-
-Written by the founding engineer session (Claude Fable 5) and updated by the Codex runtime
-refresh. Everything below was verified by running it; anything not verified is labelled.
-
-**Picking up in a fresh session:** read this file, then `docs/FOUNDATION_REVIEW.md`, then
-`AGENTS.md` §5 (invariants). Verify the repo with the command block below (~5 min; the
-venv at `.venv/` already exists — only run `make setup` if it is missing). All product work is
-on `origin/main`: measured 2026-07-27, local `main` == `origin/main` == `ab3127d` (the merge of
-PR #1, the doctrine sweep), and `git branch --no-merged origin/main` is empty — nothing is left
-unpushed. All 16 founding tasks completed; there is no half-finished product work in the tree.
-
-## Codex runtime refresh (2026-07-17)
-
-- `.codex/hooks.json` now invokes the installed floor v1.4.1 with `--runtime codex`; a
-  simulated force-push was denied and a benign `git status` was allowed.
-- `.codex/config.toml` explicitly enables hooks and disables multi-agent fan-out at T1.
-  Approval and sandbox defaults remain user-owned and are not committed.
-- `AGENTS.md`, `CLAUDE.md`, and the tier file agree on M0 state, the exact-head verification rule
-  and the Codex trust boundary. Floor (updated 2026-09-29): no Claude floor is guaranteed on this
-  host (none on DESKTOP-IHKOOJS; Kraspyon keeps a user-scope hook); Codex's runs only where its
-  reviewed `.codex/hooks.json` is trusted.
-- Human-action file: none (`.agent-harness/tier.json` declares `human_todo=null`). One human
-  follow-up remains: review and trust the changed hook hash via `/hooks` in the next Codex
-  session. (2026-07-27: the tier file moved to `.agent-harness/tier.json`; T1 is deliberate
-  and its promotion trigger is now "something consumes this repo's output", not session count.)
-- Verified on this branch: `make check`, `make test` (125 passed), and `make validate`.
-  NOT verified in this refresh: the long generated-study/report/replay/acceptance sequence;
-  its last clean-state evidence remains the founding-session record below.
-
-## What exists and is verified working
-
-- **Kernel** (`src/collaborative_hill/engine/`): canonical hashing (floats forbidden),
-  stateless hierarchical seeds, hash-linked JSONL event ledger, checkpoints, runner,
-  replay verification, copy-on-write branching. `mypy --strict`: clean (39 files).
-  `ruff`: clean.
-- **Mechanisms**: N-IPD (engine v1; pairwise per-opponent + neighbourhood linear PGG,
-  exact fractions) and Evidence Commons (engine v2; one-verification/one-challenge per
-  (agent, claim) — v2 closed a support-inflation/challenge-spam exploit found in the
-  adversarial pass; engine versions are inside the mechanism hash).
-- **Agents**: deconfounded TFT family (tft_pairwise, tft_linked, ptft include/exclude-self,
-  tft_threshold, allc, alld, random), EC personas (contributor, freerider, verifier,
-  misinformer), replay policy, LLM adapter (strict typed parsing, bounded retries, safe
-  abstention, unhashed transcript sidecar) + deterministic FakeProvider. No real provider
-  exists (deliberate — human-gated cost decision).
-- **Studies**:
-  - 000 legacy reproduction: 11 conditions × 30 replicates run; report generated
-    (`docs/research/REPLICATION_REPORT.md`): 5 exact + 6 qualitative reproductions.
-    Deconfound result: linked-TFT collapses inside pairwise; threshold-TFT sustains inside
-    neighbourhood — structure alone does not carry the legacy effect.
-  - 001 Evidence Commons: DRAFT (NOT frozen — deliberately); 2×2 + misinformer arm;
-    scripted fixture runs; mechanism certificate (dilemma certified by enumeration in all
-    4 institutions; intervention integrity certified); two skins hash-verified
-    mechanism-identical; measured cost worksheet without prices.
-- **Tests**: `make test` = **125 passed** (82 unit + 24 property + 9 metamorphic + 10
-  integration; ~8 s, re-measured 2026-07-27 at `ab3127d`). Zero xfails — no known source
-  defects. `make check` additionally runs ruff (clean) and `mypy --strict` (clean, 39 files).
-- **Acceptance A–K**: `scripts/acceptance.py` — 11/11 pass (re-run 2026-07-27 at `ab3127d`,
-  4.6 s; original clean-generated-state run was at commit `9ad1212`).
-- **Docs**: ADR-0001…0007 (accepted), FOUNDATION_REVIEW, research suite under
-  `docs/research/` (charter, legacy audit, related work, novelty matrix, methodology,
-  SAP, claims+limitations, threat model, prereg template, replication report).
-
-## Commands to verify this repository (all previously run successfully)
-
-    make doctor
-    make check
-    make test
-    make validate
-    make study-000            # ~330 episodes, regenerates REPLICATION_REPORT.md
-    make study-001-smoke
-    make replay-smoke
-    .venv/Scripts/python.exe scripts/acceptance.py
-
-## Known failures / caveats (none hidden)
-
-- No CI exists (T1 sandbox — promote to T2 before adding; see `.agent-harness/tier.json`).
-  The proving-check table in `CLAUDE.md` is the gate in its place.
-- `artifacts/` is gitignored and regenerable, never canon. The trees on disk at handoff
-  (`DRAFT-5dcde1a9b6c9` = study 000, `DRAFT-a3bffdfcf171` = study 001) were produced by
-  the final clean-state pass under EC engine v2; `make study-000` / `make study-001-smoke`
-  reproduce them (deterministic).
-- `git status` CRLF warnings on Windows are cosmetic; event files are written with
-  explicit `\n` so ledger bytes are platform-stable.
-- Legacy repo clone lives in the session scratchpad (temp) — re-clone
-  `Chris0Jeky/N-person-prisoners-dilemma-simulation` @ `f7f1cceb` if needed again.
-- The `.claude/settings.local.json` bypassPermissions file is owner-managed (gitignored).
-- Codex project hooks are hash-trusted. After `.codex/hooks.json` changes, use `/hooks` to
-  review and trust the new definition before assuming the deny floor is active.
-- The installed shared dispatcher is versioned outside this repo and moves independently
-  (measured 2026-07-27: `~/.claude/hooks/dispatch.py` reports floor 1.6.20; the `.codex/hooks.json`
-  comment still says v1.4.1 — cosmetic, and editing it would force a fresh Codex `/hooks`
-  trust round, so it is left alone). Do not pin a floor version in this repo's docs.
-
-## Open scientific questions
-
-1. Which framing of the deconfound is right for publication: "structure AND strategy
-   jointly required" vs "the legacy claim needs narrowing"? (Study 000 report has data.)
-2. pTFT denominator (include/exclude-self) and TFT-E exploration granularity are
-   underspecified in the legacy draft — which convention should the lineage canonize?
-3. Evidence Commons v0 verification cannot be lied about (engine-adjudicated). When
-   deception lands (NEXT.md E3), what is the honest-verifier baseline to compare against?
-4. Do the ECParams placeholder weights create the *intended* effect sizes for LLM
-   populations, or are they too coarse? (Pilot question.)
-
-## Open engineering questions
-
-1. Real provider adapter: which SDK, how to pin model versions, where token counts come
-   from (NEXT.md E1).
-2. Condition-order randomisation for LLM runs is designed (METHODOLOGY.md) but not
-   implemented in run_study (no-op for deterministic scripted runs; needed before pilot).
-3. Message-passing (`communication: "messages"`) is schema-only — no mechanism consumes
-   messages yet.
-4. Study-hash artifact directories use `DRAFT-<hash12>` for unfrozen studies — revisit
-   naming when the first frozen study lands.
-5. Should `.codex/hooks.json`'s stale floor-version comment be refreshed? (Costs a Codex
-   `/hooks` re-trust round for a comment; deferred deliberately — see the caveats above.)
-
-## HUMAN-OWNED decisions (do not decide these silently — locked)
+## Human-owned decisions — unchanged
 
 1. Study 001 final hypotheses and wording.
-2. Primary outcomes (proposal: briefing quality + contribution rate).
-3. Utility weights (ECParams defaults are placeholders that provably yield a dilemma).
-4. Full study sample size (after pilot) and minimum effect of interest.
-5. Model providers/versions; single- vs mixed-model populations.
-6. Acceptable cost ceiling + stopping rules.
-7. Whether Study 001 is publication-ready; venue.
-8. Whether any legacy result counts as "replicated" (see REPLICATION_REPORT verdicts).
-9. Novelty claims (NOVELTY_MATRIX has the honest assessment + open verification items).
-10. The repository is now public and the foundation is on `origin/main`; any future
-    publication, release, or paid-run decision remains human-owned.
+2. Primary outcomes (proposal: briefing quality and contribution rate).
+3. Utility weights; ECParams defaults remain placeholders.
+4. Full sample size after pilot and minimum effect of interest.
+5. Model providers/versions and single- versus mixed-model populations.
+6. Acceptable cost ceiling and stopping rules.
+7. Whether Study 001 is publication-ready and its venue.
+8. Whether any legacy result counts as replicated.
+9. Novelty claims and their outstanding verification.
+10. Any future publication, release or paid-run decision; the repository is already public.
 
-## Next five tasks (detail in NEXT.md)
-
-1. Human: fill + freeze Study 001 preregistration (R1 ⛔).
-2. Real provider adapter with honest token capture (E1).
-3. 5-episode/cell pilot + variance/cost report (R2).
-4. Deterministic analysis pipeline for the 2×2 (E2).
-5. Deception-capable verification design (E3).
-
-## Read-first for the next model
-
-1. `CLAUDE.md` (hard rules + the proving-check table) — 2 minutes.
-2. `docs/FOUNDATION_REVIEW.md` (why everything is the way it is) — 5 minutes.
-3. `AGENTS.md` §5 invariants + §7 how-to-add — 5 minutes.
-4. `src/collaborative_hill/engine/runner.py` (the lifecycle, top docstring).
-5. `studies/000-legacy-reproduction/README.md` + `docs/research/REPLICATION_REPORT.md`
-   (what the science says so far).
-6. `docs/research/LEGACY_AUDIT.md` before ever trusting a legacy number.
-
-## Swarm publish candidate (2026-10-01)
-
-Changed: Adds an Evidence Commons verification regression for stale cited evidence and an inaccessible supporting item. Both targeted guard-removal probes failed at the new assertions, and the source was restored byte-for-byte.
-
-Changed: Rejects malformed and unknown branch override parameters with usage errors and accepts rational epsilon values. The three regression cases failed against the original CLI; plain policy overrides remain covered.
-
-Verified in this candidate worktree: `make check`, the full pytest suite, and
-`make validate` for studies 000 and 001. The worker draft was reviewed inline by
-the publishing coordinator. Worktree-local development dependencies were installed
-without shared site packages using `requirements-lock.txt`, including analysis extras.
-
-NOT verified: hosted CI (none declared), the long study/report/acceptance sequence,
-and real providers.
-
-Residual risk: publication is not merge approval; the later land turn must refresh
-review and exact-head evidence. The worktree and its original branch stay in place
-for the host. Human-action file is null; the human-owned decisions above remain open.
+No study was frozen and no real or paid provider was called. `human_todo=null` is
+unchanged. Hook trust remains user-owned: review changed hook definitions before
+relying on them; this pass did not modify hooks or their trust configuration.
+Current licensing remains GPL-3.0-only with the historical MIT grant preserved.
