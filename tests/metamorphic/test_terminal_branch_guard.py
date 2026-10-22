@@ -6,8 +6,7 @@ from collaborative_hill.engine.branching import branch_run
 from collaborative_hill.engine.replay import replay_run
 from collaborative_hill.engine.store import FileCheckpointStore, RunPaths
 
-from .test_counterfactual_workflow import _snapshot
-from .test_counterfactual_workflow import counterfactual
+from .test_counterfactual_workflow import _snapshot, counterfactual
 
 __all__ = ["counterfactual"]
 
