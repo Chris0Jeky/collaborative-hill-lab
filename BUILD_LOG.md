@@ -108,3 +108,66 @@ Policy IDs remain descriptive labels, not executable serialization or signatures
 Equal kernel seeds do not imply coupled provider sampling or reduced variance.
 No study was frozen, no owner scientific decision was changed, and no paid model
 run was made. T1, hook trust and the absence of persistent main CI remain unchanged.
+
+## 2026-10-22 — E2 notebook-free analysis skeleton (feat/chl-analyze)
+
+Step 0 confirmed no `analyze` command or analysis implementation existed. Read-only
+Git checks confirmed a clean linked worktree before edits. No Git command that
+writes was used, per the task's explicit boundary; changes remain uncommitted.
+
+Added `reporting/analysis.py`, dependency-free `analysis_stats.py`, `chl analyze`,
+the canonical scripted golden JSON, and 38 regression/oracle cases. Only verified
+completed ledgers supply episode outcomes. Failures and invalid artifacts remain
+visible as exclusions; copied episodes and branches never inflate sample sizes or
+attrition denominators. The original extra misinformer condition is not pooled
+into the factorial. No scenario, study definition, lock or checked-in hash changed.
+
+Draft choices are explicit in output: equal-cell weighting and independent
+within-cell bootstrap for legacy runs; complete declared blocks for eligible v2
+scripted runs; 2000 draws from recorded `rng_for` streams rooted at 20261022;
+type-7 percentile CIs; two-sided centered bootstrap p-values with +1 correction;
+Holm across E1/E2/E3. Paired t intervals are checked against reference quantiles.
+Zero-variance cells/contrasts suppress inference. Secondary summaries and effects
+are non-confirmatory. Attrition includes a Pearson chi-square test with a sparse
+expected-count warning. Invalid-rate and predeclared-exclusion sensitivity rows
+remain explicitly not run because the SAP supplies no threshold/rules. No
+scientific choice was frozen, and no simulation is presented as predicting humans.
+
+Commands actually run from this worktree (PowerShell; temporary files kept here):
+
+```powershell
+New-Item -ItemType Directory -Force artifacts/analysis-check/tmp | Out-Null
+$env:PYTHONPATH = Join-Path (Get-Location) 'src'
+$env:PYTHONDONTWRITEBYTECODE = '1'
+$env:TEMP = Join-Path (Get-Location) 'artifacts/analysis-check/tmp'
+$env:TMP = $env:TEMP
+& ../assess/.venv/Scripts/python.exe -m ruff check src tests studies scripts
+& ../assess/.venv/Scripts/python.exe -m mypy
+& ../assess/.venv/Scripts/python.exe -m pytest tests/unit/test_analysis_stats.py tests/integration/test_analysis.py -q -p no:cacheprovider -o addopts=--strict-markers --basetemp artifacts/analysis-check/pytest-final-analysis
+& ../assess/.venv/Scripts/python.exe -m pytest tests -q -p no:cacheprovider -o addopts=--strict-markers --basetemp artifacts/analysis-check/pytest-final-full
+& ../assess/.venv/Scripts/python.exe -m collaborative_hill.cli study validate studies/001-evidence-commons
+& ../assess/.venv/Scripts/python.exe -m collaborative_hill.cli study validate studies/000-legacy-reproduction
+& ../assess/.venv/Scripts/python.exe scripts/acceptance.py
+git diff --check
+git diff --name-only -- studies
+```
+
+Results: Ruff all checks passed; strict mypy no issues in **45 source files**;
+focused analysis suite **38 passed** (14.02s); final full suite **557 passed,
+4 skipped** (88.63s), versus the supplied baseline 519 passed/4 skipped. Both
+studies validate, unfrozen, with hashes preserved:
+
+- Study 000: `5dcde1a9b6c98c576ca71bc03ea65dcc96175b6d8803c4db89e6c56ac8a15e9f`
+- Study 001: `a3bffdfcf1715ebd65aa45b469f3e32c720d22633cfc80769b11020bcbd37bbe`
+
+Acceptance: **11/11**. `git diff --check` passed and the study-path diff was empty.
+Initial local lint/type errors were repaired before these green results. The
+final full suite also covers the last change adding per-cell invalid-action
+summaries and keeping duplicate/branch artifacts out of attrition denominators.
+
+NOT verified: R2 pilot/real-provider data, stochastic provider coupling, a frozen
+SAP or confirmatory interpretation. Residual risk: bootstrap test/count/seed and
+attrition estimator remain draft choices; sensitivity analysis awaits declared
+rules. Human decisions remain in `HANDOFF.md` (`human_todo=null`). No Git writes,
+publication, installs or network access. Intended commit:
+`feat(analysis): add chl analyze for the Study 001 2x2 from sealed runs`.

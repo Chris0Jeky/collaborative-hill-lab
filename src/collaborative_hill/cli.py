@@ -9,6 +9,7 @@
     chl branch <run-dir> --at-event N --override agent=policy[:param=value...] --out DIR
     chl compare <left-run> <right-run> [--verify-replay]
     chl report <run-or-study-artifacts-dir>
+    chl analyze <study-artifacts-dir> [--out FILE]
     chl doctor
 """
 
@@ -282,6 +283,31 @@ def report(target: Path) -> None:
     else:
         out = study_report(target)
     typer.echo(str(out))
+
+
+@app.command("analyze")
+def analyze(
+    study_dir: Path,
+    out: Path | None = typer.Option(None, "--out", help="New canonical JSON file"),
+) -> None:
+    """Draft SAP analysis of sealed artifacts/<study-prefix> (no episode re-execution)."""
+    from collaborative_hill.engine.hashing import canonical_json
+    from collaborative_hill.reporting.analysis import analyze_study
+
+    try:
+        result = canonical_json(analyze_study(study_dir)) + "\n"
+        if out is None:
+            typer.echo(result, nl=False)
+        else:
+            target, source = out.resolve(), study_dir.resolve()
+            if target.is_relative_to(source) and target.parent != source:
+                raise ValueError("analysis output must be outside run directories")
+            # Never overwrite a sealed source, existing analysis, or unrelated file.
+            with out.open("x", encoding="utf-8", newline="\n") as stream:
+                stream.write(result)
+    except (ValueError, OSError) as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(code=2) from exc
 
 
 @app.command("doctor")

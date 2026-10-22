@@ -28,6 +28,13 @@ publication (P) tracks. Human-owned decisions are marked ⛔ (see HANDOFF.md).
    Deps: R2. Done when: `scripts/analyze_001.py` (or `chl analyze`) computes the SAP's
    paired contrasts + bootstrap CIs + Holm from sealed artifacts only, with golden-file
    test on scripted fixture data.
+   Skeleton exists: `chl analyze artifacts/<study-prefix> [--out analysis.json]`
+   reads verified seals, reports episode-level E1–E3, bootstrap intervals and Holm
+   where variance permits, and records exclusions. Legacy runs remain independent;
+   paired-policy-v2 uses complete declared blocks (no paired provider inference).
+   Outputs remain `sap_status: draft`: confirmatory use is still gated on R2 pilot
+   data, preregistration choices and the human SAP freeze. The invalid-rate sensitivity
+   cutoff is deliberately unset until declared; deterministic fixtures have no CIs.
 
 ## Soon
 
