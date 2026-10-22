@@ -11,6 +11,7 @@ from fractions import Fraction
 from pathlib import Path
 from typing import Any
 
+from collaborative_hill.engine.events import EventType
 from collaborative_hill.engine.hashing import frac_str
 from collaborative_hill.engine.replay import load_run
 from collaborative_hill.engine.seeds import (
@@ -72,6 +73,12 @@ def _episode(directory: Path) -> dict[str, Any]:
     epi, operations = metrics["epistemics"], metrics["operations"]
     proposed = operations["actions_proposed"]
     contributions = sum(epi["action_counts"].values())
+    parser_abstentions = sum(
+        ev.event_type == EventType.ACTION_PROPOSED
+        and ev.payload["proposal"]["action"].get("type") == "abstain"
+        and ev.payload["proposal"]["action"].get("reason") == "invalid_llm_output"
+        for ev in events
+    )
     row.update({
         "briefing_quality": epi["accepted_correct"] - epi["accepted_incorrect"],
         "accepted_correct": epi["accepted_correct"],
@@ -84,8 +91,13 @@ def _episode(directory: Path) -> dict[str, Any]:
         "false_claim_accepted": int(epi["false_claim_accepted"]),
         "collective_quality": events[-1].payload["collective_quality"],
         "invalid_action_count": operations["actions_rejected"],
+        "invalid_llm_output_abstentions": parser_abstentions,
         "fallback_abstentions": operations["fallback_abstentions"],
-        "invalid_action_rate": (frac_str(Fraction(operations["actions_rejected"], proposed))
+        # SAP invalid-output reporting includes parser failures and mechanism
+        # rejections once each; fallback abstentions already follow a rejection.
+        "invalid_action_rate": (frac_str(Fraction(
+            operations["actions_rejected"] + parser_abstentions, proposed,
+        ))
                                 if proposed else "0"),
     })
     for key in ("free_rider_advantage", "payoff_gini", "effort_gini"):
@@ -192,6 +204,9 @@ def _attrition(rows: list[dict[str, Any]], exclusions: list[dict[str, Any]]) -> 
             "inclusion_rate": frac_str(Fraction(included, included + len(excluded)))
             if included + len(excluded) else None,
             "invalid_action_count": sum(r.get("invalid_action_count", 0) for r in completed_rows),
+            "invalid_llm_output_abstentions": sum(
+                r.get("invalid_llm_output_abstentions", 0) for r in completed_rows
+            ),
             "fallback_abstentions": sum(r.get("fallback_abstentions", 0) for r in completed_rows),
             "mean_invalid_action_rate": frac_str(sum(
                 (Fraction(r.get("invalid_action_rate", 0)) for r in completed_rows), Fraction(),

@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from collaborative_hill.agents.llm import FakeProvider, LLMPolicy
 from collaborative_hill.domain.actions import ActionProposal, InspectEvidenceAction
 from collaborative_hill.engine.hashing import canonical_json
 from collaborative_hill.experiments import study
@@ -194,6 +195,38 @@ def test_completed_invalid_action_episodes_are_included_as_run(tmp_path, monkeyp
                and r["invalid_action_rate"] == "1/36" for r in result["episodes"])
     assert all(c["invalid_action_count"] == 3 and c["mean_invalid_action_rate"] == "1/36"
                for c in result["attrition"]["per_cell"].values())
+    assert result["sensitivity"]["excluding_high_invalid_rate"] == {
+        "status": "not_run", "reason": "threshold_not_declared",
+    }
+
+
+@pytest.mark.parametrize(("script", "parser_failures", "rejections", "rate"), [
+    (["garbage", "still not JSON"] * 12, 36, 0, "1"),
+    (["garbage", "still not JSON", '{"action":{"type":"abstain","reason":"voluntary"}}',
+      '{"action":{"type":"inspect_evidence","evidence_id":"missing"}}'] * 4,
+     12, 12, "2/3"),
+])
+def test_parser_failure_abstentions_are_reported_separately(
+    tmp_path, monkeypatch, script, parser_failures, rejections, rate,
+):
+    def malformed_policies(resolved):
+        return {a.agent_id: LLMPolicy(a.agent_id, FakeProvider(list(script)), resolved.skin,
+                                      max_retries=1) for a in resolved.spec.cognition.agents}
+
+    monkeypatch.setattr(study, "build_policies", malformed_policies)
+    result = analyze_study(make_fixture(tmp_path))
+    assert result["exclusions"] == []
+    assert len(result["episodes"]) == 12
+    for row in result["episodes"]:
+        assert row["invalid_llm_output_abstentions"] == parser_failures
+        assert row["invalid_action_count"] == rejections
+        assert row["fallback_abstentions"] == rejections
+        assert row["invalid_action_rate"] == rate
+    for cell in result["attrition"]["per_cell"].values():
+        assert cell["invalid_llm_output_abstentions"] == 3 * parser_failures
+        assert cell["invalid_action_count"] == 3 * rejections
+        assert cell["fallback_abstentions"] == 3 * rejections
+        assert cell["mean_invalid_action_rate"] == rate
     assert result["sensitivity"]["excluding_high_invalid_rate"] == {
         "status": "not_run", "reason": "threshold_not_declared",
     }

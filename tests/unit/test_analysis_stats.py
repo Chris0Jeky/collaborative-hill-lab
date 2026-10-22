@@ -1,6 +1,7 @@
 """Hand-computed factorial and multiplicity oracles; no simulation claims."""
 
 from fractions import Fraction as F
+from unittest.mock import Mock, call
 
 import pytest
 
@@ -46,6 +47,19 @@ def test_bootstrap_seed_and_intervals():
     other = bootstrap_means(values, seed=43, samples=79, scope="test")
     assert interval(first) != interval(other)
     assert first != bootstrap_means(values, seed=42, samples=79, scope="other")
+
+
+def test_bootstrap_draws_exactly_n_indices_per_replicate(monkeypatch):
+    # Independent index/mean oracle: three replicates of three episodes or blocks.
+    # Drawing 2n, even from duplicated values, must fail rather than narrow the CI.
+    rng = Mock()
+    rng.randrange.side_effect = [0, 0, 2, 1, 2, 2, 0, 1, 1]
+    factory = Mock(return_value=rng)
+    monkeypatch.setattr("collaborative_hill.reporting.analysis_stats.rng_for", factory)
+    draws = bootstrap_means(list(map(F, [0, 6, 12])), seed=42, samples=3, scope="oracle")
+    factory.assert_called_once_with(42, "chl.analyze.v1", "oracle")
+    assert rng.randrange.call_args_list == [call(3)] * 9
+    assert draws == list(map(F, [4, 10, 4]))
 
 
 def test_equal_cell_weighting_and_contrast_signs():

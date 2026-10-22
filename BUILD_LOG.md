@@ -171,3 +171,100 @@ attrition estimator remain draft choices; sensitivity analysis awaits declared
 rules. Human decisions remain in `HANDOFF.md` (`human_todo=null`). No Git writes,
 publication, installs or network access. Intended commit:
 `feat(analysis): add chl analyze for the Study 001 2x2 from sealed runs`.
+
+## 2026-10-22 — PR #58 analysis review fix round
+
+Step 0: clean linked worktree on `feat/chl-analyze`, HEAD
+`e6bf84b171d2b26daa76c1db59a0682c1505a233`. Both findings still existed.
+No network, installs or Git writes were used. All temporary outputs stayed under
+ignored `artifacts/analysis-fix/`; only the supplied sibling venv was used.
+
+Added `invalid_llm_output_abstentions` to episode rows and per-cell summaries.
+Count only proposed abstentions with reason `invalid_llm_output`, once per
+proposal, rather than counting both proposed and accepted ledger entries.
+Mechanism rejection and fallback counts retain their meanings. The analysis
+invalid-action rate now includes parser failures plus rejections; it does not
+double-count rejection fallbacks or count ordinary abstentions. This combined
+rate feeds the existing per-cell invalid-output reporting. Sensitivity exclusions
+remain explicitly not run until a threshold is declared. Existing versioned
+operational metrics, production bootstrap code and study inputs are unchanged.
+
+Regression evidence:
+
+- All-malformed and mixed-output integration cases failed before the production
+  fix with `KeyError: invalid_llm_output_abstentions` (2 failed, 17 deselected).
+  A preliminary test-authoring typo (`spec.agents` rather than
+  `spec.cognition.agents`) was corrected before this meaningful red run.
+- The all-malformed case produces 36 exhausted-parser abstentions per episode;
+  the mixed case produces 12 parser abstentions, 12 mechanism rejections/fallbacks
+  and 12 ordinary abstentions, with invalid-output rate `2/3`.
+- The new independent bootstrap oracle supplies nine literal indices for three
+  replicates of size three, asserts all nine `randrange(3)` calls, and checks
+  hand-derived replicate means `[4, 10, 4]` for values `[0, 6, 12]`.
+- An in-memory mutation doubled the observation list before calling the original
+  bootstrap helper, hence sampling 2n. Before adding the oracle, all 21 statistics
+  tests still passed (1.84s). With the oracle, that same mutation failed on the
+  exhausted index stream (1 failed, 0.93s). The normal helper passes.
+- Re-executing the original analysis source from `git show HEAD:...` in memory
+  on the same 12 verified completed malformed-output episodes gave rejection=0,
+  fallback=0, rate=0. Fixed analysis gave parser=36, rejection=0, fallback=0,
+  rate=1 for every episode; neither analysis excluded an episode.
+- The golden JSON was compared against `HEAD`: stripping the 16 new zero-valued
+  fields (12 episodes, four cell summaries) exactly reproduces the old canonical
+  JSON. No existing field/value was changed.
+
+Commands actually run (PowerShell, from this worktree):
+
+```powershell
+New-Item -ItemType Directory -Force artifacts/analysis-fix/tmp | Out-Null
+$env:PYTHONPATH = Join-Path (Get-Location) 'src'
+$env:PYTHONDONTWRITEBYTECODE = '1'
+$env:TEMP = Join-Path (Get-Location) 'artifacts/analysis-fix/tmp'
+$env:TMP = $env:TEMP
+$env:HYPOTHESIS_STORAGE_DIRECTORY = Join-Path (Get-Location) 'artifacts/analysis-fix/hypothesis'
+& ../assess/.venv/Scripts/python.exe -m pytest tests/integration/test_analysis.py -k parser_failure -q -p no:cacheprovider -o addopts=--strict-markers --basetemp artifacts/analysis-fix/pytest-parser-red-verified
+& ../assess/.venv/Scripts/python.exe -m pytest tests/unit/test_analysis_stats.py tests/integration/test_analysis.py -q -p no:cacheprovider -o addopts=--strict-markers --basetemp artifacts/analysis-fix/pytest-focused
+& ../assess/.venv/Scripts/python.exe -m ruff check src tests studies scripts --cache-dir artifacts/analysis-fix/ruff
+& ../assess/.venv/Scripts/python.exe -m mypy --cache-dir artifacts/analysis-fix/mypy
+& ../assess/.venv/Scripts/python.exe -m pytest tests -q -p no:cacheprovider -o addopts=--strict-markers --basetemp artifacts/analysis-fix/pytest-full
+& ../assess/.venv/Scripts/python.exe scripts/acceptance.py
+& ../assess/.venv/Scripts/python.exe -m collaborative_hill.cli study validate studies/000-legacy-reproduction
+& ../assess/.venv/Scripts/python.exe -m collaborative_hill.cli study validate studies/001-evidence-commons
+git diff --check
+git diff --exit-code HEAD -- studies
+```
+
+The two mutation runs used this in-memory wrapper via the supplied Python's
+stdin; `selection` was the whole statistics module before adding the oracle,
+then the new oracle's node ID. `output` was respectively
+`artifacts/analysis-fix/pytest-mutation-baseline` and
+`artifacts/analysis-fix/pytest-mutation-red`:
+
+```python
+import pytest
+from collaborative_hill.reporting import analysis_stats
+original = analysis_stats.bootstrap_means
+
+def doubled(values, **kwargs):
+    return original(list(values) * 2, **kwargs)
+
+analysis_stats.bootstrap_means = doubled
+raise SystemExit(pytest.main([selection, '-q', '-p', 'no:cacheprovider',
+    '-o', 'addopts=--strict-markers', '--basetemp', output]))
+```
+
+Final results: focused analysis suite **41 passed** (19.79s); Ruff all checks
+passed; strict mypy no issues in **45 source files**; full suite **560 passed,
+4 skipped** (112.04s), against baseline 557 passed/4 skipped. Acceptance
+**11/11**. Both studies validate, unfrozen, with unchanged hashes:
+
+- Study 000: `5dcde1a9b6c98c576ca71bc03ea65dcc96175b6d8803c4db89e6c56ac8a15e9f`
+- Study 001: `a3bffdfcf1715ebd65aa45b469f3e32c720d22633cfc80769b11020bcbd37bbe`
+
+`git diff --check` passed; the diff against HEAD under `studies/` is empty.
+NOT verified: real-provider runs, provider randomness coupling, R2 pilot or
+confirmatory inference/SAP freeze. Residual risk: analysis remains draft and
+sensitivity exclusions await human-declared rules. Human decisions remain in
+`HANDOFF.md` (`human_todo=null`). Work remains uncommitted under the explicit
+no-Git-writes rule. Intended commit:
+`fix(analysis): count invalid-LLM-output abstentions and pin the bootstrap draw size`.
