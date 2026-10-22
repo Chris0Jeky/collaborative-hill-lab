@@ -71,6 +71,14 @@ class InteractionPlane(BaseModel):
     graph: Literal["complete"] = "complete"  # extension point: named topologies
     communication: Literal["none", "messages"] = "none"
 
+    @model_validator(mode="after")
+    def _messages_not_implemented(self) -> "InteractionPlane":
+        # Declared for the roadmap, but no mechanism consumes it yet (HANDOFF open eng.
+        # question 3). Accepting it would run a "messages" condition as "none".
+        if self.communication == "messages":
+            raise ValueError("communication='messages' is declared but not implemented; use 'none'")
+        return self
+
 
 class PolicySpec(BaseModel):
     """Cognition assignment. ``params`` values are int/str/bool only (rationals
