@@ -90,7 +90,8 @@ def main() -> int:
         lines.extend(["", "Inspect `summary.json` for paths, replay proofs and action differences.",
                       "Nested branches explicitly resupply the inherited non-original policy.",
                       "The second branch retains that policy; a new run ID alone changes hashes,",
-                      "not actions. Utilities cover the entire episode, including the common prefix."])
+                      "not actions. Utilities cover the entire episode,",
+                      "including the common prefix."])
         (output / "README.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     except (ValueError, OSError) as exc:
         print(f"error: {exc}", file=sys.stderr)

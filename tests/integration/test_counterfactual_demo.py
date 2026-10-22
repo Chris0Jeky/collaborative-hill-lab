@@ -17,7 +17,8 @@ def test_counterfactual_demo_is_end_to_end_and_refuses_existing_output(tmp_path)
     output = tmp_path / 'demo'
     command = [sys.executable, str(ROOT / 'scripts' / 'counterfactual_demo.py'),
                '--out', str(output)]
-    result = subprocess.run(command, cwd=ROOT, capture_output=True, text=True, timeout=45)
+    result = subprocess.run(command, cwd=ROOT, capture_output=True, text=True,
+                            timeout=45, check=False)
     assert result.returncode == 0, result.stdout + result.stderr
     summary = json.loads((output / 'summary.json').read_text())
     assert summary['scope'] == 'offline_counterfactual_demonstration'
@@ -32,7 +33,8 @@ def test_counterfactual_demo_is_end_to_end_and_refuses_existing_output(tmp_path)
         assert set(entry['child_to_grandchild']['utility_delta'].values()) == {'0'}
     assert (output / 'README.md').is_file()
     snapshot = {str(p): p.read_bytes() for p in output.rglob('*') if p.is_file()}
-    repeat = subprocess.run(command, cwd=ROOT, capture_output=True, text=True, timeout=45)
+    repeat = subprocess.run(command, cwd=ROOT, capture_output=True, text=True,
+                            timeout=45, check=False)
     assert repeat.returncode == 2
     assert 'exist' in repeat.stderr.lower()
     assert snapshot == {str(p): p.read_bytes() for p in output.rglob('*') if p.is_file()}
