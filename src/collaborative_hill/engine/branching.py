@@ -72,6 +72,8 @@ def branch_run(
     except (KeyError, TypeError) as exc:
         raise ChainError("malformed checkpoint record") from exc
     validate_checkpoint(record, fork_seq, parent_events)
+    if parent_events[fork_seq].run_id != manifest["run_id"]:
+        raise ValueError("cannot branch an inherited checkpoint with no direct-parent segment")
     state = record["state"]
     if not child_run_id.strip() or child_run_id in {e.run_id for e in parent_events}:
         raise ValueError("child run identity must be non-empty and different from every ancestor")

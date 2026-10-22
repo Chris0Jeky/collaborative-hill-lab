@@ -11,6 +11,8 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      PYTEST_ADDOPTS: '-o addopts=--strict-markers'
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
@@ -23,9 +25,20 @@ jobs:
           git rev-parse HEAD
           git rev-parse HEAD:src
           git rev-parse HEAD:tests
+          git rev-parse HEAD:scripts
       - name: Install committed lock
-        run: make setup PYTHON=python
+        run: |
+          make setup PYTHON=python > setup.log 2>&1 || { cat setup.log; exit 1; }
+          .venv/bin/python -m pip check
       - name: Repository gates
-        run: make check test validate
+        run: |
+          make check test validate > gates.log 2>&1 || { cat gates.log; exit 1; }
+          grep -E 'passed|Success:|study_hash|All checks passed' gates.log
       - name: Acceptance
         run: .venv/bin/python scripts/acceptance.py
+      - name: Offline counterfactual tutorial when present
+        run: |
+          if test -f scripts/counterfactual_demo.py; then
+            .venv/bin/python scripts/counterfactual_demo.py --out artifacts/verification-demo
+            cat artifacts/verification-demo/README.md
+          fi
