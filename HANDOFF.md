@@ -44,7 +44,7 @@ The tutorial output directory must not already exist. Its `README.md` and
 `summary.json` contain the comparisons and replay reports. Failed attempts retain
 partial artifacts for diagnosis; use a new output directory for a retry.
 
-## Exact verification
+## Previous published verification
 
 The combined product tree `5b5f7a480f621044f17cd825bf49962e1667d7f0` passed fresh
 committed-lock installation, pip check, Ruff, strict mypy (43 source files),
@@ -64,10 +64,30 @@ Native Windows/macOS execution, multiprocess stress and power-loss recovery were
 not verified. No independent human review is claimed. The temporary verification
 workflow was not merged into main; there is still no persistent main-branch CI.
 
+## Local replay-failure verification
+
+The uncommitted `replay-fail` worktree passed Ruff, strict mypy (43 source files),
+**549 passed / 4 skipped** on Windows using `../assess/.venv/Scripts/python.exe`,
+**11/11 acceptance scenarios**, and both unchanged study validations. The 30 new
+offline regression cases cover provider failures at different policy boundaries,
+retry exhaustion, failure during retry, failed branches, illegal-action handling,
+and rehashed inconsistent failure histories. The original pre-fix 17-event failure
+fixture now replays identically; isolated replay smoke passes. Commands and the
+unfiltered smoke's negative-fixture limitation are recorded in `BUILD_LOG.md`.
+No Git writes, network, installs, or owner decisions were made in this slice.
+
 ## Boundaries and remaining engineering directions
 
-Replay verifies deterministic engine transitions given recorded actions, not
-provider sampling or arbitrary provider exceptions. Policy labels are not a
+Replay verifies deterministic engine transitions given recorded actions and
+typed `ProviderError` outcomes in existing `RunFailed` seals, including episodes
+with `invalid_llm_output` abstentions after bounded retries. Replay calls no
+provider: it raises the recorded error only when the engine reaches that agent's
+proposal boundary at the recorded round, then compares the regenerated prefix
+and terminal state/seal. Conflicting proposals and inconsistent failure histories
+are refused. Existing event bytes, versions, and study hashes are unchanged;
+no ADR-level architecture change was needed. Provider sampling, retry transcripts,
+and arbitrary exception classes are not reproduced. Failure messages are recorded
+inputs, not independently authenticated evidence of an outage. Policy labels are not a
 serialization of executable policy objects or an authentication scheme. Nested
 branches require explicit resupply of inherited non-original policies. A terminal
 branch can replay, but its inherited terminal checkpoint cannot be forked again
@@ -80,10 +100,10 @@ equal draw consumption or reduced variance. Hash links check consistency relativ
 to a retained commitment, not authenticity against a writer who can replace every
 artifact. Existing best-effort cleanup and filesystem hard-link limitations remain.
 
-Useful next independent increments are a declared multi-replicate contrast design,
-serializable policy-override specifications, and explicit replay support for
-recorded provider failures. Real providers, condition-order randomisation for paid
-pilots, and scientific preregistration still need the separate decisions below.
+Useful next independent increments are a declared multi-replicate contrast design
+and serializable policy-override specifications. Real providers, condition-order
+randomisation for paid pilots, and scientific preregistration still need the
+separate decisions below.
 No unfinished prototype from this pass is required to run the new workflow.
 
 ## Human-owned decisions — unchanged

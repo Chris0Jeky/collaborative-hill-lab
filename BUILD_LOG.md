@@ -108,3 +108,70 @@ Policy IDs remain descriptive labels, not executable serialization or signatures
 Equal kernel seeds do not imply coupled provider sampling or reduced variance.
 No study was frozen, no owner scientific decision was changed, and no paid model
 run was made. T1, hook trust and the absence of persistent main CI remain unchanged.
+
+## 2026-10-22 — Recorded provider-failure replay (local, uncommitted)
+
+Step 0 reproduced the gap before product edits: FakeProvider failed for `a2` on
+call 1 in `attr-ledger`; its sealed 17-event ledger diverged on replay at seq 16
+(`RunFailed` versus a different `RunFailed` reason). The first new regression also
+failed before the fix, at seq 4 for an immediate `a1` outage.
+
+Replay now decodes the existing `policy error for AGENT: ProviderError: MESSAGE`
+seal and raises that typed error from ReplayPolicy at the recorded round. The
+unchanged runner regenerates every engine event and final state/seal; conflicting
+proposals refuse explicitly and chain mismatches report an inconsistent recorded
+failure. Invalid-output abstentions remain recorded typed proposals. No event,
+manifest, seed protocol, study hash, runner behavior, or ADR was changed. Messages
+are recorded inputs; provider sampling and arbitrary exception classes are outside
+this replay scope. Thirty offline regressions include rehashed/pinned mutations,
+absent transcripts/checkpoints/parents, no-provider guards, both seed protocols,
+failure during retry, and attempted failure after engine completion.
+
+All commands ran from this worktree with `PYTHONPATH` set to its `src`,
+`PYTHONDONTWRITEBYTECODE=1`, and `TEMP`/`TMP` set to the existing
+`artifacts/replay-failure-step0` directory. No installs or network were used.
+
+```powershell
+& ../assess/.venv/Scripts/python.exe -m ruff check src tests studies scripts --cache-dir artifacts/ruff-cache
+& ../assess/.venv/Scripts/python.exe -m mypy --cache-dir artifacts/mypy-cache
+& ../assess/.venv/Scripts/python.exe -m pytest tests -q -p no:cacheprovider -o addopts=--strict-markers --basetemp=artifacts/replay-failure-full
+& ../assess/.venv/Scripts/python.exe scripts/acceptance.py
+& ../assess/.venv/Scripts/python.exe -m collaborative_hill.cli study validate studies/000-legacy-reproduction
+& ../assess/.venv/Scripts/python.exe -m collaborative_hill.cli study validate studies/001-evidence-commons
+git diff --check
+```
+
+Results: Ruff clean; strict mypy clean (43 source files); **549 passed, 4 skipped
+in 142.97s** (baseline 519 passed, 4 skipped); acceptance **11/11**; both studies
+valid with unchanged hashes `5dcde1a9b6c98c576ca71bc03ea65dcc96175b6d8803c4db89e6c56ac8a15e9f`
+and `a3bffdfcf1715ebd65aa45b469f3e32c720d22633cfc80769b11020bcbd37bbe`.
+The pytest addopts override keeps strict markers and exposes the result counts.
+The earlier focused suite passed 28 cases before the final two cases were added;
+all 30 are included in the passing full suite.
+
+The preserved Step-0 ledger now replays all 17 events with identical hashes/seal.
+An optional `python scripts/replay_smoke.py` run refused deliberately corrupted
+negative-test ledgers and a replay scratch ledger lacking a frozen scenario,
+because its broad `artifacts/*/*/*/events.jsonl` glob also discovers test output.
+No script repair was needed for this fixture-layout issue. The same smoke entry
+point passed **1/1** with only the unchanged Step-0 fixture in scope:
+
+```powershell
+@'
+from pathlib import Path
+from shutil import copytree
+import runpy
+source, = Path('artifacts/replay-failure-step0/runs').glob('*/*/*/events.jsonl')
+root = Path('artifacts/replay-failure-smoke')
+copytree(source.parent, root / 'artifacts' / 'fixture' / 'attr-ledger' / 'original')
+smoke = runpy.run_path('scripts/replay_smoke.py')
+smoke['main'].__globals__['REPO'] = root
+raise SystemExit(smoke['main']())
+'@ | & ../assess/.venv/Scripts/python.exe -
+```
+
+Use a fresh smoke root if repeating the copy. Arbitrary provider exception classes,
+real providers, external publication, and independent human review were not
+verified. Git was read only; nothing was staged, committed, pushed, or merged.
+`human_todo=null`; HANDOFF.md's human-owned scientific decisions remain unchanged.
+Intended commit: `feat(replay): replay sealed runs that ended in recorded provider failures`.

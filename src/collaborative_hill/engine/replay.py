@@ -2,8 +2,10 @@
 
 Replay rebuilds the mechanism from the run directory's frozen resolved
 scenario (written at run time, so replay is self-contained), drives it with
-ReplayPolicies fed from the recorded ActionProposed events, and compares the
-resulting chain hash-by-hash against the original.
+ReplayPolicies fed from recorded ActionProposed events and typed ProviderError
+outcomes in RunFailed seals, and compares the resulting chain hash-by-hash
+against the original. Failures are raised only at the recorded policy boundary;
+the runner independently regenerates the prefix and terminal state hash.
 
 Determinism scope (ADR-0001): replay is deterministic GIVEN recorded typed
 actions. For scripted policies a from-scratch rerun also matches (tested);
@@ -21,6 +23,7 @@ from collaborative_hill.agents.replay import (
     ReplayPolicy,
     policy_ids_from_events,
     proposals_from_events,
+    provider_errors_from_events,
 )
 from collaborative_hill.engine.events import Event, EventType
 from collaborative_hill.engine.runner import RunConfig, run_episode
@@ -78,9 +81,11 @@ def _replay_segments(events: list[Event], resolved: ResolvedScenario,
                      manifest: dict[str, Any], paths: RunPaths) -> list[Event]:
     mechanism = resolved.build_mechanism()
     recorded = proposals_from_events(events)
+    provider_errors = provider_errors_from_events(events)
     original_policy_ids = policy_ids_from_events(events)
     policies = {
-        agent: ReplayPolicy(agent, original_policy_ids[agent], recorded.get(agent, {}))
+        agent: ReplayPolicy(agent, original_policy_ids[agent], recorded.get(agent, {}),
+                            provider_errors.get(agent, {}))
         for agent in mechanism.agent_ids()
     }
     starts = [0, *(i for i in range(1, len(events))
@@ -136,7 +141,12 @@ def replay_run(run_dir: Path, keep_dir: Path | None = None) -> ReplayReport:
     finally:
         if keep_dir is None:
             shutil.rmtree(workdir, ignore_errors=True)
-    return compare_chains(manifest["run_id"], events, replayed)
+    report = compare_chains(manifest["run_id"], events, replayed)
+    if not report.chains_match and events[-1].event_type == EventType.RUN_FAILED:
+        return report.model_copy(update={
+            "detail": f"recorded failure inconsistent with engine replay: {report.detail}",
+        })
+    return report
 
 
 def compare_chains(run_id: str, original: list[Event], replayed: list[Event]) -> ReplayReport:
