@@ -22,10 +22,11 @@ from collaborative_hill.agents.replay import (
     policy_ids_from_events,
     proposals_from_events,
 )
-from collaborative_hill.engine.events import Event
+from collaborative_hill.engine.events import Event, EventType
 from collaborative_hill.engine.runner import RunConfig, run_episode
 from collaborative_hill.engine.seeds import LEGACY_SEED_PROTOCOL, validate_recorded_seed_metadata
-from collaborative_hill.engine.store import FileEventStore, RunPaths
+from collaborative_hill.engine.store import FileCheckpointStore, FileEventStore, RunPaths
+from collaborative_hill.engine.validation import effective_policy_ids, validate_run
 from collaborative_hill.experiments.scenario import ResolvedScenario
 
 
@@ -54,11 +55,27 @@ def load_run(run_dir: Path) -> tuple[list[Event], ResolvedScenario, dict[str, An
     manifest.setdefault("seed_protocol", LEGACY_SEED_PROTOCOL)
     if events:
         validate_recorded_seed_metadata(manifest, events[0].payload)
+    validate_run(events, resolved, manifest)
+    effective_policy_ids(run_dir, events, manifest)
     return events, resolved, manifest
 
 
-def replay_run(run_dir: Path, keep_dir: Path | None = None) -> ReplayReport:
-    events, resolved, manifest = load_run(Path(run_dir))
+class _RoundBoundary:
+    """Stop a replay segment at a fork using the unchanged episode lifecycle."""
+
+    def __init__(self, mechanism: Any, stop_round: int) -> None:
+        self.mechanism = mechanism
+        self.stop_round = stop_round
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self.mechanism, name)
+
+    def is_terminal(self, state: dict[str, Any]) -> bool:
+        return bool(state["round"] >= self.stop_round or self.mechanism.is_terminal(state))
+
+
+def _replay_segments(events: list[Event], resolved: ResolvedScenario,
+                     manifest: dict[str, Any], paths: RunPaths) -> list[Event]:
     mechanism = resolved.build_mechanism()
     recorded = proposals_from_events(events)
     original_policy_ids = policy_ids_from_events(events)
@@ -66,30 +83,60 @@ def replay_run(run_dir: Path, keep_dir: Path | None = None) -> ReplayReport:
         agent: ReplayPolicy(agent, original_policy_ids[agent], recorded.get(agent, {}))
         for agent in mechanism.agent_ids()
     }
-    config = RunConfig(
-        study_id=manifest["study_id"],
-        run_id=manifest["run_id"],
-        seed_root=tuple(manifest["seed_root"]),
-        seed_protocol=manifest["seed_protocol"],
-        policy_seed_root=manifest.get("policy_seed_root"),
-        scenario_block=manifest.get("scenario_block"),
-        checkpoint_every=manifest["checkpoint_every"],
-        invalid_action_policy=manifest["invalid_action_policy"],
-    )
-
-    workdir = keep_dir or Path(tempfile.mkdtemp(prefix="chl-replay-"))
-    try:
-        paths = RunPaths(workdir / "replay").create()
-        run_episode(mechanism=mechanism, policies=policies, config=config, paths=paths,
-                    start_meta={"scenario_hash": resolved.scenario_hash,
-                                "mechanism_hash": resolved.mechanism_hash,
-                                "narrative_hash": resolved.narrative_hash})
+    starts = [0, *(i for i in range(1, len(events))
+                   if events[i].run_id != events[i - 1].run_id)]
+    state = None
+    replayed: list[Event] = []
+    reserved = {"agents", "policies", "seed_root", "invalid_action_policy",
+                "seed_protocol", "policy_seed_root", "scenario_block"}
+    start_meta = {k: v for k, v in events[0].payload.items() if k not in reserved}
+    for index, start in enumerate(starts):
+        end = starts[index + 1] if index + 1 < len(starts) else None
+        config = RunConfig(
+            study_id=manifest["study_id"], run_id=events[start].run_id,
+            seed_root=tuple(manifest["seed_root"]),
+            seed_protocol=manifest["seed_protocol"],
+            policy_seed_root=manifest.get("policy_seed_root"),
+            scenario_block=manifest.get("scenario_block"),
+            checkpoint_every=manifest["checkpoint_every"],
+            invalid_action_policy=manifest["invalid_action_policy"],
+        )
+        engine = mechanism if end is None else _RoundBoundary(mechanism, events[end].logical_time)
+        result = run_episode(mechanism=engine, policies=policies, config=config, paths=paths,
+                             start_state=state, start_meta=start_meta)
         replayed = FileEventStore(paths.events).load_all(verify=True)
+        if end is not None:
+            # The boundary adapter produces a temporary completion seal, not an
+            # event from the original branch. Remove ONLY that generated seal;
+            # all prefix events and state were re-executed, never copied from input.
+            if result.status != "completed" or replayed[-1].event_type != EventType.RUN_COMPLETED:
+                return replayed
+            record = FileCheckpointStore(paths.checkpoints).load(result.event_count - 2)
+            state = record["state"]
+            lines = paths.events.read_bytes().splitlines(keepends=True)
+            paths.events.write_bytes(b"".join(lines[:-1]))
+            replayed = FileEventStore(paths.events).load_all(verify=True)
+            if not compare_chains(config.run_id, events[:end], replayed).chains_match:
+                return replayed
+    return replayed
+
+
+def replay_run(run_dir: Path, keep_dir: Path | None = None) -> ReplayReport:
+    """Re-execute every ancestral segment without reading parent paths/checkpoints."""
+    run_dir = Path(run_dir)
+    events, resolved, manifest = load_run(run_dir)
+    workdir = (Path(keep_dir) if keep_dir is not None
+               else Path(tempfile.mkdtemp(prefix="chl-replay-")))
+    target = workdir / "replay"
+    if target.resolve().is_relative_to(run_dir.resolve()):
+        raise ValueError("replay output must be outside the source run")
+    try:
+        with RunPaths(target).reserve() as paths:
+            replayed = _replay_segments(events, resolved, manifest, paths)
     finally:
         if keep_dir is None:
             shutil.rmtree(workdir, ignore_errors=True)
-
-    return compare_chains(config.run_id, events, replayed)
+    return compare_chains(manifest["run_id"], events, replayed)
 
 
 def compare_chains(run_id: str, original: list[Event], replayed: list[Event]) -> ReplayReport:

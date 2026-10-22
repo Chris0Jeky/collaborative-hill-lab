@@ -124,7 +124,11 @@ def replay(run_dir: Path) -> None:
     """Re-execute a sealed run and verify the event hash chain matches."""
     from collaborative_hill.engine.replay import replay_run
 
-    report = replay_run(run_dir)
+    try:
+        report = replay_run(run_dir)
+    except (ValueError, OSError) as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(code=2) from exc
     typer.echo(report.model_dump_json(indent=2))
     if not report.chains_match:
         raise typer.Exit(code=2)
@@ -197,7 +201,11 @@ def branch(
     from collaborative_hill.engine.replay import load_run
     from collaborative_hill.experiments.scenario import NIPDWorld
 
-    _, resolved, manifest = load_run(run_dir)
+    try:
+        _, resolved, manifest = load_run(run_dir)
+    except (ValueError, OSError) as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(code=2) from exc
     overrides = {}
     for item in override:
         agent, name, params = _parse_override_item(item)
@@ -238,7 +246,7 @@ def branch(
             parent_dir=run_dir, fork_seq=at_event, child_dir=out,
             child_run_id=child_run_id, policy_overrides=overrides,
         )
-    except FileExistsError as exc:
+    except (ValueError, OSError) as exc:
         typer.echo(f"error: {exc}", err=True)
         raise typer.Exit(code=2) from exc
     typer.echo(branch_manifest.model_dump_json(indent=2))
