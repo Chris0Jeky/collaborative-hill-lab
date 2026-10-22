@@ -5,6 +5,71 @@ The previous handoff is preserved byte-for-byte in
 Its dated counts, paths and publication states are historical, not current status.
 The operating rules remain in `CLAUDE.md` and `AGENTS.md`; the repository remains T1.
 
+## PR #58 fix round — 2026-10-22
+
+Both review findings were confirmed at `e6bf84b171d2b26daa76c1db59a0682c1505a233`.
+Analysis now reports `invalid_llm_output_abstentions` per episode and per cell,
+separately from mechanism `invalid_action_count` and `fallback_abstentions`.
+Its `invalid_action_rate` includes parser-failure abstentions plus mechanism
+rejections once each; ordinary abstentions are excluded. The mean per-cell rate
+uses that same definition for draft SAP invalid-output/sensitivity reporting.
+Sensitivity exclusions still require a human-declared threshold. Existing
+versioned operational metrics are unchanged. The golden JSON changes only by
+adding this field, zero-valued in its 12 episodes and four cell summaries.
+
+Two integration cases cover all-malformed replies and mixed parser failures,
+ordinary abstentions and mechanism rejections. Both failed on the missing field
+before the fix. An independent RNG oracle pins three indices per bootstrap
+replicate and hand-computed means. The in-memory doubled-observation/2n mutation
+passed all 21 original statistics tests but fails the new oracle. Production
+bootstrap code needed no change. Exact verification commands and results are
+in the latest `BUILD_LOG.md` entry.
+
+Verification: Ruff clean; strict mypy clean in 45 source files; focused suite
+41 passed; full suite **560 passed, 4 skipped** (112.04s); acceptance **11/11**.
+Both studies validate with their original content hashes. Real-provider data,
+provider randomness coupling and confirmatory/SAP freeze decisions remain unverified.
+
+Changes remain uncommitted: the task prohibits Git writes and network access.
+No study inputs, hashes, freeze state or human-owned decisions were changed.
+The human-action home remains the decision list below (`human_todo=null`).
+Intended commit:
+`fix(analysis): count invalid-LLM-output abstentions and pin the bootstrap draw size`.
+
+## E2 analysis skeleton — local worktree checkpoint
+
+`chl analyze artifacts/<study-prefix> [--out analysis.json]` now reads verified
+sealed runs into one row per completed episode, recording failed/unsealed/invalid
+artifacts as exclusions. Analysis never re-executes episodes or trusts metric
+caches. The four original factorial conditions are explicit; the misinformer
+condition and counterfactual branches are not independent factorial data.
+
+The draft SAP's E1/E2/E3 use equal-cell contrasts for legacy independent runs;
+explicit complete paired-policy-v2 blocks use within-block differences and block
+bootstrap, with a supplementary Student-t interval. Unverified policy/provider
+coupling suppresses paired inference. All output remains `sap_status: draft`.
+Bootstrap uses `rng_for` with recorded seed 20261022 and 2000 draws by default,
+type-7 percentile intervals, centered two-sided bootstrap p-values and Holm over
+the three primary tests. Secondary outcomes are descriptive. Zero-variance cells
+have `n_effective=1` and no intervals/p-values. Missing sensitivity thresholds and
+exclusion rules are explicitly marked not run, rather than inferred.
+
+Local proof on Windows, using `../assess/.venv/Scripts/python.exe` with this
+worktree's `src` on `PYTHONPATH`: Ruff clean, strict mypy clean (45 source files),
+**557 passed, 4 skipped** in the full suite (88.63s); **38** new focused tests pass.
+The golden fixture runs three scripted episodes in each of four cells and checks
+canonical JSON byte-for-byte, read-only behavior, and episode sample sizes.
+Both study validations retain their original hashes; acceptance is **11/11**.
+Exact commands are in the latest `BUILD_LOG.md` entry.
+
+R2 pilot data, preregistration/SAP choices and the human freeze remain required
+before confirmatory use. No real provider, paid run, freeze, Git write, commit,
+push or network access was performed. `NEXT.md` records the E2 skeleton; the
+human-owned decision list below is unchanged (`human_todo=null`). Intended commit:
+`feat(analysis): add chl analyze for the Study 001 2x2 from sealed runs`.
+
+The remaining sections preserve the earlier counterfactual milestone checkpoint.
+
 ## Landed in this pass
 
 PR #54 (`e0428cf00bcf6ac423ab1dadd5a82090fb75babb`) repairs counterfactual replay:
