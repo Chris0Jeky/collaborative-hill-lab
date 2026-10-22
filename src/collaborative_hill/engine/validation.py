@@ -23,7 +23,8 @@ def validate_run(events: list[Event], resolved: ResolvedScenario,
         raise ChainError("run requires exactly one terminal seal at the end")
     terminal = events[-1]
     expected = {"completed": EventType.RUN_COMPLETED, "failed": EventType.RUN_FAILED}
-    if terminal.event_type != expected.get(manifest.get("status")):
+    status = manifest.get("status")
+    if not isinstance(status, str) or terminal.event_type != expected.get(status):
         raise ChainError("manifest status does not match the terminal seal")
     if terminal.run_id != manifest.get("run_id") or any(
         event.study_id != manifest.get("study_id") for event in events
@@ -32,6 +33,12 @@ def validate_run(events: list[Event], resolved: ResolvedScenario,
     for field, actual in (("event_count", len(events)), ("final_event_hash", terminal.event_hash)):
         if manifest.get(field) is not None and manifest[field] != actual:
             raise ChainError(f"manifest {field} does not match the sealed ledger")
+    _validate_scenario_bindings(events, resolved, manifest)
+    _validate_ancestry(events, manifest)
+
+
+def _validate_scenario_bindings(events: list[Event], resolved: ResolvedScenario,
+                                manifest: dict[str, Any]) -> None:
     canonical = compile_scenario(resolved.spec, resolved.skin)
     for field in ("scenario_hash", "mechanism_hash", "narrative_hash", "evidence_corpus_hash"):
         actual = getattr(canonical, field)
@@ -47,6 +54,9 @@ def validate_run(events: list[Event], resolved: ResolvedScenario,
     roster = sorted(a.agent_id for a in resolved.spec.cognition.agents)
     if roster != events[0].payload.get("agents"):
         raise ChainError("RunStarted agent roster does not match the resolved scenario")
+
+
+def _validate_ancestry(events: list[Event], manifest: dict[str, Any]) -> None:
     # A run ID may occupy only one contiguous segment. Reusing an ancestor ID
     # makes the fork boundary ambiguous and is not a supported branch format.
     seen: set[str] = set()
