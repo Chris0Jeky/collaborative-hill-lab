@@ -7,6 +7,7 @@
     chl run <study-dir> [--artifacts DIR] [--condition ID] [--replicates N]
     chl replay <run-dir>
     chl branch <run-dir> --at-event N --override agent=policy[:param=value...] --out DIR
+    chl compare <left-run> <right-run> [--verify-replay]
     chl report <run-or-study-artifacts-dir>
     chl doctor
 """
@@ -251,6 +252,24 @@ def branch(
         raise typer.Exit(code=2) from exc
     typer.echo(branch_manifest.model_dump_json(indent=2))
     typer.echo(f"{result.run_id}: {result.status} ({result.event_count} events)")
+
+
+@app.command("compare")
+def compare(
+    left: Path,
+    right: Path,
+    verify_replay: bool = typer.Option(False, "--verify-replay",
+                                       help="Re-execute both ledgers before comparing"),
+) -> None:
+    """Print a read-only, descriptive JSON comparison of two compatible runs."""
+    from collaborative_hill.reporting.comparison import compare_runs
+
+    try:
+        result = compare_runs(left, right, verify_replay=verify_replay)
+    except (ValueError, OSError) as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(code=2) from exc
+    typer.echo(json.dumps(result, indent=2, sort_keys=True))
 
 
 @app.command("report")
