@@ -7,7 +7,9 @@ from collaborative_hill.engine.replay import replay_run
 from collaborative_hill.engine.store import FileCheckpointStore, RunPaths
 
 from .test_counterfactual_workflow import _snapshot
-from .test_counterfactual_workflow import counterfactual as counterfactual
+from .test_counterfactual_workflow import counterfactual
+
+__all__ = ["counterfactual"]
 
 pytestmark = pytest.mark.metamorphic
 
