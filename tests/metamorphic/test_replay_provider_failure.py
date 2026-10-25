@@ -7,6 +7,7 @@ import pytest
 from typer.testing import CliRunner
 
 from collaborative_hill.agents.llm import FakeProvider, LLMPolicy
+from collaborative_hill.agents.llm.providers import ProviderError
 from collaborative_hill.cli import app
 from collaborative_hill.engine.branching import branch_run
 from collaborative_hill.engine.events import EventType
@@ -15,7 +16,14 @@ from collaborative_hill.engine.replay import load_run, replay_run
 from collaborative_hill.engine.store import FileCheckpointStore, FileEventStore, RunPaths
 from collaborative_hill.experiments import study
 
-from ._helpers import default_ec_evidence, ec_spec, find_run_dirs, plain_skin, write_study
+from ._helpers import (
+    default_ec_evidence,
+    ec_item,
+    ec_spec,
+    find_run_dirs,
+    plain_skin,
+    write_study,
+)
 
 pytestmark = pytest.mark.metamorphic
 GOOD = '{"action":{"type":"abstain"}}'
@@ -93,6 +101,47 @@ def test_provider_failure_replays_exact_chain_and_seal(tmp_path, monkeypatch,
         f"policy error for {agent}: ProviderError: simulated provider outage at call {fail_at}"
     )
     assert policies[agent].provider.calls == fail_at + 1
+    _assert_replay(run_dir, tmp_path, monkeypatch)
+
+
+@pytest.mark.parametrize("agent,message", [
+    ("a", "alias: ProviderError: outage"),
+    ("a: ProviderError: alias", "outage"),
+])
+@pytest.mark.parametrize("fail_at", [0, 2])
+def test_provider_failure_uses_proposal_boundary_for_prefix_ids(
+    tmp_path, monkeypatch, agent, message, fail_at,
+):
+    directory = tmp_path / "study"
+    evidence = (ec_item("e1", "src", "s1", "p1a", "supports"),)
+    spec = ec_spec(evidence, rounds=4, agents=(
+        ("a: ProviderError: alias", "ec_contributor"), ("a", "ec_contributor"),
+    ))
+    write_study(directory, study_id="prefix-ids", seed=17, checkpoint_every=1,
+                conditions=[("cell", spec, plain_skin())])
+
+    def reply(prompt, index):
+        if index >= fail_at:
+            raise ProviderError(message)
+        return GOOD
+
+    def build(resolved):
+        return {
+            a.agent_id: LLMPolicy(
+                a.agent_id,
+                FakeProvider(reply if a.agent_id == agent else [GOOD] * 4), resolved.skin,
+            )
+            for a in resolved.spec.cognition.agents
+        }
+
+    monkeypatch.setattr(study, "build_policies", build)
+    result, = study.run_study(directory, tmp_path / "runs")
+    run_dir, = find_run_dirs(tmp_path / "runs")
+    assert result.status == "failed" and result.rounds_played == fail_at
+    # Both agents produce identical seal text; only the proposal boundary differs.
+    assert result.failure_reason == (
+        "policy error for a: ProviderError: alias: ProviderError: outage"
+    )
     _assert_replay(run_dir, tmp_path, monkeypatch)
 
 

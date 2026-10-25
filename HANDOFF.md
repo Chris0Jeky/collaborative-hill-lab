@@ -1,9 +1,34 @@
-# HANDOFF — current checkpoint, 2026-10-22
+# HANDOFF — current checkpoint, 2026-10-25
 
 The previous handoff is preserved byte-for-byte in
 [the historical checkpoint](docs/history/HANDOFF-through-2026-10-21.md).
 Its dated counts, paths and publication states are historical, not current status.
 The operating rules remain in `CLAUDE.md` and `AGENTS.md`; the repository remains T1.
+
+## Issue #60 — unambiguous provider-failure replay (local worktree)
+
+Changed: `agents/replay.py` identifies the failed provider at the runner's first
+unproposed agent in sorted order for the terminal round, then checks that agent's
+error prefix. Agent IDs containing `: ProviderError: ` no longer cause valid
+ledgers to be rejected. Existing ledger bytes and the provider-error format are
+unchanged. Four regression cases cover identical seal text from two different
+failing agents, both immediately and after two completed rounds.
+
+Verified on Python 3.12.10 / Windows, against base
+`8b7cdc1739c036be42206304f8013bf7ba7ea526` plus this uncommitted diff: the corrected
+regression fails twice before the production fix (two controls pass), then all
+four cases pass. `make check test validate` passes: Ruff clean, strict mypy clean
+in 45 source files, 286 unit/property tests and 594 full-suite tests pass, with
+four pre-existing skips. Acceptance is **11/11**; both study hashes are unchanged.
+Exact commands and initial fixture correction are recorded in `BUILD_LOG.md`.
+
+NOT verified: real providers, the four skipped filesystem cases, hosted CI or
+independent review. Residual risk: decoding relies on the runner's sorted proposal
+order; full regenerated-chain comparison continues to reject inconsistent histories.
+The human-action home remains the unchanged human-owned decision list below
+(`human_todo=null`). No Git writes or publication occurred under the task's rule.
+Intended commit: `fix(replay): decode provider failures at the proposal boundary`.
+Earlier checkpoints below retain their historical evidence and publication status.
 
 ## PR #58 fix round — 2026-10-22
 
