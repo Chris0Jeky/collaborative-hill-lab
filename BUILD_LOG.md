@@ -332,3 +332,69 @@ real providers, external publication, and independent human review were not
 verified. Git was read only; nothing was staged, committed, pushed, or merged.
 `human_todo=null`; HANDOFF.md's human-owned scientific decisions remain unchanged.
 Intended commit: `feat(replay): replay sealed runs that ended in recorded provider failures`.
+
+## 2026-10-25 — Issue #60: decode provider failures at the proposal boundary
+
+Worktree: `.wt/ex-collaborative-hill-l-1`, branch `sol/ex-collaborative-hill-l-1`,
+base/HEAD `8b7cdc1739c036be42206304f8013bf7ba7ea526` (equal to local `origin/main`).
+The worktree started clean. Issue #60 was verified open through the GitHub connector.
+All commands below ran from this worktree's root. No Git-writing command ran.
+
+The initial shared Python 3.14 suite could not collect because Typer was missing.
+An isolated Python 3.12.10 environment was installed without changing the lock:
+
+```powershell
+py -3.12 -m venv .venv
+& .venv/Scripts/python.exe -m pip install --disable-pip-version-check -r requirements-lock.txt
+& .venv/Scripts/python.exe -m pip install --disable-pip-version-check --no-build-isolation -c requirements-lock.txt -e '.[dev,analysis]'
+& .venv/Scripts/python.exe -m pip check
+```
+
+Installation and pip check passed. Temporary files were directed into ignored
+`artifacts/session-temp` using process-local `TEMP` and `TMP`; pytest outputs,
+logs, caches, and the local venv are also ignored.
+
+Before editing production code, the full suite passed **590 existing tests**,
+with four skips. The four new cases initially failed scenario validation because
+the fixture omitted required evidence; a valid synthetic item corrected that
+fixture. The actual fails-without-fix proof then ran:
+
+```powershell
+& .venv/Scripts/python.exe -m pytest tests/metamorphic/test_replay_provider_failure.py -k prefix_ids -o addopts=--strict-markers -q --basetemp artifacts/red-tests
+```
+
+Result: **2 failed, 2 passed, 30 deselected**. The valid failed runs for agent
+`a: ProviderError: alias` were decoded as failures of `a`, raising
+`recorded provider failure for a conflicts with a recorded proposal`.
+Both agents deliberately produce identical seal text, so choosing the longest
+textual prefix would break the passing short-ID controls instead.
+
+The decoder now uses the first unproposed agent in the terminal round's sorted
+proposal order, then decodes only that agent's exact provider-error prefix.
+The same regression command with `--basetemp artifacts/green-tests` gives
+**4 passed, 30 deselected**. It verifies whole-chain and seal equality, CLI replay,
+unchanged source artifacts, and that no provider is invoked during replay.
+
+Final gate commands:
+
+```powershell
+& .venv/Scripts/python.exe -m collaborative_hill.cli doctor
+$env:PYTEST_ADDOPTS = '-o addopts=--strict-markers --basetemp=artifacts/gate-tests'
+make check test validate
+& .venv/Scripts/python.exe scripts/acceptance.py
+git diff --check
+```
+
+All passed: doctor all OK; Ruff clean; strict mypy clean in **45 source files**;
+**286 passed, 4 skipped** for unit/property; **594 passed, 4 skipped** for the
+full suite (175.61s); acceptance **11/11**. Study hashes remain
+`5dcde1a9b6c98c576ca71bc03ea65dcc96175b6d8803c4db89e6c56ac8a15e9f` and
+`a3bffdfcf1715ebd65aa45b469f3e32c720d22633cfc80769b11020bcbd37bbe`.
+Generated logs live under ignored `artifacts/` and are not publication artifacts.
+
+NOT verified: real providers, four pre-existing skipped filesystem cases, hosted
+CI, or independent review. Residual risk: decoding depends on sorted runner
+proposal order; regenerated-chain comparison remains authoritative. Human-owned
+scientific decisions remain in `HANDOFF.md` (`human_todo=null`). Changes are
+uncommitted; no PR was published under the no-Git-writes rule. Intended commit:
+`fix(replay): decode provider failures at the proposal boundary`.

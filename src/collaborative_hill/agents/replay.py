@@ -59,7 +59,12 @@ def provider_errors_from_events(events: list[Event]) -> dict[str, dict[int, str]
         return {}
     reason = terminal.payload.get("reason")
     if isinstance(reason, str):
-        for agent in policy_ids_from_events(events):
+        # The runner calls policies in sorted order; IDs/messages can share prefixes.
+        proposed = {ev.payload["agent_id"] for ev in events
+                    if ev.event_type == EventType.ACTION_PROPOSED
+                    and ev.logical_time == terminal.logical_time}
+        agent = next((a for a in sorted(policy_ids_from_events(events)) if a not in proposed), None)
+        if agent is not None:
             prefix = f"policy error for {agent}: ProviderError: "
             if reason.startswith(prefix):
                 return {agent: {terminal.logical_time: reason[len(prefix):]}}
