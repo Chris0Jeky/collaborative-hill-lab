@@ -35,7 +35,8 @@ cross-study boundary. It reflects the **implemented v0 system**
 
 5. **Comparative, not absolute, readings.** The lab compares mechanisms and models against
    each other and against analytical/scripted baselines whose behaviour is known in closed
-   form (the hand-derived payoff tables; the enumerated dilemma certificate).
+   form (the hand-derived payoff tables; the enumerated incentive checks, which do not
+   certify a social dilemma for Study 001's current parameters because C2 fails).
 
 ---
 

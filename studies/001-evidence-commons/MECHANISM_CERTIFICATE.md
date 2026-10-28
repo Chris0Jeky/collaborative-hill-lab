@@ -35,7 +35,9 @@ only the per-agent credit split may differ.
 
 ## Verdicts
 
-- **Social dilemma (within the enumerated strategy set): CERTIFIED** — free-riding temptation exists under every institution, while all-contribute beats all-freeride collectively (C2).
+- **Social dilemma (within the enumerated strategy set): NOT CERTIFIED** — requires both C1 and C2 under every institution.
+- C1: free-riding temptation exists under every institution.
+- C2 fails under: aggregate x private, aggregate x shared_ledger, attributable x private, attributable x shared_ledger; all-contribute does not beat all-freeride collectively there.
 - **Intervention integrity: CERTIFIED** — accountability redistributes credit without changing the task (C3).
 
 ## Simulation hypotheses (NOT certified — for the preregistration)
@@ -43,9 +45,9 @@ only the per-agent credit split may differ.
 - H1-type claims that attributable accountability INCREASES contribution rely on
   agents that respond to attribution. The scripted personas here do not read
   attribution, so behaviour is institution-invariant by construction; only LLM or
-  richer agents can test H1. This certificate only establishes that the incentive
-  landscape those agents face is a genuine dilemma with attribution-dependent
-  credit flows.
+  richer agents can test H1. The C1/C2 checks above determine whether the
+  enumerated incentives satisfy the stated social-dilemma conditions; C3
+  separately checks intervention integrity.
 - Claims about the full strategy space (e.g. no clever strategy escapes the
   dilemma) are NOT certified: enumeration covered {contributor, freerider}^3.
 

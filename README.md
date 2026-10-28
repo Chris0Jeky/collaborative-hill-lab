@@ -30,7 +30,8 @@ only**:
   the interaction structure and the right reciprocity rule
   (`docs/research/REPLICATION_REPORT.md`).
 - **Study 001** (Evidence Commons): DRAFT preregistration awaiting human approval; runnable
-  scripted fixture; mechanism certificate proving the social dilemma by enumeration.
+  scripted fixture; enumeration finds free-riding temptation (C1) but fails collective
+  stakes (C2), so the configured social dilemma is **not certified**. C3 integrity passes.
 - An LLM policy adapter (typed actions, bounded retries, safe abstention) exercised by a
   deterministic fake provider. No real provider is wired up yet — adding one is a
   human-gated step.

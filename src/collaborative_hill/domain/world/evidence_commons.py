@@ -1,12 +1,12 @@
-"""Evidence Commons v0 — a social dilemma over shared truth.
+"""Evidence Commons v0 — mixed incentives over shared truth.
 
 Agents jointly assemble a briefing: for each briefing *slot* they may propose,
 verify, and challenge *claims* (proposition ids from a finite, environment-
 defined space) citing *evidence items*. Contribution actions cost effort;
 the briefing's final quality pays out equally to everyone — so free-riding
 (Withhold) is individually tempting while collective quality needs work.
-The mechanism certificate (studies/001) proves the dilemma by enumeration
-for the configured parameters.
+The mechanism certificate (studies/001) finds free-riding temptation but fails
+collective stakes for the configured parameters; a social dilemma is not certified.
 
 Deterministic rules, all adjudicated by typed code (never a model):
 
@@ -69,8 +69,8 @@ EC_ENGINE_VERSION = 2
 
 
 class ECParams(BaseModel):
-    """Integer credit-unit parameters. Defaults provably yield a social dilemma
-    at N=3 (see the mechanism certificate); final weights are HUMAN-OWNED."""
+    """Integer credit-unit parameters. Defaults fail the certificate's collective
+    stakes condition at N=3; final weights are HUMAN-OWNED."""
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 

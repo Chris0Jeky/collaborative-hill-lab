@@ -38,8 +38,9 @@ in closed form. The build/run order is fixed:
 
 1. **Analytical ground truth.** The payoff structure is hand-derived and independently
    re-derived (N=3, T=5, R=3, P=1, S=0; pairwise and neighbourhood payoff tables), and the
-   Evidence Commons dilemma is proved by enumeration in the mechanism certificate
-   (`studies/001`). These literals are the oracle — expectations in tests and analyses are
+   Evidence Commons incentives are enumerated in the mechanism certificate (`studies/001`):
+   C1 passes but C2 fails, so the configured social dilemma is not certified. Hand-derived
+   literals are the oracle — expectations in tests and analyses are
    written from the derivation, never read back from the code under test.
 2. **Scripted / deterministic baselines.** Scripted policies (`agents/scripted/*`:
    `allc`, `alld`, `random`, `tft_*`, `ptft`, `ec_contributor`, `ec_freerider`,

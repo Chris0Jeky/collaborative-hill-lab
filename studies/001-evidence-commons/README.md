@@ -13,9 +13,10 @@ core research question (see `docs/research/RESEARCH_CHARTER.md`).
   (2 contributors + 1 free-rider; misinfo arm: contributor + verifier + misinformer):
   `chl run "studies/001-evidence-commons" --artifacts artifacts`
 - `certificate.py` — the mechanism certificate: enumerates {contributor, freerider}³ under
-  all four institutions and certifies (exact arithmetic): free-riding temptation exists
-  everywhere (C1), contribution is collectively better (C2), and accountability
-  redistributes credit without changing the task (C3). Output: `MECHANISM_CERTIFICATE.md`.
+  all four institutions using exact arithmetic. Free-riding temptation exists everywhere
+  (C1), but all-contribute has lower total utility than all-freeride in every institution
+  (C2 fails): the social dilemma is **not certified**. Accountability redistributes credit
+  without changing the task (C3 passes). Output: `MECHANISM_CERTIFICATE.md`.
 - `PREREGISTRATION.md` — DRAFT; every open item marked `HUMAN DECISION`.
 - `COST_WORKSHEET.md` — measured prompt sizes + formulas; no prices assumed.
 

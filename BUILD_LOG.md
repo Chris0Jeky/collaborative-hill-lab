@@ -398,3 +398,54 @@ proposal order; regenerated-chain comparison remains authoritative. Human-owned
 scientific decisions remain in `HANDOFF.md` (`human_todo=null`). Changes are
 uncommitted; no PR was published under the no-Git-writes rule. Intended commit:
 `fix(replay): decode provider failures at the proposal boundary`.
+
+## 2026-10-28 — reject the false Study 001 social-dilemma certificate
+
+Owned isolated worktree, freshly fetched base
+`5a66e57de42d750171a68597470beabf0a7a3369`; primary checkout untouched.
+Free RAM before setup: 13.38 GiB; before the serial gates: 11.26 GiB.
+Installed the committed lock with
+`make setup PYTHON=C:/AI/voice-lab-kokoro/python312/python.exe` (Python 3.12.10;
+`pip check` clean). Git Bash did not find `make`; the existing Windows `make.cmd`
+wrapper successfully ran the same Makefile. No dependency or policy edit.
+
+Before editing the generator,
+`.venv/Scripts/python.exe studies/001-evidence-commons/certificate.py` ran 32 episodes
+and reproduced the checked-in report without a diff: four C2 failures (-20/-7 vs 0)
+alongside a false CERTIFIED verdict. The new
+`.venv/Scripts/python.exe -m pytest tests/unit/test_certificate.py -q` failed all seven
+cases before the fix (the positive control reached its console-summary assertion;
+the false-positive cases failed the verdict assertion). All seven pass after the fix.
+The synthetic positive control uses benefit=1/2 per contributor and own cost=1:
+unilateral gain=1/2 and all-contribute total=3/2 > all-freeride total=0.
+Other controls cover absent C1, equal C2 totals, both absent and one failed institution.
+The real-study case exercises the 32 sealed episodes without mocking the engine.
+
+The verdict now requires every institution's C1 and C2; failed conditions are named.
+C3 remains a separate integrity verdict, with truthful failure prose as well.
+Removed the unconditional genuine-dilemma claim and corrected its current consumers
+(READMEs, research claims, draft preregistration rationale and mechanism docstrings).
+No policy, hypothesis selection, weights, scenario bytes or legacy reports changed.
+
+Proof on this diff: `make check test validate` exits 0 (Ruff; strict mypy, 45 files;
+293 unit/property passed, 4 skipped; 601 full-suite passed, 4 skipped).
+`.venv/Scripts/python.exe scripts/acceptance.py` exits 0, 11/11 scenarios using synthetic
+data and FakeProvider only. `git diff --check` passes. Fixed one new test line-length
+error before the full gates; no pre-existing failures were dismissed.
+
+Compared the entire pre-verdict report section against the executed baseline: identical,
+including all C1/C2 numeric rows and C3 counts. A second corrected generator execution
+is byte-identical (report SHA-256
+`cba5d90334bb9473e6b5d04f827eb609693442ea6618080ad604a9e19f9fd92e`).
+Full `validate_study` results before/after compare equal, including all scenario,
+mechanism, narrative and evidence hashes, seed protocol and frozen=false for both studies.
+Study 000: `5dcde1a9b6c98c576ca71bc03ea65dcc96175b6d8803c4db89e6c56ac8a15e9f`.
+Study 001: `a3bffdfcf1715ebd65aa45b469f3e32c720d22633cfc80769b11020bcbd37bbe`.
+Git also confirms unchanged study JSON, Study 000, generator inputs, legacy replication
+report and harness configuration. Proof logs are outside the checkout, not committed.
+
+NOT verified: the four existing filesystem skips, real providers/humans, persistent
+hosted CI (none configured), or full-strategy-space incentives. Independent review and
+publication status are recorded on the PR. Residual risk: unchanged placeholder weights
+fail C2. The owner product-direction park and all ten HANDOFF decisions remain in force;
+this correctness repair neither unfreezes/freezes a study nor starts feature research.
