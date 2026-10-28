@@ -13,7 +13,9 @@ performed by the founding agent (locked principle #7).
   Theoretical mechanism: attribution restores the targeted-reciprocity channel that the
   legacy N-IPD work showed carries cooperation (Study 000: per-opponent TFT sustains, linked
   or probabilistic aggregate reciprocity collapses); credit that follows the contributor
-  makes contribution individually rational (mechanism certificate C1/C3).
+  is hypothesised to make contribution individually rational. The mechanism certificate
+  does not establish this: C1 still finds free-riding temptation, C2 fails collective
+  stakes, and C3 establishes only intervention integrity for the enumerated profiles.
 - **H2 (evidence topology):** a *shared provenance ledger* increases verification rate and
   reduces provenance-broken accepted claims versus *private/fragmented* evidence, holding
   accountability fixed.

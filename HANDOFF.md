@@ -1,4 +1,35 @@
-# HANDOFF — current checkpoint, 2026-10-25
+# HANDOFF — current checkpoint, 2026-10-28
+
+## Social-dilemma certificate correction
+
+Changed: the certificate now requires C1 **and** C2 in every institution. Its verdict,
+failed-condition explanation, console summary and current documentation agree. The
+unchanged Study 001 parameters yield C1 true, C2 false in all four institutions, and
+zero C3 violations: **social dilemma NOT CERTIFIED; intervention integrity CERTIFIED**.
+Historical reports remain historical; the earlier false certification is superseded here.
+
+Verified on Python 3.12.10 / Windows from base `5a66e57de42d750171a68597470beabf0a7a3369`:
+the original 32-episode generator reproduced the contradictory report without a diff;
+the new report-level regression failed before the fix. Seven focused tests now pass,
+including C1-true/C2-false, a positive control, equal totals and a single failing
+institution. `make check test validate` passes: Ruff, strict mypy (45 files),
+293 unit/property tests and 601 full-suite tests, with four pre-existing filesystem
+skips. Acceptance passes 11/11. Regeneration is byte-identical; all numeric sections,
+scenario identities, study hashes and freeze states are unchanged. See `BUILD_LOG.md`.
+
+Publication goes through a ready PR with an independent review and the post-push age
+gate; the PR records the final review and merge state. No publication state is inferred
+from these local checks.
+
+NOT verified: the four skipped filesystem cases, real providers, human behaviour,
+or a social dilemma beyond the enumerated scripted strategies. No persistent CI exists.
+Residual risk: placeholder utility weights still fail C2; this repair reports that
+failure and does not retune the study. Feature work remains parked under the owner's
+product-direction decision. No study was frozen and no real/paid provider was used.
+The human-action home is the ten unchanged decisions below (`human_todo=null`),
+including weights, hypotheses, publication readiness and any paid run.
+
+Earlier checkpoints below retain their dated evidence and publication state.
 
 The previous handoff is preserved byte-for-byte in
 [the historical checkpoint](docs/history/HANDOFF-through-2026-10-21.md).

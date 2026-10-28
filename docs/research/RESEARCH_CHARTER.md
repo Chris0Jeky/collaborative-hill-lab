@@ -236,9 +236,9 @@ asserted:
    seed/model provenance in a run manifest, effect sizes with intervals, and an
    exploratory/confirmatory split are wired into the study lifecycle
    (`_discovery/methodology-stats.md` §2).
-6. **Study 001 is a runnable draft** whose mechanism certificate proves the Evidence Commons is a
-   social dilemma by enumeration at the configured parameters, with the 2×2 institution design
-   changing only attribution/visibility and not the task.
+6. **Study 001 is a runnable draft** whose enumerated certificate finds free-riding temptation
+   (C1) but fails collective stakes (C2) at the configured parameters: the social dilemma is
+   not certified. Accountability intervention integrity (C3) passes for identical profiles.
 
 Honest boundary: the foundation phase certifies the *instrument*, not the *finding*. Numeric
 reproduction of the legacy headline percentages and any confirmatory LLM result are downstream of a

@@ -123,11 +123,13 @@ def main() -> None:
         "contribution collectively better? |",
         "|---|---|---|---|",
     ]
+    c2_summary = {}
     for acc, topo in INSTITUTIONS:
         u_all_c = sum(results[(acc, topo, ("contributor",) * 3)]["utility"].values())
         u_all_f = sum(results[(acc, topo, ("freerider",) * 3)]["utility"].values())
+        c2_summary[(acc, topo)] = u_all_c > u_all_f
         lines.append(f"| {acc} x {topo} | {float(u_all_c):.2f} | {float(u_all_f):.2f} "
-                     f"| {'YES' if u_all_c > u_all_f else 'NO'} |")
+                     f"| {'YES' if c2_summary[(acc, topo)] else 'NO'} |")
 
     lines += [
         "",
@@ -160,16 +162,27 @@ def main() -> None:
         "",
     ]
     c1_all = all(v[1] for v in c1_summary.values())
+    c2_all = all(c2_summary.values())
     lines.append(
         f"- **Social dilemma (within the enumerated strategy set): "
-        f"{'CERTIFIED' if c1_all else 'PARTIAL'}** — free-riding temptation exists under "
-        + ("every institution" if c1_all else
-           "only: " + ", ".join(f"{a}x{t}" for (a, t), v in c1_summary.items() if v[1]))
-        + ", while all-contribute beats all-freeride collectively (C2)."
+        f"{'CERTIFIED' if c1_all and c2_all else 'NOT CERTIFIED'}** — "
+        "requires both C1 and C2 under every institution."
+    )
+    lines.append(
+        "- C1: free-riding temptation exists under every institution." if c1_all else
+        "- C1 fails under: " + ", ".join(
+            f"{a} x {t}" for (a, t), v in c1_summary.items() if not v[1]) + "."
+    )
+    lines.append(
+        "- C2: all-contribute beats all-freeride collectively under every institution."
+        if c2_all else "- C2 fails under: " + ", ".join(
+            f"{a} x {t}" for (a, t), better in c2_summary.items() if not better)
+        + "; all-contribute does not beat all-freeride collectively there."
     )
     lines.append(
         "- **Intervention integrity: " + ("CERTIFIED" if not violations else "VIOLATED")
-        + "** — accountability redistributes credit without changing the task (C3)."
+        + "** — " + ("accountability redistributes credit without changing the task (C3)."
+                     if not violations else "accountability changes the task in the C3 rows above.")
     )
     lines += [
         "",
@@ -178,9 +191,9 @@ def main() -> None:
         "- H1-type claims that attributable accountability INCREASES contribution rely on",
         "  agents that respond to attribution. The scripted personas here do not read",
         "  attribution, so behaviour is institution-invariant by construction; only LLM or",
-        "  richer agents can test H1. This certificate only establishes that the incentive",
-        "  landscape those agents face is a genuine dilemma with attribution-dependent",
-        "  credit flows.",
+        "  richer agents can test H1. The C1/C2 checks above determine whether the",
+        "  enumerated incentives satisfy the stated social-dilemma conditions; C3",
+        "  separately checks intervention integrity.",
         "- Claims about the full strategy space (e.g. no clever strategy escapes the",
         "  dilemma) are NOT certified: enumeration covered {contributor, freerider}^3.",
         "",
@@ -190,7 +203,8 @@ def main() -> None:
     out = STUDY_DIR / "MECHANISM_CERTIFICATE.md"
     out.write_text("\n".join(lines), encoding="utf-8")
     print(f"wrote {out}")
-    print(f"C1 dilemma everywhere: {c1_all}; C3 violations: {len(violations)}")
+    print(f"C1 temptation everywhere: {c1_all}; C2 collective stakes everywhere: {c2_all}; "
+          f"C3 violations: {len(violations)}")
 
 
 if __name__ == "__main__":
