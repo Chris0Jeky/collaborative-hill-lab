@@ -21,7 +21,14 @@ and seed protocol. Within a comparison population, inputs must agree on:
 - The institution plane after removing only `accountability` and
   `evidence_topology`, the two declared interventions.
 - The narrative hash and the recorded policy assignments, providers, prompt
-  template hashes, sampling settings, and invalid-action policy.
+  template hashes, sampling/transport settings, and invalid-action policy.
+
+Available nonempty reported-model sets must also agree for the same agent within
+each declared comparison block. Sets are canonicalized independently of response
+order and checked for failed as well as completed runs. Missing or empty model
+sets remain unknown: they do not establish a model match, and pre-response
+failures remain in attrition. The readout carries available provider metadata
+without changing legacy scripted rows. See [provider usage](../PROVIDER_USAGE.md).
 
 Scenario IDs and descriptions can differ across factorial cells. Each
 condition within a block must still have one recorded scenario hash; changing

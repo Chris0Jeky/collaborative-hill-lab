@@ -137,9 +137,13 @@ is reported as a robustness check, never as the headline.
 
 ### 4.3 Nuisance terms
 
-Seat/position and (for LLM) condition-execution order are **randomised** (METHODOLOGY §4) and
-enter, if at all, as robustness covariates — tested, not primary. For scripted baselines they
-are provable no-ops and are omitted.
+The preregistration declares any randomisation or balancing of seat/position, prompt options
+and (for LLM) condition-execution order (METHODOLOGY §4). The current runner does not
+implement these procedures automatically. Nuisance terms enter, if at all, as predeclared
+robustness covariates. Reordering independent deterministic condition executions leaves
+outcomes unchanged with their inputs held fixed; moving policies between seats or graph
+positions can change interactions and outcomes. Determinism alone does not justify omitting
+placement effects or treating all roster orderings as equivalent.
 
 ### 4.4 Uncertainty intervals — bootstrap over episodes
 
@@ -151,26 +155,34 @@ for E1–E3; a t-based interval on the paired differences is reported alongside 
 
 ### 4.5 Degenerate-variance guard (the legacy zero-width-CI defence)
 
-**Deterministic scripted conditions produce identical replicates.** A scripted policy with no
-stochastic component (`allc`, `alld`, deterministic TFT, `ec_contributor`, `ec_verifier`,
-`ec_freerider`, `ec_misinformer`) yields a **byte-identical episode for every replicate** —
-the RNG stream differs by `r` but is never consumed, so `final_event_hash` is constant across
-`r`. That cell has **zero between-episode variance** and `n_effective = 1`, regardless of how
-many replicates were run.
+**Repeating a fully deterministic configuration adds no independent outcome information.**
+When policies and the mechanism consume no randomness, changing only an unused replicate
+seed repeats the same outcomes. Report those finite values as exact checks. This does not
+make the full ledgers byte-identical: run identities and recorded seed/start metadata can
+differ across replicates. Event-chain equality additionally requires matched code, inputs,
+seed protocol, run identity and start metadata; terminal hashes are not proxies for outcome
+variance.
+
+**A stochastic sample can also contain equal outcomes.** Zero observed variance does not
+prove deterministic behavior or zero population variance. Those independent episodes retain
+their actual sample count; they are not relabeled `n_effective = 1` because their observed
+values coincide.
 
 Mandatory handling:
 
-1. **Detect.** Before any interval is computed, check each cell for zero between-episode
-   variance in the outcome (equivalently: identical `final_event_hash` across replicates).
-2. **Report, never fake.** For a zero-variance cell, report the point value and explicitly
-   flag `n_effective = 1`; **do not** emit a normal/bootstrap CI (a bootstrap of identical
-   values returns zero width — the legacy bug in a new costume). State that replication was
-   degenerate and that the cell is deterministic.
-3. **Interpretation.** A deterministic-scripted 2×2 is a **mechanism-geometry check** (does
-   attributable credit change the sealed payoffs/briefing exactly as the mechanism certificate
-   predicts?), not a statistical comparison. Statistical E1–E3 with intervals require a
-   **stochastic** agent population (LLM agents, or scripted `random`/ε>0 policies) whose
-   episodes genuinely vary across replicates.
+1. **Detect.** Before computing an interval, check the variance of the episode-level
+   outcome itself. Separately establish whether the declared configuration is deterministic
+   from its policy and mechanism contracts; do not infer this from a constant sample or hash.
+2. **Report, never fake.** For zero observed variance, report the point value, episode count
+   and known design type. **Do not** emit a zero-width normal/bootstrap CI as evidence of
+   population certainty. State that the sample-based interval cannot be estimated under this
+   guard. Deterministic configurations receive exact finite readouts; stochastic samples
+   retain their independent episode count and an explicit zero-observed-variance flag.
+3. **Interpretation.** A deterministic-scripted 2×2 is an exact comparison of the declared
+   mechanisms and policies, not a population estimate from repeated deterministic runs.
+   Statistical E1–E3 require stochastic outcomes and a valid sampling/comparison design.
+   Even then, a particular sample may contain equal values; withhold unsupported inference
+   rather than claiming the underlying population is degenerate.
 
 This is the direct structural fix for the legacy `3_TFT` / `2_TFT+1_AllD` zero-width CIs.
 
@@ -178,7 +190,7 @@ This is the direct structural fix for the legacy `3_TFT` / `2_TFT+1_AllD` zero-w
 
 If a cell's `briefing_quality` (or a binary derived outcome like `false_claim_accepted`)
 is perfectly separated (all identical, or all 0 / all 1), do not force a logistic fit — fall
-back to the episode-level linear model and report the degenerate cell per §4.5.
+back to the episode-level linear model and report zero observed variance per §4.5.
 
 ---
 

@@ -56,8 +56,9 @@ SD, since the design is CRN-paired), and the formula/simulation yielding N per c
 resulting N here before confirmatory collection. **[HUMAN-DECISION]** minimum effect, power, α, N.
 
 **9. Randomisation.** What is randomised and how: replicate→cell pairing via shared seeds (CRN),
-seat/position, prompt option order, and condition **execution order** for LLM runs; note that for
-deterministic scripted runs this is a provable no-op (METHODOLOGY §4). State the seed policy
+seat/position, prompt option order, and condition **execution order** for LLM runs. Reordering
+independent deterministic condition executions is distinct from moving agents between seats
+or graph positions, which can change outcomes (METHODOLOGY §4). State the seed policy
 (`derive_seed`, no global RNG). **[HUMAN-DECISION]** the seat/order randomisation scheme for LLM.
 
 **10. Exclusions / data-handling.** Definition of an invalid **episode** (`RunFailed`: provider
@@ -84,9 +85,13 @@ pre-registered group-sequential/alpha-spending design. No open-ended "run until 
 State it explicitly. **[HUMAN-DECISION]** fixed-N vs sequential and its parameters.
 
 **14. Cost ceiling.** Maximum episodes and maximum $/tokens for the study, and what happens if
-the ceiling binds before N (down-scope hypotheses / drop a cell / raise the minimum detectable
-effect — never silently truncate, METHODOLOGY §14). Per-episode cost is logged in the manifest
-when measured. **[HUMAN-DECISION]** the max spend and max episode count.
+the ceiling binds before N. Declare any stopping/adaptation rule and its analysis before
+collection. Preserve completed/failed episodes and the unattempted allocation by cell;
+report the shortfall, deviations and resulting power or comparability limitations. A revised
+sample size, hypothesis or minimum effect belongs to a separately declared follow-up unless
+covered by the predeclared adaptation; it cannot retroactively confirm the original study
+(METHODOLOGY §14). Per-episode cost is logged in the manifest when measured.
+**[HUMAN-DECISION]** the max spend and max episode count.
 
 **15. Claim boundary.** One sentence scoping any positive result: which model(s), environment,
 N, institution cell(s), and scale it does and does not license generalising to — and the

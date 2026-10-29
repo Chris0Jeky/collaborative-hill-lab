@@ -19,14 +19,70 @@ hook trust, licensing and the ten human decisions below are unchanged.
 | [#74](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/74) | Shared built-in policy parameter validation without rewriting scenario values | [40803342268](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/40803342268) |
 | [#75](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/75) | Strict study counts/IDs and complete output preflight, including aliases and nested destinations | [40803377416](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/40803377416) |
 | [#79](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/79) | Exact post hoc pTFT benchmark, reproducible figure, experiment targets and extended CI | [40805239775](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/40805239775) |
+| [#81](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/81) | Observation-responsive EC baseline, strict parameter primitives and 480-run sensitivity/control record | [40811251496](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/40811251496) |
+| [#82](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/82) | Configured provider transport, explicit execution opt-in, request accounting and continuation provenance | [40812620936](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/40812620936) |
+| [#83](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/83) | Versioned local graph N-IPD, 18 exact controls and historical-evidence regression gate | [40813963880](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/40813963880) |
 
-The six implementation PRs above are merged; their pages retain the exact review
-and check records. The combined first five
+The implementation PRs retain their exact review and check records. The combined first five
 merges also passed [main-commit CI](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/40803992791)
 at `bfd49d5c3e1e00bcfba2497b42ba05e04373bf9b`. Use checks on the exact commit
 being evaluated; a previous green run is not evidence for a changed head.
 
-### Scientific result
+### Current responsive Evidence Commons result
+
+The new `ec_conditional_contributor` uses only visible contribution history. Its
+exact peer quorum, warmup and anonymous lower-bound semantics are versioned in
+ADR-0012. Legacy contributor/freerider policies and Study 001 are unchanged. Policy
+inputs now reject float/byte coercion before normalization can alter their identity.
+
+The [declared finite design](experiments/responsive-commons/DESIGN.md) executed
+320 deterministic behavioral episodes and 160 separate fixed-action controls.
+Across the 160 attributable-minus-aggregate contrasts, quality increased in 2,
+decreased in 2 and was unchanged in 156; actions differed in 4. All 160 identical-
+action controls preserved briefing, effort, quality and total utility. Nine of
+40 two-strategy cells satisfy the declared strict C1/C2 pair. These are distinct
+tests, not a general social-dilemma certificate or a population effect estimate.
+
+Attribution sustains useful and harmful contribution in this grid. The rule does
+not inspect hidden truth, assess evidence quality or optimize utility weights.
+The [full readout](experiments/responsive-commons/RESULTS.md) preserves every cell,
+the inaccurate-evidence cases and the warmup/threshold null controls. No inferential
+interval is manufactured for deterministic enumeration.
+
+### Current graph result
+
+The new `nipd_graph` world has canonical undirected adjacency, local observations,
+explicit sum/mean payoff aggregation and defined isolate semantics (ADR-0011).
+It retains the historical complete-population engine and input hashes. The
+[18-cell exploratory experiment](experiments/graph-topology/RESULTS.md) fixes N=5,
+one AllD, eight rounds and mean edge payoff. All full cooperation curves match
+the predictions made before execution; all original sealed runs replay.
+
+The ring delays linked TFT's defection cascade by one round relative to the
+complete graph. Star outcomes depend strongly on whether AllD occupies the hub
+or a leaf. Pairwise cooperation counts directed edge votes, whereas neighborhood
+cooperation counts one vote per nonisolated agent; these units must stay explicit.
+Symmetry-equivalent seats add no independent replication. A four-cycle exact
+counterexample shows why total cooperator count is insufficient to determine
+the sparse-graph pTFT transition law. The complete-graph benchmark is not reused
+without a new state-space justification.
+
+### Provider execution capability
+
+[PR #82](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/82) supplies an
+explicit non-streaming OpenAI-compatible transport, selected-credential preflight,
+run/branch opt-in and stable failure categories. Validation and recorded-action
+replay stay offline. Measured per-request partial sums and coverage accompany
+honest null totals when any usage is unknown. Costs remain null. A continuation
+records only its own calls/transcripts and current source/runtime provenance;
+known transport or reported-model confounds are rejected by factorial analysis.
+
+Every transport response/failure used in verification was mocked. This does not
+establish live compatibility, billing, provider determinism, a total wall-clock
+deadline or an episode dollar budget. Configuration and operator commands are in
+[PROVIDER_USAGE.md](docs/PROVIDER_USAGE.md).
+
+### Preserved Study 002 result
 
 Study 002 is an **executed, unfrozen exploratory experiment**, with 29 deterministic
 controls and six stochastic pTFT cells × 32 independently seeded episodes, each
@@ -88,11 +144,37 @@ violation: **social dilemma not certified; tested same-behavior accountability
 integrity certified**. The incentive atlas gives finite-strategy admissible
 regions, without choosing weights or demonstrating a behavioral response.
 
+The responsive EC original source was clean local
+`25904e5ce84d9ed642bed5874192391ff1297729`, identical in full tree to the
+[published source](https://github.com/Chris0Jeky/collaborative-hill-lab/commit/0e12c42fc8819e6d92c4153f06760c7996a5d237).
+Its [provenance](experiments/responsive-commons/SOURCE_PROVENANCE.json) records
+the actual original environment, including setuptools 84.0.0; later full-lock
+84.1.0 validation reproduced the readout without rewriting that history.
+
+The graph original source was clean local
+`873666aa9dfe1de7cc76d31275b4828fa44e065d`, matching the published
+[source checkpoint](https://github.com/Chris0Jeky/collaborative-hill-lab/commit/78caa2a98c62c1818227e90886525d6f2aa19eb0)
+and tree `875823c171036dcf40a0b9f2834074bce7ad05f9` before execution. Its
+[separate source mapping](experiments/graph-topology/SOURCE_PROVENANCE.json)
+preserves the original JSON/Markdown/execution-source bytes and verifies 71 file
+commitments. Original graph RESULTS.json SHA-256 is
+`69349116386452e913e1eabc546082a9d052d8993fc3a2dbb5f134658fe6a099`.
+Both new experiments remain unfrozen and separate from Studies 000/001/002.
+
+The original 498-run evidence is also retained in the session deliverable
+`collaborative-hill-pass2-original-evidence-2026-10-29.zip`, SHA-256
+`107ea42fd282130b9f8d4cb3899d828205b1e37337c9cb73d13bcc83e0522459`.
+It contains 2,374 original files, separate published-source mapping records,
+per-file checksums and a byte-reproducible repack script. All 498 seals, 66,714
+event records, 552 checkpoint bindings and 120 source-file commitments were
+verified before packaging. Original on-disk artifact contents and modification
+times are unchanged; ZIP entries use fixed timestamps for reproducible packaging.
+
 ## Reproduce and verify
 
 ```bash
 make setup
-make check test validate acceptance check-atlas check-study002
+make check test validate acceptance check-atlas check-study002 check-responsive check-graph
 make study-002-plan
 make study-002 STUDY002_ARTIFACTS=artifacts/study-002-fresh
 ```
@@ -103,16 +185,20 @@ byte-identical benchmark JSON/Markdown/SVG without running more episodes or
 rewriting evidence. Setup downloads pinned dependencies; science gates call no
 model provider. Direct commands and other workflows are in README and Makefile.
 
-The integrated local code at `fe5c81d` passed Ruff, strict package mypy (45 files),
-all **849 tests**, all four StudySpec validations, **11/11 acceptance scenarios**,
-the atlas gate and the six study-module strict-mypy/generation checks on Python
-3.12.14 with the committed dependency lock. This is 217 additional test cases over
-the initial 632-case baseline. Documentation/provenance mapping edits were present
-in the working tree; they are not described as a clean scientific execution.
-The 55 core mathematical cases and 20 report cases were independently reviewed;
-labelled-agent/history enumeration supplies oracles separate from the binomial
-implementation. Review-found path blockers, ambiguous destinations, inherited
-Decimal rounding and Matplotlib style drift all received regression fixes.
+The final graph head `535ad44062657023e50bc1ab48a714d823640abe` passed the full
+**1,198-test suite** in hosted CI, Ruff, strict package mypy in 50 files, all four
+historical StudySpec validations, **11/11 acceptance scenarios**, atlas/Study 002
+checks, all 480 responsive regenerations and the 18-run graph gate. Its final
+checkout was clean. All 38 committed dependency pins were installed, including
+setuptools 84.1.0. Local integration used Python 3.12.14; hosted CI used 3.12.15.
+The strengthened historical-provenance checks have 37 focused regression cases.
+Engineering verification reruns add no independent scientific samples.
+
+Independent reviews checked policy observation boundaries, provider failures and
+continuation accounting, exact graph arithmetic and all 18 trajectories using a
+separate payoff/action oracle. The graph gate compares all scientific/identity/
+seal fields while allowing a new execution to record its own source annotations.
+It separately checks the untouched original source and published-mapping records.
 
 Exact published-head Actions logs are the hosted verification record. The final
 integration/documentation PR carries its own current check; no human review is
@@ -136,15 +222,15 @@ the maintenance record, not simulator behavior or any scientific input/result.
 
 ## Remaining directions and limits
 
-The next concrete increments are
-[responsive Evidence Commons policies (#76)](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/76),
-[a configurable offline-tested provider transport (#77)](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/77),
-and [versioned graph semantics (#78)](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/78).
-Each issue has a bounded scope and acceptance criteria. NEXT separates engineering
-that can proceed now from pilot-dependent hypotheses, weights, sample size and
-freeze decisions. No unfinished prototype is required to run this checkpoint.
+Issues #76–#78 are implemented through PRs #81–#83. The next bounded increments
+are [observable quality safeguards (#84)](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/84),
+[labeled-state sparse pTFT (#85)](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/85)
+and [provider request plans/budgets (#86)](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/86).
+NEXT separates these offline engineering/research tasks from pilot-dependent
+hypotheses, weights, sample size and freeze decisions.
 
-The current C/F baselines do not respond to incentives or attribution. All measured
+The legacy C/F baselines do not respond to incentives or attribution; the new
+conditional policy responds to visible participation, not utility weights. All measured
 findings concern scripted algorithms, not LLMs or people. Exact pTFT calculations
 use ideal rational Bernoulli assumptions; the simulator's finite-precision draws
 are unchanged. Matching kernel seeds do not pair provider randomness. Factorial

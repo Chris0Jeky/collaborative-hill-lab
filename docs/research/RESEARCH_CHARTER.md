@@ -157,8 +157,9 @@ These are non-negotiable for the foundation phase; changing one requires an ADR.
    explicit allow-list.
 3. **Mechanism vs narrative.** The numbers (payoffs, thresholds, action schemas, information policy,
    seeds) live in the mechanism and are hashed; the prose "skin" is a pure render of mechanism state
-   and is never read back into mechanics. Permuting the skin must not change any mechanism or event
-   hash of a fixed-action replay.
+   and is never read back into mechanics. Changing the skin preserves mechanism identity and
+   fixed-action world transitions. Event-chain equality additionally holds run identity and
+   narrative-bearing start metadata fixed; ordinary study runs can record distinct narrative identities.
 4. **Event-sourced reproducibility.** Runs are append-only, hash-chained event ledgers over
    canonical JSON with integer/`Fraction`-exact scored quantities (no floats in hashed payloads).
    Seeds are derived by *identity*, not draw order, so adding an agent does not perturb others'
@@ -189,12 +190,16 @@ validators); scripted + LLM-adapter agents with a fake provider; metrics/manifes
 Study 000 (legacy N-IPD reproduction / deconfounding) and Study 001 (Evidence Commons 2×2, draft).
 The authorized 2026-10-29 extension adds Study 002's N=3/N=5 complete-graph sensitivity
 experiment, a post hoc exact finite-population pTFT benchmark, the finite-strategy
-incentive atlas, sealed factorial analysis and persistent verification. These remain
-offline exploratory engineering and scripted research, not a live LLM finding.
+incentive atlas, sealed factorial analysis and persistent verification. A further authorized
+engineering slice adds observation-responsive EC controls, explicitly versioned local
+graph N-IPD and configurable provider transport with mocked HTTP validation. These remain
+exploratory scripted research and provider engineering, not a live LLM finding. The new
+transport does not select a live model, budget or confirmatory design.
 
 **Explicit non-goals now:** RL / Q-learning agents (the legacy QL claims are out of foundation
-scope); large-N and sparse network-topology experiments; real users or human-subject data; live
-network/shell/filesystem tools inside an episode; cryptographic authenticity/signing of ledgers
+scope); large-N or general-network conclusions beyond the small declared graph controls;
+real users or human-subject data; agent-controlled network/shell/filesystem tools inside an
+episode; cryptographic authenticity/signing of ledgers
 (integrity, not authenticity, is the T1 concern); production deployment or any external consumer.
 Institutional levers beyond the Study-001 2×2 (reputation, sanctions, commitments) are *designed
 but not built* until a study needs them (second-occurrence rule).

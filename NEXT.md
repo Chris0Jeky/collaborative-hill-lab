@@ -24,39 +24,57 @@ for those choices.
 - A post hoc exact finite-state pTFT benchmark complements Study 002's original
   Monte Carlo results without changing its sample or settings
   ([#72](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/72)).
+- **Responsive Evidence Commons** adds a versioned conditional contributor and
+  an executed finite grid: 320 behavioral episodes, 160 matched contrasts and
+  160 separate same-action controls. Positive, negative and null quality effects
+  are retained ([#81](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/81)).
+- **Configured provider execution** is integrated with explicit opt-in, offline
+  validation/replay, request-level usage coverage, continuation accounting and
+  known transport/model comparison checks. All transport validation uses mocked
+  responses ([#82](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/82)).
+- **Versioned graph N-IPD** provides local observations, canonical undirected
+  adjacency and explicit payoff normalization. All 18 deterministic topology
+  controls match their prior predictions and replay successfully
+  ([#83](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/83)).
 
 ## Next useful increments
 
-### 1. Observation-responsive Evidence Commons baselines
+### 1. Quality safeguards grounded in visible evidence
 
-[Issue #76](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/76).
-The current contributor/freerider policies ignore attribution and utility weights.
-They are useful controls for incentive inequalities, but cannot test behavioral
-response to institutions. Add new versioned policies that respond to visible
-contribution history and accountability; retain response-free controls and current
-Study 001 inputs. Start with hand-checkable traces, observation/permutation tests
-and a separate unfrozen experiment. Report incentives, identical-action integrity
-and observed behavior as distinct results. This can proceed entirely offline.
+[Issue #84](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/84).
+The new conditional contributor responds to visible participation, but attribution
+can sustain harmful activity on misleading evidence. Specify a new versioned rule
+using only declared observable evidence/provenance/contradiction signals, with an
+explicit negative control when those observations cannot distinguish false support.
+Any new truth or credit feedback requires a separately versioned observation
+contract. Hold budgets and evidence access fixed within each planned contrast;
+retain all existing controls and original results. Report quality, activity,
+effort, utility, finite-strategy incentives and identical-action integrity
+separately. No final Study 001 weight choice or live provider is needed.
 
-### 2. Configurable provider transport and honest usage capture
+### 2. Exact labeled-state pTFT on small sparse graphs
 
-[Issue #77](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/77).
-Implement one explicitly configured endpoint behind the existing policy seam,
-with mocked success, timeout, malformed output, refusal and unavailable-usage
-cases. Record model and sampling metadata; keep unmeasured tokens/cost null.
-Contract testing does not depend on choosing a live-study model and must never
-make paid calls implicitly. A real pilot separately needs an approved endpoint,
-model/version, budget and stopping rule.
+[Issue #85](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/85).
+ADR-0011 gives two reachable four-cycle configurations with the same cooperator
+count and different next-count distributions. A sparse-graph benchmark must keep
+enough labeled state to recover those local transition probabilities. Begin with
+small connected graphs, fixed AllD actors, neighborhood broadcast and no
+exploration. Check exact transition rows, complete-graph projections, relabeling
+and an independent labeled-history oracle. Keep ideal rational-Bernoulli results
+distinct from the finite-precision simulator and declare any new stochastic
+sampling plan before execution.
 
-### 3. Versioned graph-topology experiment
+### 3. Offline request planning and cumulative attempt budgets
 
-[Issue #78](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/78).
-Study 002 covers N=3/N=5 complete graphs, not sparse networks. Specify graph
-identity, payoff normalization, edge observations and isolated-agent semantics in
-an ADR before implementation. Preserve current complete-graph behavior and hashes;
-begin with ring/star oracles and a complete-graph equivalence control. Separate
-topology changes from composition and policy changes. The pTFT count-state model
-requires a new justification before use on a sparse graph.
+[Issue #86](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/86).
+The transport's token cap and socket timeout do not enforce a whole-episode
+budget or deadline. Add an offline plan that counts action-format repair and
+HTTP 429 attempts separately, then an explicit cumulative admission limit with
+recorded scope and stopping reasons. Failed/unknown attempts still consume the
+declared attempt budget. Keep partial measurements and unknown dollar totals
+honest; define continuation behavior and preflight failure before requests.
+Use mocked transports. Live provider/version, cost and stopping choices remain
+human-owned.
 
 ## Path to a live Study 001 result
 
@@ -65,7 +83,8 @@ requires a new justification before use on a sparse graph.
    weights fail the collective-stakes certificate; the incentive atlas presents
    admissible finite-strategy alternatives without selecting one. Record a separate
    pilot plan rather than presenting the current draft as confirmatory.
-2. **Run the declared pilot.** After the provider transport is verified, measure
+2. **Run the declared pilot.** After endpoint-specific compatibility and operational
+   budget controls are verified, measure
    episode-level variance, invalid-output rate and actual tokens/cost. The existing
    backlog proposed five episodes per cell; that is a candidate pilot budget, not
    an established power requirement.
@@ -76,16 +95,18 @@ requires a new justification before use on a sparse graph.
    check skin robustness, and distinguish kernel seed pairing from provider
    randomness. Publication and novelty claims remain human decisions.
 
-The analysis implementation and provider contract tests can proceed before the
-pilot; pilot-dependent power and confirmatory choices cannot. This removes the
-old backlog's circular dependency between preregistration and unknown pilot variance.
+The analysis implementation and offline provider contract tests already work.
+The three engineering/research increments above can proceed before a live pilot;
+pilot-dependent power and confirmatory choices cannot. Stop according to a
+declared rule and preserve incomplete results if a budget binds. A revised design
+is a separately declared follow-up, not a retroactive confirmation of the original.
 
 ## Later, when a concrete experiment needs them
 
 - **Deception-capable verification:** a new mechanism version with agent-reported
   outcomes and an engine audit trail, retaining v0 behavior and hashes.
 - **Reputation or sanctions:** explicit institution rules and C3-style checks,
-  preferably after a responsive behavioral baseline exists.
+  building on the new responsive behavioral baseline and its harmful controls.
 - **Concordia cognition adapter:** typed actions behind the observation firewall,
   pinned dependency and fake-provider contract tests.
 - **Policy-override serialization:** make inherited counterfactual policy intent

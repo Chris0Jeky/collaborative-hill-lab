@@ -1,10 +1,15 @@
 # Novelty Matrix — Collaborative Hill Lab
 
-**Status:** Foundation-phase discovery consolidation. **Date:** 2026-07-13.
-Consolidates `_discovery/related-work.md` §§5–6. Cells reflect documented behaviour of each
-system; the **CHL row is planned/claimed** and must be re-checked against the code as it is built.
-Full citations and confidence tags are in `RELATED_WORK.md`. "—" = not present / not a design
-concern.
+**Status:** Historical comparison hypotheses with the CHL implementation row updated
+2026-10-29. The external rows and candidate-novelty discussion retain the
+2026-07-13 discovery consolidation from `_discovery/related-work.md` §§5–6;
+they are not a refreshed literature review or evidence of current uniqueness.
+Full historical citations and confidence tags are in `RELATED_WORK.md`.
+The CHL row now reflects the implemented engine and finite scripted experiments
+described in [HANDOFF](../../HANDOFF.md), with claim limits in
+[CLAIMS_AND_LIMITATIONS.md](CLAIMS_AND_LIMITATIONS.md). "—" means not documented
+in that survey, not proof that a capability is absent. Open verification items
+below must be resolved against current primary sources before publication.
 
 ---
 
@@ -22,13 +27,13 @@ metrics · major limitations.
 | **Melting Pot 2.0** (arXiv:2211.13746) | Do MARL agents generalize to novel social partners? | 50+ gridworld substrates, 256+ scenarios | Spatial gridworld; mixed cooperation/competition | Pixel observations | Substrate rules (e.g. zapping/tagging) | — | **Deterministic, seeded, fully reproducible** substrates | — (scenario sets, not run branching) | Focal per-capita return, generalization scores | RL not LLM; no NL evidence/epistemics; no provenance |
 | **Generative Agents** (UIST'23, arXiv:2304.03442) | Can LLM agents produce believable emergent social behaviour? | Smallville sandbox (Sims-like) | Spatial proximity + NL conversation | Memory stream (obs/plan/reflect); gossip spreads | User intervention (ad hoc) | — (no accuracy tracking of spread info) | Not a goal; LLM-bound | — | Believability (human eval) | Believability not truth; no incentives, provenance, replay, or scoring |
 | **Akata et al.** (Nat. Hum. Behav. 2025) | How do LLMs behave in repeated 2×2 games? | Iterated PD, Battle of the Sexes, etc. | **Pairwise, 2-player** repeated | Opponent-info + social CoT | — (game payoff only) | — | Model-bound experiments | — | Game score, cooperation rate, coordination success | 2-player only; no population/institution/evidence layer |
-| **Collaborative Hill Lab** (planned) | Which interaction/information/institutional structures move LLM-agent populations from the Tragic Valley to the Collaborative Hill in *building shared truth*? | **Evidence Commons** (contested claims + evidence under mixed incentives); N-IPD micro-mechanism | **Pairwise-targeted vs aggregate/neighbourhood accountability as a first-class manipulable** (carries the N-person PD finding) | Configurable observation policy (five-plane; allow-list projection); private vs shared-ledger topology | Taxonomy incl. attributable vs aggregate accountability now; reputation/sanctions/commitments designed, deferred | **First-class provenance-tracked claims/evidence**; verification checks provenance, not truth | **Seeds derived by identity + canonical JSON + hash-chained event ledger + content-addressed stores → bit-exact replay** | **Native branchable counterfactuals** (prefix byte-identical) off any checkpoint | Epistemic accuracy (briefing correctness) + cooperation + collapse metrics (Tragic-Valley/Collaborative-Hill) | Planned/unbuilt; no study run yet; claims unproven; LLM-snapshot sensitivity still applies |
+| **Collaborative Hill Lab** (implemented scripted controls) | How do declared interaction, information and accountability rules change behavior and epistemic outcomes within specified populations? | Evidence Commons v0; legacy complete-population and versioned local-graph N-IPD | Explicit complete/ring/star controls; targeted, linked and neighborhood reciprocity named separately | Five-plane scenarios and observation allowlists; EC private/shared-ledger evidence | EC aggregate/attributable accounting; reputation/sanctions remain future work | Provenance-tracked claims/evidence; verification does not establish truth | Seeded scripted execution, hash-linked recorded-action replay and retained source commitments | Branches from retained checkpoints preserve the prefix and record continuation provenance | Briefing quality, contribution, exact payoffs and explicitly defined cooperation vote units | Finite scripted evidence only; provider transport tested with mocks; no live-model findings, universal institutional benefit or verified novelty claim |
 
 ---
 
-## Honest novelty assessment
+## Candidate novelty assessment from the discovery record
 
-### Defensible lanes (survive scrutiny)
+### Historical candidate lanes requiring current verification
 
 1. **Epistemic payoff as the social dilemma (clearest novelty, MED-HIGH).** GovSim and SanctSim make
    agents fight over *quantities* (fish, contributions). No surveyed *incentive-structure* system makes
@@ -90,6 +95,7 @@ metrics · major limitations.
   the README (directly gates novelty claim 2).
 - Read NetworkGames (arXiv:2511.21783) and SanctSim in full to confirm neither already implements the
   pairwise-vs-aggregate targeting IV (gates novelty claim 3).
-- Re-confirm every CHL-row cell against the built code before publishing the matrix — the row is
-  currently *claimed*, and each guarantee (bit-exact replay, prefix-identical branching, truth
-  firewall) must be demonstrated by a passing test per `RESEARCH_CHARTER.md` §9, not asserted.
+- The CHL row was reconciled with implementation and retained scripted evidence on
+  2026-10-29. Before publishing a comparison, cite the exact tested source and the
+  scope of replay, branching and observation-boundary tests; do not turn finite
+  engineering checks into an unconditional guarantee or a live-model result.

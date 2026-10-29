@@ -3,7 +3,8 @@
 Synthesis of the six-lens Phase 0 discovery (full reports in `docs/research/_discovery/`),
 reconciled by the founding engineer against first-hand reads of `prisoners.tex`,
 `npdl/core/utils.py`, and `CORRECTED_RESULTS_SUMMARY.md`. Written 2026-07-13, before the
-foundation implementation was finalized; the "as built" notes were completed after.
+foundation implementation was finalized; the "as built" notes below include the
+2026-10-29 engineering extensions. The original discovery conclusions remain historical.
 
 ## 1. What can be safely reused from the legacy repo
 
@@ -61,12 +62,39 @@ Everything else. Decisive findings:
 
 Five-plane typed scenarios compiled to content-hashed, mechanism/skin-separated resolved
 scenarios (ADR-0003/0004); hash-linked JSONL event ledger with unhashed meta and
-copy-on-write branching (ADR-0002); stateless hierarchical randomness giving paired runs
-by construction (ADR-0005); human-gated study freezing with exhaustive manifests
+copy-on-write branching (ADR-0002); stateless hierarchical randomness with explicit
+versioned policy-stream pairing (ADR-0005/0008); human-gated study freezing with manifests
 (ADR-0006); LLM adapter with typed actions, bounded retries, observable rationale only
-(ADR-0007). Two mechanisms: N-IPD (both interaction structures, exact fractions, the full
+(ADR-0007). The original mechanisms are N-IPD (both complete-population interaction structures,
+exact fractions, the full
 deconfounded TFT family) and Evidence Commons v0 (slots/propositions/evidence, provenance-
 checking verification, net-support acceptance, 2×2 institutions, integer credit units).
+
+The later extensions keep those historical contracts intact:
+
+- [ADR-0009](adr/0009-counterfactual-replay.md) defines recorded-action replay and
+  counterfactual lineage. Equal kernel streams alone do not establish paired provider
+  randomness or a valid causal comparison.
+- [ADR-0010](adr/0010-configurable-provider-transport.md) adds an explicitly configured
+  OpenAI-compatible transport, sanitized failure records and measured request accounting.
+  Validation and replay remain offline; study/branch provider execution requires opt-in.
+  Tests use mocked HTTP, and no live model or billing behavior has been verified.
+- [ADR-0011](adr/0011-versioned-graph-nipd.md) adds the separate `nipd_graph` world:
+  canonical undirected adjacency, local observations, explicit sum/mean edge payoffs and
+  local-degree reciprocity. Isolates earn zero and add no eligible interaction votes;
+  a graph needs at least one edge. Separate complete-graph tests match legacy
+  pairwise/sum and neighbourhood/mean rewards; the new mechanism identity stays distinct.
+- [ADR-0012](adr/0012-responsive-ec-contribution-quorum.md) adds a conditional contributor
+  gated by the conservative visible count of peers who proposed or verified. Threshold
+  zero is an exact action control for the legacy contributor. The
+  [responsive experiment](../experiments/responsive-commons/RESULTS.md) keeps all 320
+  behavioral episodes and 160 fixed-action controls, including harmful and null effects.
+
+The graph experiment's [recorded readout](../experiments/graph-topology/RESULTS.md)
+matches all 18 pre-execution cooperation predictions and verifies replay of every sealed
+run. Its small deterministic topology/placement/policy controls keep analytical predictions
+separate from original-run evidence. Neither experiment changes Study 001 or selects its
+final weights, hypotheses or model population.
 
 Review fixes adopted from the adversarial architecture lens: determinism-scope statement
 (replay ≠ model reproducibility), branch/run_id resolution via copy-on-write with honest
@@ -83,10 +111,14 @@ instead — cheaper), Philox/numpy in the kernel (no persisted RNG state to fast
 | hidden truth leaks to agents | observation projection; truth fields only in world plane | leak canary scans of full ledgers |
 | narrative changes mechanics | skin schema structurally inert; separate hashes | skin-isolation metamorphic test |
 | unreproducible runs | seeds + ledger + manifests; replay verification | replay/rerun chain-equality tests |
-| silent action repair | ActionRejected + explicit abstain fallback | invalid-LLM-output tests |
+| silent action repair | parser retry/abstain path; separate ActionRejected + explicit fallback | invalid-output and failure-replay tests |
 | pseudo-replication | episode as unit of analysis | METHODOLOGY.md + report design |
 | defect-class recurrence (legacy 0% bug) | schema-safe metrics | legacy-defect regression fixture |
-| fabricated cost/tokens | None-unless-measured manifests | cost-honesty test |
+| fabricated cost/tokens | per-request coverage; unknown totals stay None; separate continuation usage | provider-accounting and workflow tests |
+| undeclared provider execution | offline validation/replay; explicit run/branch opt-in; credential preflight | mocked provider-workflow tests |
+| credential leakage or configuration drift | redirect refusal, bounded redaction and immutable request settings | provider transport/redaction tests |
+| sparse-graph denominator or privacy errors | versioned local observations, explicit vote/payoff units, isolate handling | graph oracle/noninterference/equivalence tests |
+| institutional benefit inferred from contribution alone | accurate/misleading corpora; all profiles retained; separate C1/C2/C3 checks | responsive EC hand traces and exact readout |
 
 ## 7. Decisions that remain human-owned
 

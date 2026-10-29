@@ -2,26 +2,28 @@
 
 Status: **living methodology backbone.** Binds to the implemented system as of the
 engine/domain/experiments layers (`engine/runner.py`, `engine/seeds.py`,
-`domain/world/evidence_commons.py`, `experiments/study.py`, `metrics/*`). Study-specific
+`domain/world/evidence_commons.py`, `domain/world/graph_nipd.py`,
+`experiments/study.py`, `metrics/*`). Study-specific
 numbers (N per cell, effect sizes, K windows) are declared per study in a preregistration
 (`PREREGISTRATION_TEMPLATE.md`) and analysed under a study SAP
 (`STATISTICAL_ANALYSIS_PLAN.md`); this file is the method that all studies inherit.
 
-This document consolidates and supersedes `_discovery/methodology-stats.md`. Where the
-discovery draft was prescriptive ("the lab must…"), the mechanisms it asked for are now
-implemented; this file cites the code construct that realises each one.
+This document consolidates and supersedes `_discovery/methodology-stats.md`. It separates
+implemented engine checks from procedures a future live study must declare. The optional
+provider transport has offline engineering tests; no live pilot, automatic condition-order
+randomizer or dollar-budget controller is implied by its availability.
 
 ---
 
 ## 0. What we are measuring, and what we are not
 
 The lab studies **properties of populations of LLM (and scripted) agents under configured
-interaction, information, and institutional mechanisms** — specifically whether targeted
-pairwise accountability breeds accurate cooperation (the Collaborative Hill) where diffuse
-aggregate accountability breeds free-riding and misinformation (the Tragic Valley). The
+interaction, information, and institutional mechanisms** — including when changes improve
+accurate cooperation, leave it unchanged or make it worse. The
 first environment is **Evidence Commons** (`domain/world/evidence_commons.py`); the
 canonical micro-mechanism is the **N-person Prisoner's Dilemma** (`domain/world/nipd.py`)
-used for legacy reproduction and calibration.
+used for legacy reproduction and calibration. The separately versioned graph world uses
+explicit local neighborhoods; it does not reinterpret old complete-population records.
 
 We make **model-comparison and mechanism-comparison** claims ("under model M, mechanism A
 produces higher briefing quality than mechanism B, on this environment, at this scale"). We
@@ -44,19 +46,53 @@ in closed form. The build/run order is fixed:
    written from the derivation, never read back from the code under test.
 2. **Scripted / deterministic baselines.** Scripted policies (`agents/scripted/*`:
    `allc`, `alld`, `random`, `tft_*`, `ptft`, `ec_contributor`, `ec_freerider`,
-   `ec_verifier`, `ec_misinformer`) run the same mechanism with fully specified strategies.
+   `ec_verifier`, `ec_misinformer`, `ec_conditional_contributor`, and the graph-local
+   reciprocators) run the same mechanism with fully specified strategies.
    These calibrate the environment (does the dilemma bite? does attributable credit change
    the payoff geometry as the certificate predicts?) and produce the null/positive-control
    curves against which LLM populations are read.
 3. **LLM experiments.** Only after 1–2 are sealed do LLM populations (`agents/llm/*`) run
    the identical scenarios. A `FakeProvider` (scripted, deterministic completion provider)
-   exercises the entire LLM code path — parsing, retries, abstention, transcript sidecar —
-   without a network call, so the harness itself is validated before any real provider spend.
+   exercises parsing, retries, abstention and transcript recording. Mocked HTTP fixtures
+   additionally check the configurable transport, usage accounting and workflow boundary
+   without sending requests. A live pilot remains separate work under its declared design.
 
-Rationale: a scripted `ec_freerider` population is the mechanistic definition of the Valley;
-an `ec_contributor`/`ec_verifier` mix is the Hill. If the LLM population lands between them,
-the baselines give the reading a scale. Without them, an LLM cooperation number is a
-free-floating datum.
+Scripted populations provide explicit controls, not guaranteed upper or lower performance
+bounds. A contributor can spread fresh misinformation. The responsive EC experiment
+therefore fixes both accurate and misleading corpora and retains positive, negative and
+null accountability contrasts. Its conditional policy reads contribution history rather
+than truth or utility weights; monetary-incentive diagnostics and behavior are separate.
+
+### Current finite controls
+
+The [responsive EC design](../../experiments/responsive-commons/DESIGN.md) enumerates
+320 deterministic episodes at N=3 and 12 rounds: two accountability levels, two evidence
+topologies, two corpora, five threshold/warmup rules and eight labeled active/freerider
+profiles. The [full readout](../../experiments/responsive-commons/RESULTS.md) has 2 positive,
+2 negative and 156 zero quality contrasts. For each strategy pair, C1 is existence of a
+strictly profitable unilateral active-to-freerider switch among twelve labeled deviations;
+C2 is strictly greater total utility at CCC than FFF. Neither condition establishes
+dominance, equilibrium or a general social dilemma. All 160 separate fixed-action replays
+test C3 by holding typed actions and the world/topology fixed while changing accountability.
+Their agreement on briefing, effort, quality and total utility does not require adaptive
+policies to choose the same actions under different observations.
+
+The [graph design](../../experiments/graph-topology/README.md) fixes N=5, one AllD,
+eight rounds and mean edge payoff. Its 18 conditions cross complete/ring/star adjacency,
+AllD's labeled seat and targeted/linked/quorum reciprocity. All 18
+[recorded cooperation curves](../../experiments/graph-topology/RESULTS.md) match the
+pre-execution predictions; every original sealed run replays. Placement and policy are
+explicit factors. Pairwise rates count directed edge votes; neighbourhood rates count
+one vote per positive-degree agent. A star's first-round difference can therefore reflect
+vote weighting before any reciprocal response. Comparisons across policy modes also change
+the action/observation rule. The Study 002 complete-population count-state pTFT benchmark
+cannot be transferred to sparse graphs; [ADR-0011](../adr/0011-versioned-graph-nipd.md)
+gives an exact local-history counterexample.
+
+These are unfrozen exploratory controls. Deterministic enumeration supplies exact values
+for the declared grid, not repeated samples or inferential confidence intervals. Local
+pre-execution predictions, execution source commitments and original ledger evidence are
+recorded separately; a later byte-identical regeneration is a check, not another sample.
 
 ---
 
@@ -81,12 +117,15 @@ to per-round rates first and reports `mean_cooperation` / `final_window_cooperat
 
 The legacy headline pipeline (`run_research_experiments.py`) ran deterministic configs
 (`3_TFT`, `2_TFT+1_AllD` with `exploration_rate: 0.0`) 20× and computed a 95% CI as
-`mean ± 1.96·σ/√20` with population `σ` (ddof=0). Because the dynamics were deterministic,
-**all 20 runs were byte-identical**: `σ = 0`, the CI had **zero width**, and "20 runs for
-statistical significance" was one run copied 20 times. The lab treats this as the canonical
-anti-pattern: replicate count is not sample size, and a zero-variance cell is `n_effective =
-1`, not `n = 20`. The SAP's degenerate-variance guard (below, and §4.5 of the SAP) exists
-specifically to detect and *report* this rather than emit a false-tight interval.
+`mean ± 1.96·σ/√20` with population `σ` (ddof=0). Repeating a fixed deterministic
+trajectory gives `σ = 0` and a **zero-width** interval, without adding evidence through
+"20 runs for statistical significance." The lab treats this as the canonical
+anti-pattern: repeating a known deterministic trajectory adds no independent outcome
+information. This differs from a stochastic sample whose observed values happen to be
+equal: zero empirical variance does not prove a degenerate population or reduce those
+independent episodes to one. The SAP's degenerate-variance guard (§4.5) reports when its
+sample-based interval cannot be estimated rather than claiming population certainty.
+Study 002's ideal-process benchmark illustrates this distinction explicitly.
 
 ---
 
@@ -138,22 +177,25 @@ their replicate numbers match. See SAP §3 for the intended future paired Study 
 
 ## 4. Condition-order and position randomisation (and when it is a no-op)
 
-For **LLM runs**, execution order and positional layout are nuisance variables that can
-confound results:
+For a future **LLM study**, execution order and positional layout are nuisance variables
+to address in its design:
 
-- **Condition execution order** is randomised so provider drift (§6) cannot align with a
-  single condition (e.g. "attributable happened to run in the morning").
-- **Seat / position and prompt option order** are randomised or balanced across conditions,
+- **Condition execution order** should be randomized or balanced so provider drift (§6)
+  cannot align with a single condition (e.g. "attributable happened to run in the morning").
+- **Seat / position and prompt option order** should be randomized or balanced across conditions,
   because LLMs exhibit primacy bias (over-selecting first-listed options/agents).
 
-For **deterministic scripted runs this randomisation is a provable no-op**: a scripted
-episode's sealed ledger is a pure function of `(mechanism, policies, seed_root)`. It does not
-read wall-clock time (that lives only in unhashed event `meta`), does not depend on the order
-conditions execute, and — for policies with no stochastic component — does not even depend on
-the drawn RNG values. Two runs of the same scripted condition produce byte-identical
-`final_event_hash`. We still record order in the manifest for uniformity, but for scripted
-baselines it carries no inferential weight. (This is also why replay is exact: `agents/replay.py`
-reproduces recorded actions, and the hash chain verifies it.)
+The current `run_study` executes conditions and replicates in their declared order; it
+does not implement a randomized scheduler or automatically balance prompt options. A live
+design needs to specify and record that schedule before drawing conclusions about drift.
+
+Reordering independent **deterministic scripted condition executions** does not change
+their outcomes when code, inputs, seed protocol, run identity and start metadata are held
+fixed. World transitions do not read wall-clock time. This does not make agent placement
+or list order inert: graph position changes local interactions, and EC resolution/ties use
+declared identities and claim order. Deterministic relabeling tests have their own explicit
+scope; stochastic seed paths also depend on agent IDs. Replay checks reproduce recorded
+actions under the same engine contract, without making a provider call.
 
 ---
 
@@ -169,7 +211,7 @@ Every confirmatory study follows a three-phase procedure:
    compute N/cell to detect the pre-declared minimum effect of interest at the target power
    (e.g. 80–90%) and Holm-adjusted α. For a paired design, use the measured variance of
    the paired contrast, rather than assuming a reduction from the between-cell marginal.
-3. **Confirm.** Freeze N (the stopping rule, §12), run the confirmatory batch, analyse per
+3. **Confirm.** Freeze N (the stopping rule, §14), run the confirmatory batch, analyse per
    the frozen SAP.
 
 This prevents both the legacy underpowered scenarios (`runs: 3`/`5`) and optional-stopping
@@ -179,24 +221,44 @@ p-hacking.
 
 ## 6. Provider drift logging via manifests
 
-LLM sampling is a second RNG we do not control at the client, and providers silently update
-models. The lab pins and logs everything pinnable in the **run manifest**
+LLM sampling is separate from the kernel RNG, and a requested model alias can resolve to a
+different served version. The lab records available execution provenance in the **run manifest**
 (`experiments/manifests.py`, written per run by `study.py`):
 
-- `providers` (model_id per agent), `prompt_template_hashes`, `sampling`
-  (temperature/top_p/etc.), `scorer_versions`.
+- `providers` (requested model per agent), `prompt_template_hashes`, declared `sampling`,
+  transport/endpoint settings in `provider_metadata`, observed `reported_models`, and
+  `scorer_versions`. Exact sampling strings and serialized wire-number strings remain distinct.
 - `code_commit`, `worktree_dirty`, `python_version`, `platform`,
   `dependency_lock_sha256`, `study_hash`, `study_frozen`, per-condition `scenario_hash` /
   `mechanism_hash` / `narrative_hash` / `evidence_corpus_hash`.
-- Cost/token fields (`input_tokens`, `output_tokens`, `cost_usd`, `pricing_table_version`)
-  are recorded **only when measured** — a `None` means unmeasured and is **never
-  fabricated**.
+- `provider_usage` records completion calls, request attempts, known per-dimension token
+  sums and measurement coverage. An input/output total is known only when every attempted
+  request reports that dimension. Unknown 429/timeout usage is retained; measured refusal
+  and action-repair usage is included. Costs and prices remain unknown because the transport
+  supplies no price table. A continuation records only calls and transcript rows after its
+  own starting cursors and clears inherited usage/pricing metadata.
 
-Drift protocol: pin `model_id` with a dated/versioned alias where the provider exposes one;
+The [provider contract](../PROVIDER_USAGE.md) defines explicit endpoint/model/token-cap
+configuration, environment-variable credential references, redacted errors and bounded
+retries. Its timeout covers socket I/O, not a total request or DNS deadline. Transport
+retries (`rate_limit_retries`) are opt-in and limited to HTTP 429. Separately, the policy's
+`max_retries` can request additional completions to repair invalid action JSON inside a
+valid text response; these calls also count toward usage. Validation and recorded-action
+replay remain offline. Effective network policies
+in a study or branch require execution opt-in; every selected credential/configuration is
+preflighted before the first call or output reservation. These are engineering controls,
+not evidence of live reliability, model determinism, billing accuracy or paired randomness.
+
+For a future live study, the drift protocol is to pin `model_id` with a dated/versioned
+alias where the provider exposes one;
 **block-collect each condition contemporaneously** (interleave, do not batch a whole
 condition then the next); and schedule **anchor re-runs** of a fixed scenario at intervals to
 detect behavioural drift between provider updates. A cross-time comparison whose manifests
-show a changed served model version is flagged, not silently pooled.
+show a changed served model version is flagged, not silently pooled. The factorial
+analyzer checks recorded transport settings within each declared block and rejects
+different known reported-model sets for the same agent, including versions observed in
+failed runs. Missing/empty sets remain unknown and do not remove pre-response failures
+from attrition. Metadata consistency cannot authenticate a provider's implementation.
 
 ---
 
@@ -209,8 +271,10 @@ wording), so it cannot change legal actions, payoffs, visibility, institution, o
 +agent roster) and is provably **untouched by the skin** (`narrative_hash` is separate).
 
 - **For scripted agents**, metamorphic tests assert that swapping skins leaves
-  `mechanism_hash` and the **entire event chain** byte-identical. This proves the skin is a
-  pure presentation layer — a necessary invariant, not a robustness *finding*.
+  `mechanism_hash` and world behavior unchanged. Full event-chain equality additionally
+  holds run identity fixed and omits narrative-bearing start metadata; ordinary study
+  runs can record different narrative hashes. This checks presentation separation, not
+  an empirical LLM robustness finding.
 - **For LLM agents**, the skin is the surface the model actually reads, so behaviour *may*
   change with wording. This is the real robustness axis: **a mechanism effect must survive
   re-skinning across ≥2–3 skins** to be reported as a mechanism effect rather than a
@@ -234,9 +298,12 @@ separated section and **never described as confirmed**. This blocks HARKing and 
 
 ## 9. Effect sizes and uncertainty intervals over point p-values
 
-The primary readout of any contrast is an **estimated effect with a 95% uncertainty
-interval** (bootstrap-over-episodes preferred; see SAP §4.4), not a bare p-value. p-values
-are secondary and always reported alongside the effect and its interval. The legacy
+For a sampled stochastic comparison, the primary readout is an **estimated effect with
+an uncertainty interval** (the draft SAP uses 95% bootstrap-over-episode intervals; §4.4),
+with the design and assumptions stated. p-values are secondary. A finite deterministic
+enumeration instead reports exact differences for its declared cells; it does not invent
+sampling uncertainty. If the design or observed data cannot support an interval, report
+that limitation explicitly. The legacy
 "effect = sign of a mean difference" (a boolean that flips on any nonzero difference of any
 magnitude, with no interval) is explicitly disallowed.
 
@@ -292,12 +359,22 @@ Failure taxonomy, mapped to the engine's typed events:
 ## 14. Cost ceilings and abort conditions
 
 Each study declares a **maximum spend and maximum episode count** (preregistration field 14).
-Per-episode token/cost is logged in the manifest when measured. If the ceiling binds before
-the confirmatory N is reached, the response is to **down-scope the hypotheses** (raise the
-minimum detectable effect, drop a cell), never to silently truncate — silent truncation
-biases results by *when you stopped*. Abort conditions (e.g. per-cell failure rate above a
-threshold, a provider deprecation mid-study) are predeclared and, when triggered, logged in
-the deviations record.
+Per-episode tokens and any independently measured costs belong in the manifest. The current
+transport records token coverage but cannot infer dollars, cancel remote generation or
+enforce a total study spend from a completion-token cap. A live pilot needs an operational
+budget/stopping procedure in addition to the request settings.
+
+If a ceiling or abort threshold binds before the confirmatory N is reached, follow the
+**predeclared stopping or adaptation rule and its analysis**, if one exists. Preserve the
+completed and failed episodes, record the unattempted allocation by cell, and log the
+stopping reason and any departure from the declared plan. Report incomplete collection and
+the resulting power or comparability limitations. Without a predeclared adaptation, the
+original hypotheses, cells and target N remain the reference; do not revise them after
+seeing results to make the shortened run appear confirmatory. Any revision outside the
+predeclared adaptation belongs to a separately declared follow-up, including a changed
+sample size, hypothesis or minimum effect; it cannot retroactively confirm the original
+study. Other abort conditions (e.g. a provider deprecation mid-study) likewise remain
+predeclared and recorded when triggered.
 
 ## 15. Model-comparison vs absolute-trustworthiness
 
@@ -332,11 +409,12 @@ preregistered contrast is a first-class result of the study.
 | Episode as unit | `runner.run_episode` (one sealed ledger); `metrics/cooperation.py` collapses to one scalar/episode |
 | CRN / paired seeds | Explicit `paired-policy-v2`; `engine/seeds.study_seed_roots`; shared `(scenario_block, replicate)` policy root; legacy/default streams remain independent (ADR-0008) |
 | No global RNG | `engine/seeds.py` (every stream derived from an explicit path) |
-| Provenance / drift log | `experiments/manifests.RunManifest`, written by `run_study` |
+| Provenance / drift log | `RunManifest`, provider attempt accounting and within-block configuration/reported-model checks |
+| Offline verification / explicit provider execution | configuration-only validation; run/branch opt-in and credential preflight; recorded-action replay |
+| Finite responsive controls | `experiments/responsive-commons/`: declared full grid, separate C1/C2 diagnostics and fixed-action C3 replays |
+| Local graph semantics | `nipd_graph`, canonical adjacency, local observation tests and explicit payoff/vote denominators |
 | Freeze before confirm | `study.freeze_study` → `study.lock.json`; `run_study` rejects post-freeze drift |
 | Skin is presentation-only | `scenario.NarrativeSkin` (no rule-bearing fields); `mechanism_hash` excludes it |
 | Programmatic scoring only | `metrics/*` over sealed ledgers; `runner` never imports metrics |
 | No silent repair | `runner` `ActionRejected` + typed fallback; `LLMPolicy` abstain-on-invalid (ADR-0007) |
-| Costs never fabricated | manifest token/cost fields `None` when unmeasured |
-</content>
-</invoke>
+| Costs never fabricated | unknown totals remain `None`; measured partial sums labeled; child usage excludes the parent prefix |

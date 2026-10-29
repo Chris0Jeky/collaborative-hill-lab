@@ -19,12 +19,13 @@ criteria; [HANDOFF.md](HANDOFF.md) records evidence and remaining decisions.
 - [x] Finite-strategy incentive atlas with exact constraints and boundary controls
 - [x] Input/path safety and shared built-in policy parameter validation
 - [x] Persistent exact-commit CI, full regression suite and A–K acceptance checks
-- [x] Architecture records 0001–0009, research documentation and current handoff
+- [x] Architecture records 0001–0012, research documentation and current handoff
 
 ## M1 — First live pilot
 
-- [ ] Observation-responsive scripted institutional baselines and controls (#76)
-- [ ] Configurable provider transport, offline contract tests and real usage capture (#77)
+- [x] Observation-responsive scripted institutional baselines and controls (#76 / #81)
+- [x] Configurable provider transport, mocked contract tests and measured-usage accounting (#77 / #82)
+- [ ] Offline request planning and cumulative provider attempt budgets (#86)
 - [ ] Human-approved pilot specification: institutions/weights, outcomes, model,
       sampling settings, skins, cost ceiling and stopping rules
 - [ ] Declared pilot executed with measured variance, invalid-output rate and cost
@@ -42,7 +43,11 @@ criteria; [HANDOFF.md](HANDOFF.md) records evidence and remaining decisions.
 - [x] N=3/N=5 complete-graph threshold and composition sensitivity (Study 002)
 - [x] pTFT include/exclude-self sensitivity with independent episode uncertainty
 - [x] Exact finite-population pTFT means, variances and absorption benchmark
-- [ ] Versioned sparse graph semantics and complete-graph equivalence controls (#78)
+- [x] Versioned sparse graph semantics and complete-graph equivalence controls (#78 / #83)
+- [x] Executed complete/ring/star controls with 18 exact predicted trajectories
+- [x] Responsive EC grid with harmful/null controls and separate C1/C2/C3 diagnostics
+- [ ] Observation-grounded quality safeguards for responsive EC (#84)
+- [ ] Exact labeled-state sparse-graph pTFT benchmark (#85)
 - [ ] Deception-capable verification, with unchanged v0 controls
 - [ ] Reputation/sanction institutions with responsive policies and integrity checks
 - [ ] Concordia cognition adapter behind the observation firewall

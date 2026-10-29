@@ -38,3 +38,20 @@ provides the existing exclusive-writer and cleanup behavior. These checks
 describe the current filesystem layout: they are not a transaction against
 another process swapping ancestor directories concurrently. No permission or
 power-loss guarantee is inferred from a successful preflight.
+
+## Optional provider execution
+
+`llm_openai_compatible` parameters are validated without resolving credentials or
+sending requests. Serialized policy values remain strict integers, strings and
+booleans; rational sampling values use strings. The endpoint, model and positive
+completion-token cap are explicit, and credentials are referenced by environment
+variable name rather than stored in the study.
+
+`run_study(..., allow_provider_requests=True)` or the CLI's
+`--allow-provider-requests` enables the configured execution path. Without it,
+selected network policies are refused before construction or output reservation.
+With it, all selected provider configurations and credentials are preflighted
+before the first episode can make a request. An unselected condition does not
+require its credentials. Validation and recorded-action replay remain offline;
+scripted branch replacements can also remain offline. See the
+[provider contract](PROVIDER_USAGE.md) for failure, retry and usage semantics.
