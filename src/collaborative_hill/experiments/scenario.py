@@ -34,6 +34,7 @@ from collaborative_hill.domain.world.evidence_commons import (
     ECWorldSpec,
     EvidenceCommonsMechanism,
 )
+from collaborative_hill.domain.world.graph_nipd import GraphNIPDMechanism, UndirectedGraph
 from collaborative_hill.domain.world.nipd import NIPDMechanism, NIPDParams
 from collaborative_hill.engine.hashing import content_hash
 
@@ -47,6 +48,18 @@ class NIPDWorld(BaseModel):
     mode: Literal["pairwise", "neighbourhood"]
     params: NIPDParams = NIPDParams()
     rounds: int = 50
+
+
+class GraphNIPDWorld(BaseModel):
+    """New graph contract; complete-population NIPDWorld remains unchanged."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    kind: Literal["nipd_graph"] = "nipd_graph"
+    mode: Literal["pairwise", "neighbourhood"]
+    params: NIPDParams = NIPDParams()
+    rounds: int = Field(default=50, strict=True, gt=0)
+    payoff_aggregation: Literal["sum", "mean"]
 
 
 class ECWorld(BaseModel):
@@ -69,7 +82,7 @@ class InteractionPlane(BaseModel):
 
     structure: Literal["pairwise", "neighbourhood", "commons"]
     scheduling: Literal["simultaneous"] = "simultaneous"
-    graph: Literal["complete"] = "complete"  # extension point: named topologies
+    graph: Literal["complete"] | UndirectedGraph = "complete"
     communication: Literal["none", "messages"] = "none"
 
     @model_validator(mode="after")
@@ -140,7 +153,7 @@ class ScenarioSpec(BaseModel):
     schema_version: int = 1
     scenario_id: str
     description: str = ""
-    world: NIPDWorld | ECWorld = Field(discriminator="kind")
+    world: NIPDWorld | GraphNIPDWorld | ECWorld = Field(discriminator="kind")
     information: InformationPlane = InformationPlane()
     interaction: InteractionPlane
     institution: InstitutionConfig = InstitutionConfig()
@@ -151,7 +164,14 @@ class ScenarioSpec(BaseModel):
         ids = [a.agent_id for a in self.cognition.agents]
         if len(set(ids)) != len(ids):
             raise ValueError("duplicate agent ids in cognition plane")
-        if isinstance(self.world, NIPDWorld):
+        if isinstance(self.world, GraphNIPDWorld):
+            if not isinstance(self.interaction.graph, UndirectedGraph):
+                raise ValueError("nipd_graph requires explicit undirected graph adjacency")
+            if set(ids) != set(self.interaction.graph.adjacency):
+                raise ValueError("graph adjacency must cover exactly the cognition roster")
+        elif self.interaction.graph != "complete":
+            raise ValueError("legacy worlds require interaction.graph='complete'")
+        if isinstance(self.world, NIPDWorld | GraphNIPDWorld):
             if self.interaction.structure != self.world.mode:
                 raise ValueError(
                     f"interaction.structure {self.interaction.structure} must match "
@@ -190,10 +210,16 @@ def mechanism_view(spec: ScenarioSpec) -> dict[str, Any]:
     ``engine_version`` binds the hash to the resolution SEMANTICS, so a
     behaviour-changing engine fix can never silently keep old hashes."""
     from collaborative_hill.domain.world.evidence_commons import EC_ENGINE_VERSION
+    from collaborative_hill.domain.world.graph_nipd import GRAPH_NIPD_ENGINE_VERSION
     from collaborative_hill.domain.world.nipd import NIPD_ENGINE_VERSION
 
-    engine_version = (NIPD_ENGINE_VERSION if isinstance(spec.world, NIPDWorld)
-                      else EC_ENGINE_VERSION)
+    ids = [a.agent_id for a in spec.cognition.agents]
+    if isinstance(spec.world, GraphNIPDWorld):
+        engine_version = GRAPH_NIPD_ENGINE_VERSION
+        ids = sorted(ids)
+    else:
+        engine_version = (NIPD_ENGINE_VERSION if isinstance(spec.world, NIPDWorld)
+                          else EC_ENGINE_VERSION)
     return {
         "domain": "chl.mechanism.v1",
         "engine_version": engine_version,
@@ -201,7 +227,7 @@ def mechanism_view(spec: ScenarioSpec) -> dict[str, Any]:
         "information": spec.information.model_dump(mode="json"),
         "interaction": spec.interaction.model_dump(mode="json"),
         "institution": spec.institution.model_dump(mode="json"),
-        "agent_ids": [a.agent_id for a in spec.cognition.agents],
+        "agent_ids": ids,
     }
 
 
@@ -254,6 +280,15 @@ def _validate_skin_references(spec: ScenarioSpec, skin: NarrativeSkin) -> None:
 
 def build_mechanism(spec: ScenarioSpec) -> Any:
     agent_ids = [a.agent_id for a in spec.cognition.agents]
+    if isinstance(spec.world, GraphNIPDWorld):
+        graph = spec.interaction.graph
+        if not isinstance(graph, UndirectedGraph):
+            raise ValueError("nipd_graph requires explicit undirected graph adjacency")
+        return GraphNIPDMechanism(
+            agent_ids=agent_ids, mode=spec.world.mode, params=spec.world.params,
+            rounds=spec.world.rounds, adjacency=graph.adjacency,
+            payoff_aggregation=spec.world.payoff_aggregation,
+        )
     if isinstance(spec.world, NIPDWorld):
         return NIPDMechanism(
             agent_ids=agent_ids,
