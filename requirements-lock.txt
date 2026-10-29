@@ -29,7 +29,7 @@ pytest==9.1.1
 python-dateutil==2.9.0.post0
 rich==15.0.0
 ruff==0.15.21
-setuptools==84.0.0
+setuptools==84.1.0
 shellingham==1.5.4
 six==1.17.0
 sortedcontainers==2.4.0
