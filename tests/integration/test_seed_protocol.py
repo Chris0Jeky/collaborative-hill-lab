@@ -35,8 +35,11 @@ class DrawAuditPolicy:
         return ActionProposal(action=action, justification=str(rng.getrandbits(64)))
 
 
-def _audit_policies(resolved):
-    return {agent.agent_id: DrawAuditPolicy() for agent in resolved.spec.cognition.agents}
+def _audit_policies(resolved, *, allow_provider_requests=False, overrides=None):
+    assert allow_provider_requests is False
+    policies = {agent.agent_id: DrawAuditPolicy() for agent in resolved.spec.cognition.agents}
+    policies.update(overrides or {})
+    return policies
 
 
 def _copy_paired_study(tmp_path):

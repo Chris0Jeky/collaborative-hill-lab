@@ -38,7 +38,8 @@ def _patch_parent(monkeypatch, resolved):
 
 def _patch_branch(monkeypatch, captured):
     def fake_branch_run(*, parent_dir, fork_seq, child_dir, child_run_id,
-                        policy_overrides):
+                        policy_overrides, allow_provider_requests=False):
+        assert allow_provider_requests is False
         captured.update(policy_overrides)
         result = SimpleNamespace(
             run_id=child_run_id, status="completed", event_count=0

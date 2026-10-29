@@ -775,3 +775,43 @@ replaced by the correct worktree invocation. A local mypy SQLite cache was then
 found malformed; the remaining standalone checks passed with a fresh cache.
 These were local execution-environment problems, not skipped checks. The final
 published head must pass the complete Actions gate with the full dependency lock.
+
+# 2026-10-29 — configurable provider transport and complete workflow integration (#77)
+
+Added an explicitly configured OpenAI-compatible, non-streaming transport using
+only the standard library. Endpoint, requested model and token cap are required;
+sampling remains exact in configuration, with wire representations recorded.
+Credentials resolve only from the selected environment variable or direct Python
+argument and never enter artifacts. Default requests do not retry ambiguous
+failures; optional bounded HTTP 429 and action-format retries are separate.
+Actual response model IDs, per-request token coverage and measured partial sums
+are recorded. Incomplete totals and all unmeasured costs remain null.
+
+Study/CLI execution requires an explicit provider-request flag, checks all
+selected credentials before any request or output, and retains the existing
+exclusive run reservation before policy construction. Validation and recorded
+replay remain offline. Scripted replacements can branch a provider-parent run
+without credentials. Real provider overrides still need execution opt-in.
+Continuation manifests and transcripts include only new calls, clear inherited
+provider/pricing data, and record the continuation's code/environment/timestamps.
+The latter also fixes the old copying of parent execution provenance.
+
+Independent review exposed two defects before publication: mutable execution
+settings could disagree with captured provenance, and huge/deep action JSON
+could escape the retry/abstain path. Read-only transport settings, drift checks
+and bounded JSON-error handling fix both, with failure replay regressions.
+The analysis layer also rejects known transport or reported-model confounds
+within a declared block, retaining unknown pre-response failures as attrition
+and preserving legacy scripted golden bytes.
+
+The combined EC/provider tree passed all 1,037 tests, Ruff, strict package mypy
+(48 files), four unchanged shipped StudySpec hashes, 11/11 acceptance, atlas,
+Study 002 and the 480-episode responsive regeneration check. This local gate used
+the isolated Python 3.12 environment with all 38 committed dependency pins,
+including setuptools 84.1.0, and explicit source PYTHONPATH. Existing CLI/seed/
+reservation/reporting test doubles were adapted to the new keyword interface;
+the actual reservation and seed contracts were retained. Independent reviewers
+also passed 14 workflow cases, 15 analysis provenance/golden cases and zero-
+request credential/selection probes. Exact published-head CI remains the merge
+gate. No live endpoint, billing, provider determinism or paid pilot was tested;
+all provider responses and failures were mocked.

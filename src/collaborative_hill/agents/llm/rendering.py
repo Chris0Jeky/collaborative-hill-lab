@@ -40,7 +40,7 @@ _ACTION_SCHEMA_EC = (
 
 
 def action_schema_for(observation: dict[str, Any]) -> str:
-    if observation.get("mechanism") == "nipd":
+    if observation.get("mechanism") in ("nipd", "nipd_graph"):
         if observation.get("mode") == "pairwise":
             return _ACTION_SCHEMA_NIPD_PAIRWISE
         return _ACTION_SCHEMA_NIPD_NEIGHBOURHOOD

@@ -44,8 +44,11 @@ def _run(tmp_path, monkeypatch, *, agent="a2", fail_at=1, malformed=None,
     path.write_text(json.dumps(data))
     policies = {}
 
-    def build(resolved):
+    def build(resolved, *, allow_provider_requests=False, overrides=None):
         for a in resolved.spec.cognition.agents:
+            if overrides and a.agent_id in overrides:
+                policies[a.agent_id] = overrides[a.agent_id]
+                continue
             policies[a.agent_id] = LLMPolicy(
                 a.agent_id,
                 FakeProvider(lambda p, i, a=a: malformed if a.agent_id == "a1"
@@ -125,9 +128,10 @@ def test_provider_failure_uses_proposal_boundary_for_prefix_ids(
             raise ProviderError(message)
         return GOOD
 
-    def build(resolved):
+    def build(resolved, *, allow_provider_requests=False, overrides=None):
         return {
-            a.agent_id: LLMPolicy(
+            a.agent_id: overrides[a.agent_id] if overrides and a.agent_id in overrides
+            else LLMPolicy(
                 a.agent_id,
                 FakeProvider(reply if a.agent_id == agent else [GOOD] * 4), resolved.skin,
             )
@@ -145,7 +149,12 @@ def test_provider_failure_uses_proposal_boundary_for_prefix_ids(
     _assert_replay(run_dir, tmp_path, monkeypatch)
 
 
-@pytest.mark.parametrize("malformed", ["garbage", '{"action":{"type":"teleport"}}'])
+@pytest.mark.parametrize("malformed", [
+    "garbage", '{"action":{"type":"teleport"}}',
+    pytest.param('{"action":{"type":"abstain"},"extra":' + "1" * 5000 + "}",
+                 id="large-integer"),
+    pytest.param("[" * 10000 + "0" + "]" * 10000, id="deep-json"),
+])
 @pytest.mark.parametrize("fail_at", [None, 2])
 def test_retry_exhaustion_replays_with_or_without_provider_failure(
     tmp_path, monkeypatch, malformed, fail_at,
