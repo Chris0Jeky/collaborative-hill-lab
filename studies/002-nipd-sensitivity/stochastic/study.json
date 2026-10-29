@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "study_id": "002-nipd-sensitivity-stochastic",
+  "title": "N-IPD sensitivity: stochastic component (UNFROZEN DRAFT)",
+  "seed": 20261029,
+  "seed_protocol": "legacy-independent-v1",
+  "replicates": 32,
+  "checkpoint_every": 10,
+  "invalid_action_policy": "fail",
+  "conditions": [
+    {
+      "condition_id": "nb-n3-m2-ptft-include",
+      "scenario": "../scenarios/nb-n3-m2-ptft-include.json",
+      "skin": "../skins/plain.json",
+      "scenario_block": null
+    },
+    {
+      "condition_id": "nb-n3-m2-ptft-exclude",
+      "scenario": "../scenarios/nb-n3-m2-ptft-exclude.json",
+      "skin": "../skins/plain.json",
+      "scenario_block": null
+    },
+    {
+      "condition_id": "nb-n5-m4-ptft-include",
+      "scenario": "../scenarios/nb-n5-m4-ptft-include.json",
+      "skin": "../skins/plain.json",
+      "scenario_block": null
+    },
+    {
+      "condition_id": "nb-n5-m4-ptft-exclude",
+      "scenario": "../scenarios/nb-n5-m4-ptft-exclude.json",
+      "skin": "../skins/plain.json",
+      "scenario_block": null
+    },
+    {
+      "condition_id": "nb-n5-m3-ptft-include",
+      "scenario": "../scenarios/nb-n5-m3-ptft-include.json",
+      "skin": "../skins/plain.json",
+      "scenario_block": null
+    },
+    {
+      "condition_id": "nb-n5-m3-ptft-exclude",
+      "scenario": "../scenarios/nb-n5-m3-ptft-exclude.json",
+      "skin": "../skins/plain.json",
+      "scenario_block": null
+    }
+  ]
+}

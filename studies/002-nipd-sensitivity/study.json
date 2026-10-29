@@ -1,0 +1,186 @@
+{
+  "schema_version": 1,
+  "study_id": "002-nipd-sensitivity-deterministic",
+  "title": "N-IPD sensitivity: deterministic component (UNFROZEN DRAFT)",
+  "seed": 20261029,
+  "seed_protocol": "legacy-independent-v1",
+  "replicates": 1,
+  "checkpoint_every": 10,
+  "invalid_action_policy": "fail",
+  "conditions": [
+    {
+      "condition_id": "nb-n3-m2-q0",
+      "scenario": "scenarios/nb-n3-m2-q0.json",
+      "skin": "skins/plain.json",
+      "scenario_block": null
+    },
+    {
+      "condition_id": "nb-n3-m2-q49-100",
+      "scenario": "scenarios/nb-n3-m2-q49-100.json",
+      "skin": "skins/plain.json",
+      "scenario_block": null
+    },
+    {
+      "condition_id": "nb-n3-m2-q1-2",
+      "scenario": "scenarios/nb-n3-m2-q1-2.json",
+      "skin": "skins/plain.json",
+      "scenario_block": null
+    },
+    {
+      "condition_id": "nb-n3-m2-q51-100",
+      "scenario": "scenarios/nb-n3-m2-q51-100.json",
+      "skin": "skins/plain.json",
+      "scenario_block": null
+    },
+    {
+      "condition_id": "nb-n3-m2-q3-4",
+      "scenario": "scenarios/nb-n3-m2-q3-4.json",
+      "skin": "skins/plain.json",
+      "scenario_block": null
+    },
+    {
+      "condition_id": "nb-n3-m2-q76-100",
+      "scenario": "scenarios/nb-n3-m2-q76-100.json",
+      "skin": "skins/plain.json",
+      "scenario_block": null
+    },
+    {
+      "condition_id": "nb-n3-m2-q1",
+      "scenario": "scenarios/nb-n3-m2-q1.json",
+      "skin": "skins/plain.json",
+      "scenario_block": null
+    },
+    {
+      "condition_id": "nb-n5-m4-q0",
+      "scenario": "scenarios/nb-n5-m4-q0.json",
+      "skin": "skins/plain.json",
+      "scenario_block": null
+    },
+    {
+      "condition_id": "nb-n5-m4-q49-100",
+      "scenario": "scenarios/nb-n5-m4-q49-100.json",
+      "skin": "skins/plain.json",
+      "scenario_block": null
+    },
+    {
+      "condition_id": "nb-n5-m4-q1-2",
+      "scenario": "scenarios/nb-n5-m4-q1-2.json",
+      "skin": "skins/plain.json",
+      "scenario_block": null
+    },
+    {
+      "condition_id": "nb-n5-m4-q51-100",
+      "scenario": "scenarios/nb-n5-m4-q51-100.json",
+      "skin": "skins/plain.json",
+      "scenario_block": null
+    },
+    {
+      "condition_id": "nb-n5-m4-q3-4",
+      "scenario": "scenarios/nb-n5-m4-q3-4.json",
+      "skin": "skins/plain.json",
+      "scenario_block": null
+    },
+    {
+      "condition_id": "nb-n5-m4-q76-100",
+      "scenario": "scenarios/nb-n5-m4-q76-100.json",
+      "skin": "skins/plain.json",
+      "scenario_block": null
+    },
+    {
+      "condition_id": "nb-n5-m4-q1",
+      "scenario": "scenarios/nb-n5-m4-q1.json",
+      "skin": "skins/plain.json",
+      "scenario_block": null
+    },
+    {
+      "condition_id": "nb-n5-m3-q49-100",
+      "scenario": "scenarios/nb-n5-m3-q49-100.json",
+      "skin": "skins/plain.json",
+      "scenario_block": null
+    },
+    {
+      "condition_id": "nb-n5-m3-q1-2",
+      "scenario": "scenarios/nb-n5-m3-q1-2.json",
+      "skin": "skins/plain.json",
+      "scenario_block": null
+    },
+    {
+      "condition_id": "nb-n5-m3-q51-100",
+      "scenario": "scenarios/nb-n5-m3-q51-100.json",
+      "skin": "skins/plain.json",
+      "scenario_block": null
+    },
+    {
+      "condition_id": "nb-n3-all-q1",
+      "scenario": "scenarios/nb-n3-all-q1.json",
+      "skin": "skins/plain.json",
+      "scenario_block": null
+    },
+    {
+      "condition_id": "nb-n3-alld",
+      "scenario": "scenarios/nb-n3-alld.json",
+      "skin": "skins/plain.json",
+      "scenario_block": null
+    },
+    {
+      "condition_id": "pw-n3-m2-tft",
+      "scenario": "scenarios/pw-n3-m2-tft.json",
+      "skin": "skins/plain.json",
+      "scenario_block": null
+    },
+    {
+      "condition_id": "pw-n3-m2-linked",
+      "scenario": "scenarios/pw-n3-m2-linked.json",
+      "skin": "skins/plain.json",
+      "scenario_block": null
+    },
+    {
+      "condition_id": "nb-n3-all-ptft-include",
+      "scenario": "scenarios/nb-n3-all-ptft-include.json",
+      "skin": "skins/plain.json",
+      "scenario_block": null
+    },
+    {
+      "condition_id": "nb-n3-all-ptft-exclude",
+      "scenario": "scenarios/nb-n3-all-ptft-exclude.json",
+      "skin": "skins/plain.json",
+      "scenario_block": null
+    },
+    {
+      "condition_id": "nb-n5-all-q1",
+      "scenario": "scenarios/nb-n5-all-q1.json",
+      "skin": "skins/plain.json",
+      "scenario_block": null
+    },
+    {
+      "condition_id": "nb-n5-alld",
+      "scenario": "scenarios/nb-n5-alld.json",
+      "skin": "skins/plain.json",
+      "scenario_block": null
+    },
+    {
+      "condition_id": "pw-n5-m4-tft",
+      "scenario": "scenarios/pw-n5-m4-tft.json",
+      "skin": "skins/plain.json",
+      "scenario_block": null
+    },
+    {
+      "condition_id": "pw-n5-m4-linked",
+      "scenario": "scenarios/pw-n5-m4-linked.json",
+      "skin": "skins/plain.json",
+      "scenario_block": null
+    },
+    {
+      "condition_id": "nb-n5-all-ptft-include",
+      "scenario": "scenarios/nb-n5-all-ptft-include.json",
+      "skin": "skins/plain.json",
+      "scenario_block": null
+    },
+    {
+      "condition_id": "nb-n5-all-ptft-exclude",
+      "scenario": "scenarios/nb-n5-all-ptft-exclude.json",
+      "skin": "skins/plain.json",
+      "scenario_block": null
+    }
+  ]
+}
