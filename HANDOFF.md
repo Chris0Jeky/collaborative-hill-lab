@@ -1,268 +1,158 @@
 # HANDOFF — current checkpoint, 2026-10-29
 
-## Exact incentive-region experiment — bounded offline checkpoint
+## Research engine advancement
 
-Changed: `experiments/incentive-atlas/atlas.py` and its methods README provide an
-unfrozen exact atlas of `{contributor, freerider}^3` under the four institutions.
-The plane varies correct-slot benefit `b >= 0` and signed-credit multiplier `r >= 0`;
-all other weights, budgets and evidence stay fixed. C1 has a uniform lone-contributor
-witness; strict C2 requires `b+7r>39` for private evidence and `b+7r>45/2` for shared
-evidence. All-institution admissibility is their intersection. Every coefficient,
-deviation, failed-condition witness and selected boundary/interior check is retained.
-Four admissible designs are compared without selecting a production default.
+The owner authorized broad repository work, parallel implementation and verified
+merges in this session. The earlier bounded-work/feature-park checkpoint is
+preserved byte-for-byte in
+[the historical handoff](docs/history/HANDOFF-before-research-engine-2026-10-29.md).
+Its no-CI statements and narrower session scope are historical. Repository tier,
+hook trust, licensing and the ten human decisions below are unchanged.
 
-Verified on Python 3.14.3 / Windows at implementation commit `51ba8c4`, based on
-certificate repair merge `4cfd407`: 27 new oracle cases pass; `make check test validate`
-passes (Ruff, strict mypy in 45 source files, 320 unit/property and 628 full-suite
-passes, four existing filesystem skips). The experiment's separate Ruff/strict-mypy
-checks pass. Acceptance is 11/11, and a standard report reads an atlas baseline run.
-Two fresh generations each run 224 small engine episodes and six replays; their
-atlas JSON, report and all 224 event ledgers match byte-for-byte. Atlas SHA-256:
-`925596962b752f49a9f46cefe83bfda3332f7e40e98aba74c97b3a05e918310b`.
-Both original study hashes, JSON bytes and frozen=false states remain unchanged.
-One independent mathematical/methodological review found no blocking findings.
-The PR records final publication state; commands and evidence are in `BUILD_LOG.md`.
+### Implementation references
 
-NOT verified: the four skipped filesystem cases, other platforms, humans, real/paid
-providers, arbitrary strategies, behavioral improvement, statistical power or any
-published scientific finding. No persistent CI is configured. Rational probes use
-exact integer-unit rescaling, not a change to production `ECParams`.
-Residual risk: C1 is weak and existential; credit is created rather than budget-funded;
-C2 is neither a Pareto nor equilibrium guarantee. The scripts ignore incentives and
-attribution, so their invariant behavior supplies no evidence of improved cooperation.
+| PR | Result | Exact-head CI |
+|---|---|---|
+| [#69](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/69) | Persistent CI with pinned actions, read-only token, exact checkout and clean-workspace checks | [40802143735](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/40802143735) |
+| [#70](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/70) | Reject confounded factorial populations and conflicting retries; retain valid golden results | [40802529028](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/40802529028) |
+| [#73](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/73) | Study 002 design, execution, sealed-ledger readout and source provenance | [40803286824](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/40803286824) |
+| [#74](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/74) | Shared built-in policy parameter validation without rewriting scenario values | [40803342268](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/40803342268) |
+| [#75](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/75) | Strict study counts/IDs and complete output preflight, including aliases and nested destinations | [40803377416](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/40803377416) |
+| [#79](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/79) | Exact post hoc pTFT benchmark, reproducible figure, experiment targets and extended CI | [40805239775](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/40805239775) |
 
-This completes only the owner-authorized bounded offline incentive experiment.
-The wider product park remains; no Study 002/pTFT work, freeze, release, deployment,
-participant data or paid run is included. The ten human-owned decisions below are
-unchanged, including final utility weights, hypotheses, models, budget and sample size.
-`human_todo=null`; that decision list remains the human-action home.
+The six implementation PRs above are merged; their pages retain the exact review
+and check records. The combined first five
+merges also passed [main-commit CI](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/40803992791)
+at `bfd49d5c3e1e00bcfba2497b42ba05e04373bf9b`. Use checks on the exact commit
+being evaluated; a previous green run is not evidence for a changed head.
 
-## Social-dilemma certificate correction
+### Scientific result
 
-Changed: the certificate now requires C1 **and** C2 in every institution. Its verdict,
-failed-condition explanation, console summary and current documentation agree. The
-unchanged Study 001 parameters yield C1 true, C2 false in all four institutions, and
-zero C3 violations: **social dilemma NOT CERTIFIED; intervention integrity CERTIFIED**.
-Historical reports remain historical; the earlier false certification is superseded here.
+Study 002 is an **executed, unfrozen exploratory experiment**, with 29 deterministic
+controls and six stochastic pTFT cells × 32 independently seeded episodes, each
+50 rounds long. All 29 deterministic full trajectories and payoff vectors match
+local pre-execution predictions. The quorum boundary is inclusive at
+`(m−1)/(N−1)`: 1/2 for N=3,m=2; 3/4 for N=5,m=4; and 1/2 for N=5,m=3.
+The two-defector control shows why population composition cannot be ignored.
+Targeted and linked pairwise TFT differ on the same interaction structure.
 
-Verified on Python 3.12.10 / Windows from base `5a66e57de42d750171a68597470beabf0a7a3369`:
-the original 32-episode generator reproduced the contradictory report without a diff;
-the new report-level regression failed before the fix. Seven focused tests now pass,
-including C1-true/C2-false, a positive control, equal totals and a single failing
-institution. `make check test validate` passes: Ruff, strict mypy (45 files),
-293 unit/property tests and 601 full-suite tests, with four pre-existing filesystem
-skips. Acceptance passes 11/11. Regeneration is byte-identical; all numeric sections,
-scenario identities, study hashes and freeze states are unchanged. See `BUILD_LOG.md`.
+All 192 sampled stochastic episodes reached all-D by the last observed round;
+all final ten-round windows were zero. The analytical expectations remain
+positive. The original N=3,m=2 include-self analytical mean falls outside its
+reported marginal bootstrap interval, and that discrepancy is retained in
+[RESULTS.md](studies/002-nipd-sensitivity/RESULTS.md). No extra samples or retuned
+settings were used to erase it.
 
-Publication goes through a ready PR with an independent review and the post-push age
-gate; the PR records the final review and merge state. No publication state is inferred
-from these local checks.
+The [exact benchmark](studies/002-nipd-sensitivity/EXACT_PTFT_BENCHMARK.md) was added
+**after** those observations. It computes ideal rational-Bernoulli means, variances
+including cross-round covariance, and absorption probabilities. Absorption by
+`t=40` means the entire final ten-round window is zero; `t=49` means absorption by
+the last observed round. For N=5,m=4 include-self, the ideal probability that all
+32 final windows are zero is about 0.991639. A zero empirical variance therefore
+coexists with positive model variance. Model MCSEs and event probabilities are
+not normal confidence intervals or p-values. The SVG distinguishes observed
+means from model expectations and retains all 50 rounds.
 
-NOT verified: the four skipped filesystem cases, real providers, human behaviour,
-or a social dilemma beyond the enumerated scripted strategies. No persistent CI exists.
-Residual risk: placeholder utility weights still fail C2; this repair reports that
-failure and does not retune the study. Feature work remains parked under the owner's
-product-direction decision. No study was frozen and no real/paid provider was used.
-The human-action home is the ten unchanged decisions below (`human_todo=null`),
-including weights, hypotheses, publication readiness and any paid run.
+### Execution provenance and unchanged inputs
 
-Earlier checkpoints below retain their dated evidence and publication state.
+The original Study 002 episodes ran from clean local commit
+`d4b8de90fe8317a0522764ca53b86727db93179c`. The
+[published source snapshot](https://github.com/Chris0Jeky/collaborative-hill-lab/commit/16e7c45634eb2fdaa0d70e1933c7a966f3da6967)
+has its exact Git tree, `4fb241428f18e8e4013324be6905d31b986edfe4`.
+[SOURCE_PROVENANCE.json](studies/002-nipd-sensitivity/SOURCE_PROVENANCE.json)
+records 88 per-file SHA-256 commitments. Local pre-execution predictions are not
+claimed to be an externally timestamped preregistration. Later validation and
+reporting changes do not become the source of the original run retroactively.
 
-The previous handoff is preserved byte-for-byte in
-[the historical checkpoint](docs/history/HANDOFF-through-2026-10-21.md).
-Its dated counts, paths and publication states are historical, not current status.
-The operating rules remain in `CLAUDE.md` and `AGENTS.md`; the repository remains T1.
+Original ledgers are generated artifacts outside Git. The original 221-run record
+is also preserved in the session deliverable
+`Study002_Original_Sealed_Runs_2026-10-29.zip` (archive SHA-256
+`1a72382d9ca014b3856af4451c3c425b03fa3034a9a38674bf58627a49c3108d`).
+Its 1,768 original files have individual SHA-256 commitments; all 221 terminal
+hashes were matched to the retained readout before packaging. The checked-in readout retains
+terminal event commitments, episode outcomes and exact analytical/measured curves.
+The post hoc benchmark audits that summary's identities and arithmetic; it does
+not independently reverify absent raw ledgers. Its source RESULTS.json SHA-256 is
+`b0208013a4bbfe2b5cb59b8b4d767059a08c0c6093c6259d413d680bc5bc0080`.
 
-## Issue #60 — unambiguous provider-failure replay (local worktree)
+| StudySpec | Content hash | Frozen |
+|---|---|---|
+| Study 000 | `5dcde1a9b6c98c576ca71bc03ea65dcc96175b6d8803c4db89e6c56ac8a15e9f` | false |
+| Study 001 | `a3bffdfcf1715ebd65aa45b469f3e32c720d22633cfc80769b11020bcbd37bbe` | false |
+| Study 002 deterministic | `175140649a108a4f5ea33a4c7a1decf74cdc777a9d47057839a54b7e24ed22eb` | false |
+| Study 002 stochastic | `728392210a4aa437ba2a1f6e4d8be73f99b96b896e596e81a8969c121623754f` | false |
 
-Changed: `agents/replay.py` identifies the failed provider at the runner's first
-unproposed agent in sorted order for the terminal round, then checks that agent's
-error prefix. Agent IDs containing `: ProviderError: ` no longer cause valid
-ledgers to be rejected. Existing ledger bytes and the provider-error format are
-unchanged. Four regression cases cover identical seal text from two different
-failing agents, both immediately and after two completed rounds.
+Studies 000/001 retain their original input bytes and hashes. Study 001's current
+placeholder weights still give C1=true, C2=false in every institution and no C3
+violation: **social dilemma not certified; tested same-behavior accountability
+integrity certified**. The incentive atlas gives finite-strategy admissible
+regions, without choosing weights or demonstrating a behavioral response.
 
-Verified on Python 3.12.10 / Windows, against base
-`8b7cdc1739c036be42206304f8013bf7ba7ea526` plus this uncommitted diff: the corrected
-regression fails twice before the production fix (two controls pass), then all
-four cases pass. `make check test validate` passes: Ruff clean, strict mypy clean
-in 45 source files, 286 unit/property tests and 594 full-suite tests pass, with
-four pre-existing skips. Acceptance is **11/11**; both study hashes are unchanged.
-Exact commands and initial fixture correction are recorded in `BUILD_LOG.md`.
-
-NOT verified: real providers, the four skipped filesystem cases, hosted CI or
-independent review. Residual risk: decoding relies on the runner's sorted proposal
-order; full regenerated-chain comparison continues to reject inconsistent histories.
-The human-action home remains the unchanged human-owned decision list below
-(`human_todo=null`). No Git writes or publication occurred under the task's rule.
-Intended commit: `fix(replay): decode provider failures at the proposal boundary`.
-Earlier checkpoints below retain their historical evidence and publication status.
-
-## PR #58 fix round — 2026-10-22
-
-Both review findings were confirmed at `e6bf84b171d2b26daa76c1db59a0682c1505a233`.
-Analysis now reports `invalid_llm_output_abstentions` per episode and per cell,
-separately from mechanism `invalid_action_count` and `fallback_abstentions`.
-Its `invalid_action_rate` includes parser-failure abstentions plus mechanism
-rejections once each; ordinary abstentions are excluded. The mean per-cell rate
-uses that same definition for draft SAP invalid-output/sensitivity reporting.
-Sensitivity exclusions still require a human-declared threshold. Existing
-versioned operational metrics are unchanged. The golden JSON changes only by
-adding this field, zero-valued in its 12 episodes and four cell summaries.
-
-Two integration cases cover all-malformed replies and mixed parser failures,
-ordinary abstentions and mechanism rejections. Both failed on the missing field
-before the fix. An independent RNG oracle pins three indices per bootstrap
-replicate and hand-computed means. The in-memory doubled-observation/2n mutation
-passed all 21 original statistics tests but fails the new oracle. Production
-bootstrap code needed no change. Exact verification commands and results are
-in the latest `BUILD_LOG.md` entry.
-
-Verification: Ruff clean; strict mypy clean in 45 source files; focused suite
-41 passed; full suite **560 passed, 4 skipped** (112.04s); acceptance **11/11**.
-Both studies validate with their original content hashes. Real-provider data,
-provider randomness coupling and confirmatory/SAP freeze decisions remain unverified.
-
-Changes remain uncommitted: the task prohibits Git writes and network access.
-No study inputs, hashes, freeze state or human-owned decisions were changed.
-The human-action home remains the decision list below (`human_todo=null`).
-Intended commit:
-`fix(analysis): count invalid-LLM-output abstentions and pin the bootstrap draw size`.
-
-## E2 analysis skeleton — local worktree checkpoint
-
-`chl analyze artifacts/<study-prefix> [--out analysis.json]` now reads verified
-sealed runs into one row per completed episode, recording failed/unsealed/invalid
-artifacts as exclusions. Analysis never re-executes episodes or trusts metric
-caches. The four original factorial conditions are explicit; the misinformer
-condition and counterfactual branches are not independent factorial data.
-
-The draft SAP's E1/E2/E3 use equal-cell contrasts for legacy independent runs;
-explicit complete paired-policy-v2 blocks use within-block differences and block
-bootstrap, with a supplementary Student-t interval. Unverified policy/provider
-coupling suppresses paired inference. All output remains `sap_status: draft`.
-Bootstrap uses `rng_for` with recorded seed 20261022 and 2000 draws by default,
-type-7 percentile intervals, centered two-sided bootstrap p-values and Holm over
-the three primary tests. Secondary outcomes are descriptive. Zero-variance cells
-have `n_effective=1` and no intervals/p-values. Missing sensitivity thresholds and
-exclusion rules are explicitly marked not run, rather than inferred.
-
-Local proof on Windows, using `../assess/.venv/Scripts/python.exe` with this
-worktree's `src` on `PYTHONPATH`: Ruff clean, strict mypy clean (45 source files),
-**557 passed, 4 skipped** in the full suite (88.63s); **38** new focused tests pass.
-The golden fixture runs three scripted episodes in each of four cells and checks
-canonical JSON byte-for-byte, read-only behavior, and episode sample sizes.
-Both study validations retain their original hashes; acceptance is **11/11**.
-Exact commands are in the latest `BUILD_LOG.md` entry.
-
-R2 pilot data, preregistration/SAP choices and the human freeze remain required
-before confirmatory use. No real provider, paid run, freeze, Git write, commit,
-push or network access was performed. `NEXT.md` records the E2 skeleton; the
-human-owned decision list below is unchanged (`human_todo=null`). Intended commit:
-`feat(analysis): add chl analyze for the Study 001 2x2 from sealed runs`.
-
-The remaining sections preserve the earlier counterfactual milestone checkpoint.
-
-## Landed in this pass
-
-PR #54 (`e0428cf00bcf6ac423ab1dadd5a82090fb75babb`) repairs counterfactual replay:
-all ancestral run-ID segments are re-executed from recorded proposals and
-recomputed state, without following parent directories or trusting input checkpoints.
-Branch checkpoints must match sealed boundaries. Reused ancestor IDs and silently
-reset inherited policy overrides are refused before writing child artifacts.
-Child manifests carry effective policy labels; unmeasured child usage/cost is null.
-An automated-review finding about nested terminal forks was reproduced and fixed:
-inherited checkpoints with no direct-parent prefix segment are rejected before writes.
-
-PR #55 (`e754a961b2ef3df438adb0b8bc7925c9b35a0867`) adds `chl compare` and a complete
-offline tutorial. Comparisons validate inputs, recompute metrics in memory, show
-exact rational utility differences and the first changed action, and optionally
-replay both ledgers. Failed runs retain operational metrics but no outcome delta.
-The tutorial runs parent, child and grandchild for N-IPD and Evidence Commons.
-All six replay; the second fork retaining its inherited policy preserves actions
-and utilities even though run IDs and hashes differ.
-
-Read [the workflow guide](docs/COUNTERFACTUAL_WORKFLOW.md) and
-[ADR-0009](docs/adr/0009-counterfactual-replay.md) before extending this behavior.
-The prior paired-policy seed protocol and read-only seed audit remain available.
-Neither shipped study's inputs or content hash changed.
-
-## Reproduce
+## Reproduce and verify
 
 ```bash
 make setup
-make check test validate
-.venv/bin/python scripts/acceptance.py
-.venv/bin/python scripts/counterfactual_demo.py --out artifacts/counterfactual-demo
-.venv/bin/python -m collaborative_hill.cli compare LEFT_RUN RIGHT_RUN --verify-replay
+make check test validate acceptance check-atlas check-study002
+make study-002-plan
+make study-002 STUDY002_ARTIFACTS=artifacts/study-002-fresh
 ```
 
-On Windows substitute `.venv/Scripts/python.exe` for `.venv/bin/python`.
-The tutorial output directory must not already exist. Its `README.md` and
-`summary.json` contain the comparisons and replay reports. Failed attempts retain
-partial artifacts for diagnosis; use a new output directory for a retry.
+Use a fresh artifact root for execution. The last command generates both component
+studies and their report. `make check-study002` validates canonical inputs and
+byte-identical benchmark JSON/Markdown/SVG without running more episodes or
+rewriting evidence. Setup downloads pinned dependencies; science gates call no
+model provider. Direct commands and other workflows are in README and Makefile.
 
-## Previous published verification
+The integrated local code at `fe5c81d` passed Ruff, strict package mypy (45 files),
+all **849 tests**, all four StudySpec validations, **11/11 acceptance scenarios**,
+the atlas gate and the six study-module strict-mypy/generation checks on Python
+3.12.14 with the committed dependency lock. This is 217 additional test cases over
+the initial 632-case baseline. Documentation/provenance mapping edits were present
+in the working tree; they are not described as a clean scientific execution.
+The 55 core mathematical cases and 20 report cases were independently reviewed;
+labelled-agent/history enumeration supplies oracles separate from the binomial
+implementation. Review-found path blockers, ambiguous destinations, inherited
+Decimal rounding and Matplotlib style drift all received regression fixes.
 
-The combined product tree `5b5f7a480f621044f17cd825bf49962e1667d7f0` passed fresh
-committed-lock installation, pip check, Ruff, strict mypy (43 source files),
-266 unit/property tests, **521 full-suite tests**, both study validations, and
-**11/11 acceptance scenarios**. The separate tutorial execution also passed.
-Evidence: [Actions run 39783806030](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/39783806030),
-verification commit `24fd01f63a01e7673ba9499f30b9a29119ae1fde`.
-The verification branch differs only by a temporary workflow; source, test and
-script subtrees were checked against the product tree. This documentation update
-does not alter executable source, tests, configuration, dependencies or studies.
-See `BUILD_LOG.md` for the earlier review-fix evidence and exact subtree hashes.
+Exact published-head Actions logs are the hosted verification record. The final
+integration/documentation PR carries its own current check; no human review is
+claimed from automated or agent reviews. CI covers Ubuntu/Python 3.12, not a native
+Windows/macOS or multi-version matrix.
 
-Verification used Ubuntu and Python 3.12.15 with the committed 38-pin lock.
-Local focused tests used partially installed Python 3.13 dependencies; some
-combined local reruns exceeded their execution limit and are not passing evidence.
-Native Windows/macOS execution, multiprocess stress and power-loss recovery were
-not verified. No independent human review is claimed. The temporary verification
-workflow was not merged into main; there is still no persistent main-branch CI.
+## Dependency maintenance following the integration checkpoint
 
-## Local replay-failure verification
+[PR #71](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/71) updates the
+setuptools lock pin from 84.0.0 to 84.1.0. Its original successful CI predated
+Study 002, so it was refreshed onto the integrated main branch for the complete
+current gate set. The PR retains the original bot commit, review evidence and
+exact-head checks; no force update was used.
 
-The uncommitted `replay-fail` worktree passed Ruff, strict mypy (43 source files),
-**549 passed / 4 skipped** on Windows using `../assess/.venv/Scripts/python.exe`,
-**11/11 acceptance scenarios**, and both unchanged study validations. The 30 new
-offline regression cases cover provider failures at different policy boundaries,
-retry exhaustion, failure during retry, failed branches, illegal-action handling,
-and rehashed inconsistent failure histories. The original pre-fix 17-event failure
-fixture now replays identically; isolated replay smoke passes. Commands and the
-unfiltered smoke's negative-fixture limitation are recorded in `BUILD_LOG.md`.
-No Git writes, network, installs, or owner decisions were made in this slice.
+A separate venv passed fresh locked setup/editable installation, all 38 pin checks,
+sdist-to-wheel construction with the installed backend, wheel-content/license/
+entry-point checks, `pip check`, and isolated installed-package CLI/Study 000
+validation from outside the checkout. The original shared environment and run
+records were not rewritten. This follow-up changes the build dependency pin and
+the maintenance record, not simulator behavior or any scientific input/result.
 
-## Boundaries and remaining engineering directions
+## Remaining directions and limits
 
-Replay verifies deterministic engine transitions given recorded actions and
-typed `ProviderError` outcomes in existing `RunFailed` seals, including episodes
-with `invalid_llm_output` abstentions after bounded retries. Replay calls no
-provider: it raises the recorded error only when the engine reaches that agent's
-proposal boundary at the recorded round, then compares the regenerated prefix
-and terminal state/seal. Conflicting proposals and inconsistent failure histories
-are refused. Existing event bytes, versions, and study hashes are unchanged;
-no ADR-level architecture change was needed. Provider sampling, retry transcripts,
-and arbitrary exception classes are not reproduced. Failure messages are recorded
-inputs, not independently authenticated evidence of an outage. Policy labels are not a
-serialization of executable policy objects or an authentication scheme. Nested
-branches require explicit resupply of inherited non-original policies. A terminal
-branch can replay, but its inherited terminal checkpoint cannot be forked again
-without an explicit representation for a zero-length parent segment.
+The next concrete increments are
+[responsive Evidence Commons policies (#76)](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/76),
+[a configurable offline-tested provider transport (#77)](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/77),
+and [versioned graph semantics (#78)](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/78).
+Each issue has a bounded scope and acceptance criteria. NEXT separates engineering
+that can proceed now from pilot-dependent hypotheses, weights, sample size and
+freeze decisions. No unfinished prototype is required to run this checkpoint.
 
-Comparisons require the same mechanism hash and report full-episode totals,
-including shared pre-fork history. Two episodes are not statistical evidence of
-a treatment effect. Equal kernel streams do not imply paired provider randomness,
-equal draw consumption or reduced variance. Hash links check consistency relative
-to a retained commitment, not authenticity against a writer who can replace every
-artifact. Existing best-effort cleanup and filesystem hard-link limitations remain.
-
-Useful next independent increments are a declared multi-replicate contrast design
-and serializable policy-override specifications. Real providers, condition-order
-randomisation for paid pilots, and scientific preregistration still need the
-separate decisions below.
-No unfinished prototype from this pass is required to run the new workflow.
+The current C/F baselines do not respond to incentives or attribution. All measured
+findings concern scripted algorithms, not LLMs or people. Exact pTFT calculations
+use ideal rational Bernoulli assumptions; the simulator's finite-precision draws
+are unchanged. Matching kernel seeds do not pair provider randomness. Factorial
+metadata checks cannot authenticate code or reveal entire missing runs; incomplete
+or unverifiable paired designs retain descriptive values but withhold inference.
+Output preflight checks a static filesystem and does not claim an atomic defense
+against concurrent ancestor replacement. Hash links establish consistency relative
+to retained commitments, not authenticity against wholesale replacement.
 
 ## Human-owned decisions — unchanged
 

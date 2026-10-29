@@ -7,6 +7,7 @@ study input, or lock is modified. No episode is re-executed.
 """
 
 import math
+from dataclasses import dataclass
 from fractions import Fraction
 from pathlib import Path
 from typing import Any
@@ -20,7 +21,7 @@ from collaborative_hill.engine.seeds import (
     derive_seed,
     study_seed_roots,
 )
-from collaborative_hill.experiments.scenario import ECWorld
+from collaborative_hill.experiments.scenario import ECWorld, ResolvedScenario
 from collaborative_hill.metrics import METRIC_VERSIONS
 from collaborative_hill.reporting.analysis_stats import CELLS, contrasts, describe
 from collaborative_hill.reporting.report import compute_all_metrics
@@ -39,7 +40,34 @@ AXES = {
 }
 
 
-def _episode(directory: Path) -> dict[str, Any]:
+@dataclass(frozen=True)
+class _Episode:
+    directory: Path
+    row: dict[str, Any]
+    configuration: dict[str, Any]
+
+
+def _comparison_configuration(resolved: ResolvedScenario,
+                              manifest: dict[str, Any]) -> dict[str, Any]:
+    """The factorial estimand varies only A and T within a declared population.
+
+    Scenario labels are descriptive. Every causal plane, the narrative and
+    recorded execution settings must otherwise agree; a shared study hash or
+    matching policy labels alone cannot establish that equivalence.
+    """
+    configuration = resolved.spec.model_dump(mode="json", exclude={"scenario_id", "description"})
+    for axis in ("accountability", "evidence_topology"):
+        del configuration["institution"][axis]
+    configuration["narrative_hash"] = resolved.narrative_hash
+    configuration["execution"] = {
+        field: manifest.get(field, {})
+        for field in ("policies", "providers", "prompt_template_hashes", "sampling")
+    }
+    configuration["invalid_action_policy"] = manifest["invalid_action_policy"]
+    return configuration
+
+
+def _episode(directory: Path) -> _Episode:
     events, resolved, manifest = load_run(directory)
     if manifest.get("parent_run"):
         raise ValueError("branch_not_independent_episode")
@@ -67,8 +95,9 @@ def _episode(directory: Path) -> dict[str, Any]:
         "input_tokens", "output_tokens", "cost_usd", "policies", "scenario_hash",
     )}
     row.update(run_status=manifest["status"], final_event_hash=events[-1].event_hash)
+    episode = _Episode(directory, row, _comparison_configuration(resolved, manifest))
     if manifest["status"] != "completed":
-        return row
+        return episode
     metrics = compute_all_metrics(events, manifest)
     epi, operations = metrics["epistemics"], metrics["operations"]
     proposed = operations["actions_proposed"]
@@ -105,30 +134,51 @@ def _episode(directory: Path) -> dict[str, Any]:
         # These existing metrics are derived floats; preserve their decimal value,
         # rather than pretending it is an exact mechanism Fraction.
         row[key] = str(value) if value is not None else None
-    return row
+    return episode
 
 
-def _collect(root: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+def _validate_population(episodes: list[_Episode]) -> None:
+    """Validate completed and failed attempts before selecting analysis rows.
+
+    Paired studies may declare different baseline populations in different
+    scenario blocks. Only within-block A/T comparisons are justified. Legacy
+    independent data have no declared blocking and must share one population.
+    """
+    studies = {(e.row["study_id"], e.row["study_hash"], e.row["seed_protocol"],
+                e.row["seed_root"][0]) for e in episodes}
+    if len(studies) > 1:
+        raise ValueError("analysis requires one study identity, hash, seed and seed protocol")
+    populations: dict[str | None, dict[str, Any]] = {}
+    scenarios: dict[tuple[str | None, str], str] = {}
+    for episode in episodes:
+        row = episode.row
+        block = row["scenario_block"]
+        if block in populations and populations[block] != episode.configuration:
+            raise ValueError("analysis inputs differ outside the two factorial axes "
+                             "within a comparison population")
+        populations[block] = episode.configuration
+        key = (block, row["condition_id"])
+        if key in scenarios and scenarios[key] != row["scenario_hash"]:
+            raise ValueError("analysis cannot pool different scenarios within a condition/block")
+        scenarios[key] = row["scenario_hash"]
+
+
+def _collect(root: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any]], str | None]:
     candidates = sorted({p.parent for name in ("manifest.json", "events.jsonl",
                                               "scenario.resolved.json")
                          for p in root.glob(f"*/*/{name}")})
     if not candidates:
         raise ValueError("no run artifacts found; pass artifacts/<study-hash-or-DRAFT-prefix>")
-    rows, exclusions = [], []
-    identities: set[tuple[str, int]] = set()
-    studies: set[tuple[str, str | None, str]] = set()
+    rows, exclusions, episodes = [], [], []
+    identities: dict[tuple[str, str | None, int], dict[str, Any]] = {}
     for directory in candidates:
         identity = {"run_path": directory.relative_to(root).as_posix(),
                     "condition_id": directory.parent.name}
         try:
-            row = _episode(directory)
-            studies.add((row["study_id"], row["study_hash"], row["seed_protocol"]))
+            episode = _episode(directory)
+            row = episode.row
             if row["condition_id"] != directory.parent.name:
                 raise ValueError("condition_directory_mismatch")
-            key = (row["condition_id"], row["replicate"])
-            if key in identities:
-                raise ValueError("duplicate_episode")
-            identities.add(key)
         except (ValueError, OSError, KeyError, TypeError, IndexError) as exc:
             # Stable categories; no absolute host paths, timestamps, or raw
             # provider error messages enter the derived analysis artifact.
@@ -141,14 +191,27 @@ def _collect(root: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
                                                       else "invalid_or_unsealed_artifact"),
                                "detail": type(exc).__name__})
             continue
+        episodes.append(episode)
+    _validate_population(episodes)
+    for episode in episodes:
+        row, directory = episode.row, episode.directory
+        identity = {"run_path": directory.relative_to(root).as_posix(),
+                    "condition_id": directory.parent.name}
+        key = (row["condition_id"], row["scenario_block"], row["replicate"])
+        if key in identities:
+            if identities[key] != row:
+                raise ValueError("conflicting artifacts for one episode; "
+                                 "retries cannot be selected by directory order")
+            exclusions.append({**identity, "reason": "duplicate_episode", "detail": "ValueError"})
+            continue
+        identities[key] = row
         if row["run_status"] == "failed":
             exclusions.append({**identity, "reason": "run_failed", "detail": "RunFailed",
                                "study_hash": row["study_hash"], "replicate": row["replicate"]})
         else:
             rows.append(row)
-    if len(studies) > 1:
-        raise ValueError("analysis requires one study identity, hash and seed protocol")
-    return rows, exclusions
+    protocol = episodes[0].row["seed_protocol"] if episodes else None
+    return rows, sorted(exclusions, key=lambda e: e["run_path"]), protocol
 
 
 def _blocks(rows: list[dict[str, Any]]) -> tuple[list[dict[str, Any]] | None, str | None]:
@@ -237,17 +300,12 @@ def analyze_study(study_dir: Path, *, seed: int = DEFAULT_SEED,
     """Read artifacts/<study-prefix>; output remains draft even for frozen inputs."""
     if samples < 2:
         raise ValueError("bootstrap samples must be >= 2")
-    rows, exclusions = _collect(Path(study_dir))
+    rows, exclusions, protocol = _collect(Path(study_dir))
     hashes = {r["study_hash"] for r in rows} | {
         e["study_hash"] for e in exclusions if "study_hash" in e
     }
     if len(hashes) > 1 or (hashes and None in hashes):
         raise ValueError("analysis requires one recorded study hash")
-    if len({r["seed_protocol"] for r in rows}) > 1:
-        raise ValueError("analysis cannot mix seed protocols")
-    for cell in CELLS:
-        if len({r["scenario_hash"] for r in rows if r["condition_id"] == cell}) > 1:
-            raise ValueError("analysis cannot pool different scenarios within a condition")
     primary = _effects(rows, "briefing_quality", seed, samples)
     secondary = {}
     for outcome in SECONDARIES:
@@ -267,12 +325,12 @@ def analyze_study(study_dir: Path, *, seed: int = DEFAULT_SEED,
         "schema_version": 1, "sap_status": "draft", "unit": "episode",
         "study_hash": next(iter(hashes)) if hashes else None,
         "metric_versions": dict(METRIC_VERSIONS),
-        "seed_protocol": rows[0]["seed_protocol"] if rows else None,
+        "seed_protocol": protocol,
         "bootstrap": {"seed": seed, "stream_domain": "chl.analyze.v1", "samples": samples,
                       "derived_seed_example": derive_seed(seed, "chl.analyze.v1", CELLS[0]),
                       "method": "percentile_type7", "confidence": "19/20",
-                      "resampling_unit": ("scenario_block,replicate" if rows and
-                                          rows[0]["seed_protocol"] == PAIRED_SEED_PROTOCOL
+                      "resampling_unit": ("scenario_block,replicate" if
+                                          protocol == PAIRED_SEED_PROTOCOL
                                           else "episode_within_cell")},
         "open_choices": [
             "Bootstrap count 2000 and analysis seed 20261022 are draft defaults.",

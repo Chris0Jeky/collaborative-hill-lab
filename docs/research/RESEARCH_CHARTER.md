@@ -1,6 +1,8 @@
 # Research Charter — Collaborative Hill Lab
 
 **Status:** Foundation phase (T1 sandbox). **Date:** 2026-07-13.
+**Implementation scope updated:** 2026-10-29 for Study 002, the incentive atlas and
+the versioned seed/analysis contracts; the human-owned decisions in §8 are unchanged.
 **Owner of scientific claims:** Chris (human). This charter is the standing scientific
 contract; downstream design docs and studies inherit its definitions and operating
 principles. It consolidates the Phase-0 discovery reports in `docs/research/_discovery/`
@@ -15,10 +17,11 @@ build shared truth under mixed incentives, and which interaction, information, a
 institutional structures move them from a Tragic Valley of free-riding, misinformation, and
 coordination failure to a Collaborative Hill of accurate, sustainable cooperation.**
 
-The lab carries Chris's N-person Prisoner's Dilemma finding — *targeted pairwise
-accountability breeds reciprocity; diffuse aggregate punishment breeds the valley* — from
-classical and reinforcement-learning agents to LLM agents that must reason over evidence,
-tools, and conflicting information toward a shared output. The first environment is the
+The motivating legacy hypothesis is that targeted accountability can sustain
+cooperation where diffuse responses fail. Study 000/002 show that its N-IPD
+comparison also changes the reciprocity rule; the pattern is not a structure-only
+effect. The lab tests that boundary before extending the question to LLM agents
+reasoning over evidence, tools and conflicting information. The first environment is the
 **Evidence Commons**. The lab is simultaneously a research platform, a benchmark, and an
 agent-systems testbed; its distinguishing commitment is that every result is
 hash-verifiably reproducible and every experimental structure is a first-class,
@@ -41,25 +44,23 @@ signal that obscures who contributed and who defected (neighbourhood/aggregate).
 
 ## 3. Definitions
 
-**Tragic Valley.** The region of a population's structural parameter space in which
-cooperation collapses to a low fixed point: agents free-ride, misinformation persists
-unchallenged, and collective output degrades even though every agent would be better off
-under mutual cooperation. In the N-IPD micro-mechanism this is the geometric decay of
-cooperation under diffuse (neighbourhood) accountability, where a single defector poisons
-the shared signal that all reciprocators depend on (mechanism review §3.3: expected
-cooperation ratio contracts as `q_r = (m/(m+1))·q_{r-1} → 0` for `m` reciprocators plus one
-defector). In the Evidence Commons it is the regime where free-riding dominates and the
-sealed briefing carries wrong or unsupported claims. The term is Tcaci & Huyck's metaphor
-for a low-cooperation region of parameter space, adopted here as a defined outcome regime,
-not a claim about any specific dataset.
+**Tragic Valley.** A descriptive label for a low-cooperation outcome regime:
+free-riding, unchallenged misinformation or degraded collective output. A claimed
+welfare gap must be checked for the configured utilities; current Study 001 weights
+fail collective stakes, and collective gains alone would not imply every agent benefits.
+In the ideal N-IPD include-self pTFT model with `m` reciprocators, one fixed AllD
+agent, a complete graph and zero exploration, expected cooperation follows
+`E[c_t] = (m/(m+1)) E[c_(t−1)]`. This geometric decay is a property of that specified
+rule. Quorum TFT can sustain cooperation on the same neighbourhood structure.
+The metaphor is not a result about a particular Evidence Commons dataset or people.
 
-**Collaborative Hill.** The complementary region in which cooperation is sustained at a high
-fixed point: reciprocators can identify and reward each other and quarantine defectors, so
-accurate collective output persists. In the N-IPD this is the pairwise regime where the
-TFT–TFT relationship is an absorbing `(C,C)` state and a lone defector is confined to its own
-edges (mechanism review §3.2: each reciprocator earns `R + P` per round while the defector
-is quarantined to `2P`). In the Evidence Commons it is the regime where attributable peer
-review sustains truthful, well-provenanced claims.
+**Collaborative Hill.** A descriptive label for sustained cooperation and useful
+collective output. A concrete N-IPD example is zero-exploration targeted TFT against
+one fixed AllD: reciprocal edges stay `(C,C)` while the defector is quarantined.
+For N=3, after the initial round, each TFT earns `R + P` and AllD earns `2P` per
+round. Linked TFT on that same pairwise structure collapses, so pairwise interaction
+alone is insufficient. In Evidence Commons, accurate sustained cooperation under
+responsive institutions is a research target, not an established effect of attribution.
 
 **Evidence Commons.** The lab's first environment: an evidence-grounded commons in which
 agents jointly assemble a briefing by proposing, verifying, challenging, and depending on
@@ -80,21 +81,21 @@ truth-alignment) is held by the world and never observable to agents. Implemente
 The lab descends from Chris's N-person Prisoner's Dilemma work with Tcaci & Huyck
 (*Navigating the N-Person Prisoner's Dilemma: From the Tragic Valley to the Collaborative
 Hill*; the results source is the LaTeX draft `prisoners.tex`, a work-in-progress with visible
-`undone` markers — see `LEGACY_AUDIT.md`). That work established, in classical and RL agents,
-that **the geometry of retaliation determines the equilibrium**: reciprocity conditioned on a
-*per-partner* signal (pairwise TFT) sustains cooperation, while reciprocity conditioned on a
-*pooled scalar* signal (probabilistic/neighbourhood TFT) collapses to universal defection.
-This is a statement about *structure*, independent of the substrate.
+`undone` markers — see `LEGACY_AUDIT.md`). Its targeted-versus-pooled comparison
+motivates a hypothesis about accountability. The legacy audit found implementation
+defects and a change in policy semantics between conditions; it does not establish
+a substrate-independent equilibrium theorem. Study 000 re-derives specified
+algorithmic claims in the new kernel and includes policy controls; Study 002
+extends those controls across thresholds, denominator conventions and composition.
 
-The lab transfers that structural claim to a qualitatively harder substrate — **LLM agents
-reasoning over evidence** — where the object of cooperation is not an abstract "cooperate"
-token but the construction of *accurate shared truth* under conflicting information. The
-transfer is deliberate and bounded: the N-IPD is retained as a micro-mechanism
-(`world/nipd.py`) so the lineage result can be re-derived and metamorphically checked in the
-new kernel, and the Evidence Commons generalizes the same accountability axis (targeted vs
-diffuse) from an abstract payoff to an epistemic one. The lab does **not** inherit any legacy
-code; it is a from-scratch reimplementation (Option C — see `LEGACY_AUDIT.md` §"What Study 000
-does"), keeping legacy only as an external oracle for cross-checks.
+The lab then asks whether related institutional interventions help **LLM agents
+reasoning over evidence**, where cooperation concerns accurate shared output rather
+than an abstract action. That transfer requires new evidence. Evidence Commons
+provides an accountability axis and explicit information rules for testing it;
+the scripted contributor/freerider controls do not themselves demonstrate a response
+to attribution. The implementation is from scratch (Option C in `LEGACY_AUDIT.md`),
+and hand-derived predictions, rather than the defective legacy artifacts, supply
+the current numerical oracles.
 
 ---
 
@@ -127,8 +128,10 @@ IV carried from the lineage.
 after: accountability (attributable vs aggregate credit and visibility), evidence topology, and
 the deferred extension menu (reputation, sanctions, commitments, audits, approval gates —
 `institutions.py`). Institutions read world ground truth through a read-only view and emit
-institutional events; they never mutate world truth and never change the legal action set or the
-payoff totals for identical behaviour — they change *who is seen* and *who is credited*.
+institutional events without changing world truth. In v0, C3 checks that accountability
+preserves briefing, quality and total utility for identical enumerated profiles within
+each evidence topology. Evidence sharing changes available information. A new institution
+requires its own invariance claim and tests; C3 is not a blanket guarantee for all extensions.
 
 **Cognition plane.** The agents themselves: scripted policies (TFT variants, AllC, AllD,
 free-rider, honest contributor) and LLM policies behind a provider adapter. Cognition sees
@@ -184,9 +187,13 @@ content-addressed stores, checkpoints, branching); the five-plane domain (Scenar
 skin, actions, evidence, claims, institutions); the engine (runner, replay, observation policy,
 validators); scripted + LLM-adapter agents with a fake provider; metrics/manifests/study lifecycle;
 Study 000 (legacy N-IPD reproduction / deconfounding) and Study 001 (Evidence Commons 2×2, draft).
+The authorized 2026-10-29 extension adds Study 002's N=3/N=5 complete-graph sensitivity
+experiment, a post hoc exact finite-population pTFT benchmark, the finite-strategy
+incentive atlas, sealed factorial analysis and persistent verification. These remain
+offline exploratory engineering and scripted research, not a live LLM finding.
 
 **Explicit non-goals now:** RL / Q-learning agents (the legacy QL claims are out of foundation
-scope); large-N and network-topology sweeps beyond N=3; real users or human-subject data; live
+scope); large-N and sparse network-topology experiments; real users or human-subject data; live
 network/shell/filesystem tools inside an episode; cryptographic authenticity/signing of ledgers
 (integrity, not authenticity, is the T1 concern); production deployment or any external consumer.
 Institutional levers beyond the Study-001 2×2 (reputation, sanctions, commitments) are *designed
@@ -228,14 +235,22 @@ asserted:
 3. **The truth/observation boundary holds.** Canary tests find no truth field in any observation,
    prompt, or shared transcript; the capability chokepoint is the sole mutation path; citations
    outside an agent's visible set earn zero credit (`_discovery/security-adversarial.md` §§2–3).
-4. **Study 000 deconfounds structure from strategy.** Named TFT variants (per-opponent vs
-   probabilistic vs threshold) are held explicitly distinct, so the Hill-vs-Valley contrast is
-   attributable to interaction structure and not to a silently-swapped decision rule
-   (`LEGACY_AUDIT.md` §"TFT-semantics confound").
-5. **Methodology rails are in place.** Episode-level unit of analysis, CRN-paired scenario seeds, full
-   seed/model provenance in a run manifest, effect sizes with intervals, and an
-   exploratory/confirmatory split are wired into the study lifecycle
-   (`_discovery/methodology-stats.md` §2).
+4. **Study 000 exposes the structure/strategy confound.** Named TFT variants
+   (per-opponent, linked, probabilistic and threshold) have explicit decision rules.
+   The observed legacy comparison depends on both structure and policy; it does not
+   identify a structure-only causal effect. Study 002 checks threshold, denominator and
+   composition sensitivity without erasing those policy differences
+   (`LEGACY_AUDIT.md` and `../../studies/002-nipd-sensitivity/README.md`).
+5. **Methodology rails are in place.** Analysis uses episode-level outcomes from
+   independently seeded episodes or declared paired blocks, with explicit seed protocols
+   and recorded model metadata. Original studies use independent streams;
+   declared `paired-policy-v2` drafts pair kernel policy streams within blocks but do not
+   pair LLM-provider sampling. Paired resampling uses complete `(scenario_block, replicate)`
+   blocks; cells within a block are not independent replicates. Effect sizes receive
+   intervals where the design supports them; exact deterministic controls and zero-variance
+   samples are handled explicitly.
+   Exploratory/confirmatory scope remains part of the study lifecycle (ADR-0008 and the
+   draft SAP).
 6. **Study 001 is a runnable draft** whose enumerated certificate finds free-riding temptation
    (C1) but fails collective stakes (C2) at the configured parameters: the social dilemma is
    not certified. Accountability intervention integrity (C3) passes for identical profiles.

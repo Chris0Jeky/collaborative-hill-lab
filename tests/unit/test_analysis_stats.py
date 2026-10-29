@@ -73,6 +73,23 @@ def test_equal_cell_weighting_and_contrast_signs():
     assert [F(results[k]["p_holm"]) for k in ("E1", "E2", "E3")] == holm(p)
 
 
+def test_centered_bootstrap_tail_and_holm_have_independent_literal_oracles(monkeypatch):
+    # Each cell has nonzero episode variance. Predetermined valid cell-mean
+    # resamples give E1 draws [1,1,1,1], E2 [1,3,-1,1], E3 [2,2,2,2].
+    # Their centered tail counts are 0,2,0, so the +1 correction gives
+    # 1/5,3/5,1/5. Holm across all three gives 3/5 for every contrast.
+    draws = dict(zip(CELLS, [list(map(F, values)) for values in (
+        [0, 0, 2, 2], [0, 2, 0, 2], [0, 0, 2, 2], [2, 4, 2, 4],
+    )], strict=True))
+    monkeypatch.setattr("collaborative_hill.reporting.analysis_stats.bootstrap_means",
+                        lambda values, **kwargs: draws[kwargs["scope"]])
+    cells = {c: list(map(F, [2, 4] if c == "attr-ledger" else [0, 2])) for c in CELLS}
+    result = contrasts(cells, seed=42, samples=4)
+    assert [result[c]["estimate"] for c in ("E1", "E2", "E3")] == ["1", "1", "2"]
+    assert [result[c]["p_unadjusted"] for c in ("E1", "E2", "E3")] == ["1/5", "3/5", "1/5"]
+    assert [result[c]["p_holm"] for c in ("E1", "E2", "E3")] == ["3/5", "3/5", "3/5"]
+
+
 def test_degenerate_cells_never_have_intervals_or_p_values():
     cells = {c: [F(i)] * 20 for i, c in enumerate(CELLS)}
     result = contrasts(cells, seed=42, samples=79)
