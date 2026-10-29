@@ -36,6 +36,7 @@ from collaborative_hill.agents.llm import (
     llm_manifest_fields,
 )
 from collaborative_hill.agents.scripted.ec_policies import build_ec_policy
+from collaborative_hill.agents.scripted.graph_nipd_policies import build_graph_nipd_policy
 from collaborative_hill.agents.scripted.nipd_policies import build_nipd_policy
 from collaborative_hill.agents.scripted.params import coerce_policy_params
 from collaborative_hill.engine.hashing import content_hash
@@ -57,6 +58,7 @@ from collaborative_hill.experiments.manifests import (
     write_manifest,
 )
 from collaborative_hill.experiments.scenario import (
+    GraphNIPDWorld,
     NarrativeSkin,
     NIPDWorld,
     ResolvedScenario,
@@ -246,7 +248,7 @@ def build_policies(resolved: ResolvedScenario, *, allow_provider_requests: bool 
     policy with a scripted counterfactual does not read credentials or call it.
     """
     spec = resolved.spec
-    mode = spec.world.mode if isinstance(spec.world, NIPDWorld) else None
+    mode = spec.world.mode if isinstance(spec.world, NIPDWorld | GraphNIPDWorld) else None
     policies: dict[str, Any] = {}
     replacements = overrides or {}
     unknown = set(replacements) - {agent.agent_id for agent in spec.cognition.agents}
@@ -266,7 +268,9 @@ def build_policies(resolved: ResolvedScenario, *, allow_provider_requests: bool 
             if mode is None:
                 raise ValueError(f"{name} is an NIPD policy but world is not NIPD")
             parsed = coerce_policy_params(name, params)
-            policies[agent.agent_id] = build_nipd_policy(name, mode, parsed)
+            builder = (build_graph_nipd_policy if isinstance(spec.world, GraphNIPDWorld)
+                       else build_nipd_policy)
+            policies[agent.agent_id] = builder(name, mode, parsed)
         elif name in SCRIPTED_EC:
             policies[agent.agent_id] = build_ec_policy(name, coerce_policy_params(name, params))
         elif name == "llm_fake":

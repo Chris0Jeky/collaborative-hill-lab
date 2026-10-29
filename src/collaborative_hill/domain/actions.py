@@ -40,9 +40,10 @@ class DefectAction(_ActionBase):
 class PairwiseVoteAction(_ActionBase):
     """One move per opponent (pairwise mode).
 
-    ``moves`` must contain exactly the other agents' ids — the validator in
-    the mechanism enforces this, so an agent can neither skip nor invent
-    opponents.
+    ``moves`` must contain exactly the mechanism's eligible opponents: every
+    other agent in legacy complete N-IPD, or the actor's neighbors in graph
+    N-IPD (an empty map for an isolate). The mechanism validator enforces this,
+    so an agent can neither skip nor invent interactions.
     """
 
     type: Literal["pairwise_vote"] = "pairwise_vote"

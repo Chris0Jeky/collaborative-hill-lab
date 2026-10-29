@@ -1,0 +1,120 @@
+{
+  "checkpoint_every": 2,
+  "conditions": [
+    {
+      "condition_id": "complete-d-a1-targeted",
+      "scenario": "scenarios/complete-d-a1-targeted.json",
+      "scenario_block": null,
+      "skin": "skin.json"
+    },
+    {
+      "condition_id": "complete-d-a1-linked",
+      "scenario": "scenarios/complete-d-a1-linked.json",
+      "scenario_block": null,
+      "skin": "skin.json"
+    },
+    {
+      "condition_id": "complete-d-a1-quorum",
+      "scenario": "scenarios/complete-d-a1-quorum.json",
+      "scenario_block": null,
+      "skin": "skin.json"
+    },
+    {
+      "condition_id": "complete-d-a2-targeted",
+      "scenario": "scenarios/complete-d-a2-targeted.json",
+      "scenario_block": null,
+      "skin": "skin.json"
+    },
+    {
+      "condition_id": "complete-d-a2-linked",
+      "scenario": "scenarios/complete-d-a2-linked.json",
+      "scenario_block": null,
+      "skin": "skin.json"
+    },
+    {
+      "condition_id": "complete-d-a2-quorum",
+      "scenario": "scenarios/complete-d-a2-quorum.json",
+      "scenario_block": null,
+      "skin": "skin.json"
+    },
+    {
+      "condition_id": "ring-d-a1-targeted",
+      "scenario": "scenarios/ring-d-a1-targeted.json",
+      "scenario_block": null,
+      "skin": "skin.json"
+    },
+    {
+      "condition_id": "ring-d-a1-linked",
+      "scenario": "scenarios/ring-d-a1-linked.json",
+      "scenario_block": null,
+      "skin": "skin.json"
+    },
+    {
+      "condition_id": "ring-d-a1-quorum",
+      "scenario": "scenarios/ring-d-a1-quorum.json",
+      "scenario_block": null,
+      "skin": "skin.json"
+    },
+    {
+      "condition_id": "ring-d-a2-targeted",
+      "scenario": "scenarios/ring-d-a2-targeted.json",
+      "scenario_block": null,
+      "skin": "skin.json"
+    },
+    {
+      "condition_id": "ring-d-a2-linked",
+      "scenario": "scenarios/ring-d-a2-linked.json",
+      "scenario_block": null,
+      "skin": "skin.json"
+    },
+    {
+      "condition_id": "ring-d-a2-quorum",
+      "scenario": "scenarios/ring-d-a2-quorum.json",
+      "scenario_block": null,
+      "skin": "skin.json"
+    },
+    {
+      "condition_id": "star-d-a1-targeted",
+      "scenario": "scenarios/star-d-a1-targeted.json",
+      "scenario_block": null,
+      "skin": "skin.json"
+    },
+    {
+      "condition_id": "star-d-a1-linked",
+      "scenario": "scenarios/star-d-a1-linked.json",
+      "scenario_block": null,
+      "skin": "skin.json"
+    },
+    {
+      "condition_id": "star-d-a1-quorum",
+      "scenario": "scenarios/star-d-a1-quorum.json",
+      "scenario_block": null,
+      "skin": "skin.json"
+    },
+    {
+      "condition_id": "star-d-a2-targeted",
+      "scenario": "scenarios/star-d-a2-targeted.json",
+      "scenario_block": null,
+      "skin": "skin.json"
+    },
+    {
+      "condition_id": "star-d-a2-linked",
+      "scenario": "scenarios/star-d-a2-linked.json",
+      "scenario_block": null,
+      "skin": "skin.json"
+    },
+    {
+      "condition_id": "star-d-a2-quorum",
+      "scenario": "scenarios/star-d-a2-quorum.json",
+      "scenario_block": null,
+      "skin": "skin.json"
+    }
+  ],
+  "invalid_action_policy": "fail",
+  "replicates": 1,
+  "schema_version": 1,
+  "seed": 20261029,
+  "seed_protocol": "legacy-independent-v1",
+  "study_id": "graph-topology-v1",
+  "title": ""
+}

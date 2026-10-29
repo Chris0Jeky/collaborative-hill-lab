@@ -7,7 +7,7 @@ from typing import Any
 
 from collaborative_hill.agents.llm import LLMPolicy
 from collaborative_hill.engine.seeds import SeedPath, derive_seed, study_seed_roots
-from collaborative_hill.experiments.scenario import NIPDWorld
+from collaborative_hill.experiments.scenario import GraphNIPDWorld, NIPDWorld
 from collaborative_hill.experiments.study import (
     build_policies,
     load_study,
@@ -43,7 +43,7 @@ def audit_study_seeds(
 ) -> dict[str, Any]:
     """Describe one scheduled round without running policies or writing artifacts.
 
-    Both current mechanisms start at zero and advance one round per resolution.
+    Current mechanisms start at zero and advance one round per resolution.
     A terminal state's round has no policy/mechanism stream consumer. Stream
     identities describe allocation, not actual draws or scientific comparability.
     """
@@ -68,7 +68,8 @@ def audit_study_seeds(
     for condition in sorted(spec.conditions, key=lambda item: item.condition_id):
         scenario = resolved[condition.condition_id]
         world = scenario.spec.world
-        rounds = world.rounds if isinstance(world, NIPDWorld) else world.params.rounds
+        rounds = (world.rounds if isinstance(world, NIPDWorld | GraphNIPDWorld)
+                  else world.params.rounds)
         if rounds <= 0:
             raise ValueError(f"condition {condition.condition_id!r} has no scheduled rounds")
         if round_index >= rounds:

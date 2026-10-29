@@ -1,0 +1,1468 @@
+{
+  "cells": {
+    "complete-d-a1-linked": {
+      "analytical_curve": [
+        "4/5",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "analytical_curve_match": true,
+      "cooperative_votes": [
+        16,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "defector": "a1",
+      "degree_by_agent": {
+        "a1": 4,
+        "a2": 4,
+        "a3": 4,
+        "a4": 4,
+        "a5": 4
+      },
+      "eligible_votes": [
+        20,
+        20,
+        20,
+        20,
+        20,
+        20,
+        20,
+        20
+      ],
+      "event_count": 173,
+      "final_round_cooperation": "0",
+      "manifest_worktree_dirty": false,
+      "mean_cooperation": "1/10",
+      "mechanism_hash": "2bc0b22faa9effec3596d7dc69f542df83ffe01ff736f7706fb2f75c70c439bb",
+      "mode": "pairwise",
+      "observed_curve": [
+        "4/5",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "policy": "linked",
+      "replay_verified": true,
+      "replicate": 0,
+      "run_id": "complete-d-a1-linked-r000",
+      "scenario_hash": "870b6b6d01ae503bd601500204de520cbaf2fd809aa15970fd7eb23d6be02103",
+      "scores": {
+        "a1": "12",
+        "a2": "37/4",
+        "a3": "37/4",
+        "a4": "37/4",
+        "a5": "37/4"
+      },
+      "seed_root": [
+        20261029,
+        "complete-d-a1-linked",
+        0
+      ],
+      "terminal_event_hash": "be6227c232d9c3aef92db0b8b6546d43d1e096683258e1c3beae0c1022b52ae4",
+      "topology": "complete"
+    },
+    "complete-d-a1-quorum": {
+      "analytical_curve": [
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5"
+      ],
+      "analytical_curve_match": true,
+      "cooperative_votes": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "defector": "a1",
+      "degree_by_agent": {
+        "a1": 4,
+        "a2": 4,
+        "a3": 4,
+        "a4": 4,
+        "a5": 4
+      },
+      "eligible_votes": [
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5
+      ],
+      "event_count": 173,
+      "final_round_cooperation": "4/5",
+      "manifest_worktree_dirty": false,
+      "mean_cooperation": "4/5",
+      "mechanism_hash": "a82a219ed458f8ccdf21ba4b2e65bab611c6cb4f81b4ac0ef391bc2844c820e1",
+      "mode": "neighbourhood",
+      "observed_curve": [
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5"
+      ],
+      "policy": "quorum",
+      "replay_verified": true,
+      "replicate": 0,
+      "run_id": "complete-d-a1-quorum-r000",
+      "scenario_hash": "b9d5cb8462cb58c3b59ed8c498d8cffe49ecfab610690b558e4eb410e6c693dd",
+      "scores": {
+        "a1": "40",
+        "a2": "18",
+        "a3": "18",
+        "a4": "18",
+        "a5": "18"
+      },
+      "seed_root": [
+        20261029,
+        "complete-d-a1-quorum",
+        0
+      ],
+      "terminal_event_hash": "41fe67bb8d054a8d3747b5c2530024ea3f43f4a00c8c580870ac836a1cedf400",
+      "topology": "complete"
+    },
+    "complete-d-a1-targeted": {
+      "analytical_curve": [
+        "4/5",
+        "3/5",
+        "3/5",
+        "3/5",
+        "3/5",
+        "3/5",
+        "3/5",
+        "3/5"
+      ],
+      "analytical_curve_match": true,
+      "cooperative_votes": [
+        16,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12
+      ],
+      "defector": "a1",
+      "degree_by_agent": {
+        "a1": 4,
+        "a2": 4,
+        "a3": 4,
+        "a4": 4,
+        "a5": 4
+      },
+      "eligible_votes": [
+        20,
+        20,
+        20,
+        20,
+        20,
+        20,
+        20,
+        20
+      ],
+      "event_count": 173,
+      "final_round_cooperation": "3/5",
+      "manifest_worktree_dirty": false,
+      "mean_cooperation": "5/8",
+      "mechanism_hash": "2bc0b22faa9effec3596d7dc69f542df83ffe01ff736f7706fb2f75c70c439bb",
+      "mode": "pairwise",
+      "observed_curve": [
+        "4/5",
+        "3/5",
+        "3/5",
+        "3/5",
+        "3/5",
+        "3/5",
+        "3/5",
+        "3/5"
+      ],
+      "policy": "targeted",
+      "replay_verified": true,
+      "replicate": 0,
+      "run_id": "complete-d-a1-targeted-r000",
+      "scenario_hash": "91c28eb3c154f33486e5cd15f8840c459e6394c707add549c9ad01934804129d",
+      "scores": {
+        "a1": "12",
+        "a2": "79/4",
+        "a3": "79/4",
+        "a4": "79/4",
+        "a5": "79/4"
+      },
+      "seed_root": [
+        20261029,
+        "complete-d-a1-targeted",
+        0
+      ],
+      "terminal_event_hash": "96d7ff671ee83b5065df8737255e643bf19b4d9fcb74eaf569c3b78de6449d5c",
+      "topology": "complete"
+    },
+    "complete-d-a2-linked": {
+      "analytical_curve": [
+        "4/5",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "analytical_curve_match": true,
+      "cooperative_votes": [
+        16,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "defector": "a2",
+      "degree_by_agent": {
+        "a1": 4,
+        "a2": 4,
+        "a3": 4,
+        "a4": 4,
+        "a5": 4
+      },
+      "eligible_votes": [
+        20,
+        20,
+        20,
+        20,
+        20,
+        20,
+        20,
+        20
+      ],
+      "event_count": 173,
+      "final_round_cooperation": "0",
+      "manifest_worktree_dirty": false,
+      "mean_cooperation": "1/10",
+      "mechanism_hash": "2bc0b22faa9effec3596d7dc69f542df83ffe01ff736f7706fb2f75c70c439bb",
+      "mode": "pairwise",
+      "observed_curve": [
+        "4/5",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "policy": "linked",
+      "replay_verified": true,
+      "replicate": 0,
+      "run_id": "complete-d-a2-linked-r000",
+      "scenario_hash": "472f866e62bc5097b3c42fd2de464db5d9d3666c5277150f4e07b5d2013cf103",
+      "scores": {
+        "a1": "37/4",
+        "a2": "12",
+        "a3": "37/4",
+        "a4": "37/4",
+        "a5": "37/4"
+      },
+      "seed_root": [
+        20261029,
+        "complete-d-a2-linked",
+        0
+      ],
+      "terminal_event_hash": "c2e95c643f26db21c0d38a7205892dd71be3335f815972aa99636acf28461cd9",
+      "topology": "complete"
+    },
+    "complete-d-a2-quorum": {
+      "analytical_curve": [
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5"
+      ],
+      "analytical_curve_match": true,
+      "cooperative_votes": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "defector": "a2",
+      "degree_by_agent": {
+        "a1": 4,
+        "a2": 4,
+        "a3": 4,
+        "a4": 4,
+        "a5": 4
+      },
+      "eligible_votes": [
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5
+      ],
+      "event_count": 173,
+      "final_round_cooperation": "4/5",
+      "manifest_worktree_dirty": false,
+      "mean_cooperation": "4/5",
+      "mechanism_hash": "a82a219ed458f8ccdf21ba4b2e65bab611c6cb4f81b4ac0ef391bc2844c820e1",
+      "mode": "neighbourhood",
+      "observed_curve": [
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5"
+      ],
+      "policy": "quorum",
+      "replay_verified": true,
+      "replicate": 0,
+      "run_id": "complete-d-a2-quorum-r000",
+      "scenario_hash": "93aa6ab1d8d445c874793a54811b9464a2f87a6c4a3dafe4841cb1b4ffd73e76",
+      "scores": {
+        "a1": "18",
+        "a2": "40",
+        "a3": "18",
+        "a4": "18",
+        "a5": "18"
+      },
+      "seed_root": [
+        20261029,
+        "complete-d-a2-quorum",
+        0
+      ],
+      "terminal_event_hash": "b9943fdd0c853bba9267ac85e1182af5b42848cad4feb73e09722889523046ea",
+      "topology": "complete"
+    },
+    "complete-d-a2-targeted": {
+      "analytical_curve": [
+        "4/5",
+        "3/5",
+        "3/5",
+        "3/5",
+        "3/5",
+        "3/5",
+        "3/5",
+        "3/5"
+      ],
+      "analytical_curve_match": true,
+      "cooperative_votes": [
+        16,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12
+      ],
+      "defector": "a2",
+      "degree_by_agent": {
+        "a1": 4,
+        "a2": 4,
+        "a3": 4,
+        "a4": 4,
+        "a5": 4
+      },
+      "eligible_votes": [
+        20,
+        20,
+        20,
+        20,
+        20,
+        20,
+        20,
+        20
+      ],
+      "event_count": 173,
+      "final_round_cooperation": "3/5",
+      "manifest_worktree_dirty": false,
+      "mean_cooperation": "5/8",
+      "mechanism_hash": "2bc0b22faa9effec3596d7dc69f542df83ffe01ff736f7706fb2f75c70c439bb",
+      "mode": "pairwise",
+      "observed_curve": [
+        "4/5",
+        "3/5",
+        "3/5",
+        "3/5",
+        "3/5",
+        "3/5",
+        "3/5",
+        "3/5"
+      ],
+      "policy": "targeted",
+      "replay_verified": true,
+      "replicate": 0,
+      "run_id": "complete-d-a2-targeted-r000",
+      "scenario_hash": "f33d455fe73d18cb694b5b79b0b7607a8ebaedaef175a8b89a716bd51c26a59d",
+      "scores": {
+        "a1": "79/4",
+        "a2": "12",
+        "a3": "79/4",
+        "a4": "79/4",
+        "a5": "79/4"
+      },
+      "seed_root": [
+        20261029,
+        "complete-d-a2-targeted",
+        0
+      ],
+      "terminal_event_hash": "4bae491a83d86d091701101e7620d5a3ad19552fed6ff3e15c84f70bcd58d3ce",
+      "topology": "complete"
+    },
+    "ring-d-a1-linked": {
+      "analytical_curve": [
+        "4/5",
+        "2/5",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "analytical_curve_match": true,
+      "cooperative_votes": [
+        8,
+        4,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "defector": "a1",
+      "degree_by_agent": {
+        "a1": 2,
+        "a2": 2,
+        "a3": 2,
+        "a4": 2,
+        "a5": 2
+      },
+      "eligible_votes": [
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10
+      ],
+      "event_count": 173,
+      "final_round_cooperation": "0",
+      "manifest_worktree_dirty": false,
+      "mean_cooperation": "3/20",
+      "mechanism_hash": "dfda839d7423cf140ba26f43f8772c0cac17e73c583370547bbe456ec637de50",
+      "mode": "pairwise",
+      "observed_curve": [
+        "4/5",
+        "2/5",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "policy": "linked",
+      "replay_verified": true,
+      "replicate": 0,
+      "run_id": "ring-d-a1-linked-r000",
+      "scenario_hash": "9909a584db7f9adbdf9eee3eacbe69067d6651c3a557cc8251a1ae583c9e41de",
+      "scores": {
+        "a1": "12",
+        "a2": "21/2",
+        "a3": "21/2",
+        "a4": "21/2",
+        "a5": "21/2"
+      },
+      "seed_root": [
+        20261029,
+        "ring-d-a1-linked",
+        0
+      ],
+      "terminal_event_hash": "75b7f0bfe84b104a4853b38538fda43bd75526eb95fc7daad80660d3dcaa03a6",
+      "topology": "ring"
+    },
+    "ring-d-a1-quorum": {
+      "analytical_curve": [
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5"
+      ],
+      "analytical_curve_match": true,
+      "cooperative_votes": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "defector": "a1",
+      "degree_by_agent": {
+        "a1": 2,
+        "a2": 2,
+        "a3": 2,
+        "a4": 2,
+        "a5": 2
+      },
+      "eligible_votes": [
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5
+      ],
+      "event_count": 173,
+      "final_round_cooperation": "4/5",
+      "manifest_worktree_dirty": false,
+      "mean_cooperation": "4/5",
+      "mechanism_hash": "243be6eb69b51485f29221e0f0bf64a605b1a96a32de66a25f0308f1a415d050",
+      "mode": "neighbourhood",
+      "observed_curve": [
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5"
+      ],
+      "policy": "quorum",
+      "replay_verified": true,
+      "replicate": 0,
+      "run_id": "ring-d-a1-quorum-r000",
+      "scenario_hash": "07277948c1fe02c8e5593533aac0426cfa312222f2ece8afbbc2f10446abd0d7",
+      "scores": {
+        "a1": "40",
+        "a2": "12",
+        "a3": "24",
+        "a4": "24",
+        "a5": "12"
+      },
+      "seed_root": [
+        20261029,
+        "ring-d-a1-quorum",
+        0
+      ],
+      "terminal_event_hash": "d7cf2420f9cec5f872f0f27610777d855ad67fbd9030a01b0f8fdbe10eb261fd",
+      "topology": "ring"
+    },
+    "ring-d-a1-targeted": {
+      "analytical_curve": [
+        "4/5",
+        "3/5",
+        "3/5",
+        "3/5",
+        "3/5",
+        "3/5",
+        "3/5",
+        "3/5"
+      ],
+      "analytical_curve_match": true,
+      "cooperative_votes": [
+        8,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6
+      ],
+      "defector": "a1",
+      "degree_by_agent": {
+        "a1": 2,
+        "a2": 2,
+        "a3": 2,
+        "a4": 2,
+        "a5": 2
+      },
+      "eligible_votes": [
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10
+      ],
+      "event_count": 173,
+      "final_round_cooperation": "3/5",
+      "manifest_worktree_dirty": false,
+      "mean_cooperation": "5/8",
+      "mechanism_hash": "dfda839d7423cf140ba26f43f8772c0cac17e73c583370547bbe456ec637de50",
+      "mode": "pairwise",
+      "observed_curve": [
+        "4/5",
+        "3/5",
+        "3/5",
+        "3/5",
+        "3/5",
+        "3/5",
+        "3/5",
+        "3/5"
+      ],
+      "policy": "targeted",
+      "replay_verified": true,
+      "replicate": 0,
+      "run_id": "ring-d-a1-targeted-r000",
+      "scenario_hash": "49e4c7114080593d50322ca7fbb3d2bd4ed9c55b87a40173aff2caa5d290b85e",
+      "scores": {
+        "a1": "12",
+        "a2": "31/2",
+        "a3": "24",
+        "a4": "24",
+        "a5": "31/2"
+      },
+      "seed_root": [
+        20261029,
+        "ring-d-a1-targeted",
+        0
+      ],
+      "terminal_event_hash": "3e26aea82dc1743f933c24ede3d0314f76f3068becbe9d5f7c3b55c37f90a3b1",
+      "topology": "ring"
+    },
+    "ring-d-a2-linked": {
+      "analytical_curve": [
+        "4/5",
+        "2/5",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "analytical_curve_match": true,
+      "cooperative_votes": [
+        8,
+        4,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "defector": "a2",
+      "degree_by_agent": {
+        "a1": 2,
+        "a2": 2,
+        "a3": 2,
+        "a4": 2,
+        "a5": 2
+      },
+      "eligible_votes": [
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10
+      ],
+      "event_count": 173,
+      "final_round_cooperation": "0",
+      "manifest_worktree_dirty": false,
+      "mean_cooperation": "3/20",
+      "mechanism_hash": "dfda839d7423cf140ba26f43f8772c0cac17e73c583370547bbe456ec637de50",
+      "mode": "pairwise",
+      "observed_curve": [
+        "4/5",
+        "2/5",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "policy": "linked",
+      "replay_verified": true,
+      "replicate": 0,
+      "run_id": "ring-d-a2-linked-r000",
+      "scenario_hash": "54cc172aca708dbc5ec23854abf4d3c39ac10987e1dc04058366c1a379a9072c",
+      "scores": {
+        "a1": "21/2",
+        "a2": "12",
+        "a3": "21/2",
+        "a4": "21/2",
+        "a5": "21/2"
+      },
+      "seed_root": [
+        20261029,
+        "ring-d-a2-linked",
+        0
+      ],
+      "terminal_event_hash": "eee933698ac6fa06a18af3f5072b694cf9c9bd378884f1bbbaa17c62d61dd2e7",
+      "topology": "ring"
+    },
+    "ring-d-a2-quorum": {
+      "analytical_curve": [
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5"
+      ],
+      "analytical_curve_match": true,
+      "cooperative_votes": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "defector": "a2",
+      "degree_by_agent": {
+        "a1": 2,
+        "a2": 2,
+        "a3": 2,
+        "a4": 2,
+        "a5": 2
+      },
+      "eligible_votes": [
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5
+      ],
+      "event_count": 173,
+      "final_round_cooperation": "4/5",
+      "manifest_worktree_dirty": false,
+      "mean_cooperation": "4/5",
+      "mechanism_hash": "243be6eb69b51485f29221e0f0bf64a605b1a96a32de66a25f0308f1a415d050",
+      "mode": "neighbourhood",
+      "observed_curve": [
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5"
+      ],
+      "policy": "quorum",
+      "replay_verified": true,
+      "replicate": 0,
+      "run_id": "ring-d-a2-quorum-r000",
+      "scenario_hash": "acf6ebdcb35b1e00cad19a9b318c6424078903a8fbb43834ff68bf40d5b4f067",
+      "scores": {
+        "a1": "12",
+        "a2": "40",
+        "a3": "12",
+        "a4": "24",
+        "a5": "24"
+      },
+      "seed_root": [
+        20261029,
+        "ring-d-a2-quorum",
+        0
+      ],
+      "terminal_event_hash": "889aa6584b2e44ca935d8810cffc4f79947d23c1d71e9eb8b6043de025b5e8b2",
+      "topology": "ring"
+    },
+    "ring-d-a2-targeted": {
+      "analytical_curve": [
+        "4/5",
+        "3/5",
+        "3/5",
+        "3/5",
+        "3/5",
+        "3/5",
+        "3/5",
+        "3/5"
+      ],
+      "analytical_curve_match": true,
+      "cooperative_votes": [
+        8,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6
+      ],
+      "defector": "a2",
+      "degree_by_agent": {
+        "a1": 2,
+        "a2": 2,
+        "a3": 2,
+        "a4": 2,
+        "a5": 2
+      },
+      "eligible_votes": [
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10
+      ],
+      "event_count": 173,
+      "final_round_cooperation": "3/5",
+      "manifest_worktree_dirty": false,
+      "mean_cooperation": "5/8",
+      "mechanism_hash": "dfda839d7423cf140ba26f43f8772c0cac17e73c583370547bbe456ec637de50",
+      "mode": "pairwise",
+      "observed_curve": [
+        "4/5",
+        "3/5",
+        "3/5",
+        "3/5",
+        "3/5",
+        "3/5",
+        "3/5",
+        "3/5"
+      ],
+      "policy": "targeted",
+      "replay_verified": true,
+      "replicate": 0,
+      "run_id": "ring-d-a2-targeted-r000",
+      "scenario_hash": "eefa44c1418aca8c082815ccb36a34de2a4f3565add5952cce88082588d59443",
+      "scores": {
+        "a1": "31/2",
+        "a2": "12",
+        "a3": "31/2",
+        "a4": "24",
+        "a5": "24"
+      },
+      "seed_root": [
+        20261029,
+        "ring-d-a2-targeted",
+        0
+      ],
+      "terminal_event_hash": "e7d52d530a0ea540fe7ef24529ec40ec9e36c45bfacac92035cf854fdd8d2233",
+      "topology": "ring"
+    },
+    "star-d-a1-linked": {
+      "analytical_curve": [
+        "1/2",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "analytical_curve_match": true,
+      "cooperative_votes": [
+        4,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "defector": "a1",
+      "degree_by_agent": {
+        "a1": 4,
+        "a2": 1,
+        "a3": 1,
+        "a4": 1,
+        "a5": 1
+      },
+      "eligible_votes": [
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8
+      ],
+      "event_count": 173,
+      "final_round_cooperation": "0",
+      "manifest_worktree_dirty": false,
+      "mean_cooperation": "1/16",
+      "mechanism_hash": "54fc52ed662f940ca65d7de8d3b7fef09c9653c3384d5b04c4359e30f816193d",
+      "mode": "pairwise",
+      "observed_curve": [
+        "1/2",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "policy": "linked",
+      "replay_verified": true,
+      "replicate": 0,
+      "run_id": "star-d-a1-linked-r000",
+      "scenario_hash": "8f1419afc6b6eaf7b43c8bfc22919e9f871a0ec2c813ba2d5bb9745174f9f39c",
+      "scores": {
+        "a1": "12",
+        "a2": "7",
+        "a3": "7",
+        "a4": "7",
+        "a5": "7"
+      },
+      "seed_root": [
+        20261029,
+        "star-d-a1-linked",
+        0
+      ],
+      "terminal_event_hash": "9bc5ce5fb368e11ad33c6e9e08fca010ee07f6e0de2ffe775d476514a04b6216",
+      "topology": "star"
+    },
+    "star-d-a1-quorum": {
+      "analytical_curve": [
+        "4/5",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "analytical_curve_match": true,
+      "cooperative_votes": [
+        4,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "defector": "a1",
+      "degree_by_agent": {
+        "a1": 4,
+        "a2": 1,
+        "a3": 1,
+        "a4": 1,
+        "a5": 1
+      },
+      "eligible_votes": [
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5
+      ],
+      "event_count": 173,
+      "final_round_cooperation": "0",
+      "manifest_worktree_dirty": false,
+      "mean_cooperation": "1/10",
+      "mechanism_hash": "b57a20fd60de35f594587d562e5950add08ec5b6f5bd712c98eeee83b17dcdfe",
+      "mode": "neighbourhood",
+      "observed_curve": [
+        "4/5",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "policy": "quorum",
+      "replay_verified": true,
+      "replicate": 0,
+      "run_id": "star-d-a1-quorum-r000",
+      "scenario_hash": "0d4471ca4eeebe96482d4f502b85df7a70750fc67de8b78ef16fce8ba77dc199",
+      "scores": {
+        "a1": "12",
+        "a2": "7",
+        "a3": "7",
+        "a4": "7",
+        "a5": "7"
+      },
+      "seed_root": [
+        20261029,
+        "star-d-a1-quorum",
+        0
+      ],
+      "terminal_event_hash": "5e57c3d04ad04aed41525e7ff103df9114c7d739805d03ac86007002ed7d01c3",
+      "topology": "star"
+    },
+    "star-d-a1-targeted": {
+      "analytical_curve": [
+        "1/2",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "analytical_curve_match": true,
+      "cooperative_votes": [
+        4,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "defector": "a1",
+      "degree_by_agent": {
+        "a1": 4,
+        "a2": 1,
+        "a3": 1,
+        "a4": 1,
+        "a5": 1
+      },
+      "eligible_votes": [
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8
+      ],
+      "event_count": 173,
+      "final_round_cooperation": "0",
+      "manifest_worktree_dirty": false,
+      "mean_cooperation": "1/16",
+      "mechanism_hash": "54fc52ed662f940ca65d7de8d3b7fef09c9653c3384d5b04c4359e30f816193d",
+      "mode": "pairwise",
+      "observed_curve": [
+        "1/2",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "policy": "targeted",
+      "replay_verified": true,
+      "replicate": 0,
+      "run_id": "star-d-a1-targeted-r000",
+      "scenario_hash": "7172a7235609cdc54acf3ef6ca487b431ba625145abf4e8d8940c4136c6713a4",
+      "scores": {
+        "a1": "12",
+        "a2": "7",
+        "a3": "7",
+        "a4": "7",
+        "a5": "7"
+      },
+      "seed_root": [
+        20261029,
+        "star-d-a1-targeted",
+        0
+      ],
+      "terminal_event_hash": "acbfb8dd90e1639ec6eee97dfcc225843dfde0e1e2b554c943567983d5195476",
+      "topology": "star"
+    },
+    "star-d-a2-linked": {
+      "analytical_curve": [
+        "7/8",
+        "3/8",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "analytical_curve_match": true,
+      "cooperative_votes": [
+        7,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "defector": "a2",
+      "degree_by_agent": {
+        "a1": 4,
+        "a2": 1,
+        "a3": 1,
+        "a4": 1,
+        "a5": 1
+      },
+      "eligible_votes": [
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8
+      ],
+      "event_count": 173,
+      "final_round_cooperation": "0",
+      "manifest_worktree_dirty": false,
+      "mean_cooperation": "5/32",
+      "mechanism_hash": "54fc52ed662f940ca65d7de8d3b7fef09c9653c3384d5b04c4359e30f816193d",
+      "mode": "pairwise",
+      "observed_curve": [
+        "7/8",
+        "3/8",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "policy": "linked",
+      "replay_verified": true,
+      "replicate": 0,
+      "run_id": "star-d-a2-linked-r000",
+      "scenario_hash": "4eb4957d940af211ae4f44b642acbddb68c4562bf1c0e17622cfe5710d86f2b2",
+      "scores": {
+        "a1": "49/4",
+        "a2": "12",
+        "a3": "9",
+        "a4": "9",
+        "a5": "9"
+      },
+      "seed_root": [
+        20261029,
+        "star-d-a2-linked",
+        0
+      ],
+      "terminal_event_hash": "45f03d24273ab1fa6ed596e1c5ed72b422145d72a28395c9294d9b2d5700201c",
+      "topology": "star"
+    },
+    "star-d-a2-quorum": {
+      "analytical_curve": [
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5"
+      ],
+      "analytical_curve_match": true,
+      "cooperative_votes": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "defector": "a2",
+      "degree_by_agent": {
+        "a1": 4,
+        "a2": 1,
+        "a3": 1,
+        "a4": 1,
+        "a5": 1
+      },
+      "eligible_votes": [
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5
+      ],
+      "event_count": 173,
+      "final_round_cooperation": "4/5",
+      "manifest_worktree_dirty": false,
+      "mean_cooperation": "4/5",
+      "mechanism_hash": "b57a20fd60de35f594587d562e5950add08ec5b6f5bd712c98eeee83b17dcdfe",
+      "mode": "neighbourhood",
+      "observed_curve": [
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5",
+        "4/5"
+      ],
+      "policy": "quorum",
+      "replay_verified": true,
+      "replicate": 0,
+      "run_id": "star-d-a2-quorum-r000",
+      "scenario_hash": "81e26a116356f1fc7be14b6f6fe08c68961ae0e576ff3c6970f5ba3d3e2135be",
+      "scores": {
+        "a1": "18",
+        "a2": "40",
+        "a3": "24",
+        "a4": "24",
+        "a5": "24"
+      },
+      "seed_root": [
+        20261029,
+        "star-d-a2-quorum",
+        0
+      ],
+      "terminal_event_hash": "96b87617da95adee46f883c0795c9b65b460021208b4a170ebe6cf088cac904e",
+      "topology": "star"
+    },
+    "star-d-a2-targeted": {
+      "analytical_curve": [
+        "7/8",
+        "3/4",
+        "3/4",
+        "3/4",
+        "3/4",
+        "3/4",
+        "3/4",
+        "3/4"
+      ],
+      "analytical_curve_match": true,
+      "cooperative_votes": [
+        7,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6
+      ],
+      "defector": "a2",
+      "degree_by_agent": {
+        "a1": 4,
+        "a2": 1,
+        "a3": 1,
+        "a4": 1,
+        "a5": 1
+      },
+      "eligible_votes": [
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8
+      ],
+      "event_count": 173,
+      "final_round_cooperation": "3/4",
+      "manifest_worktree_dirty": false,
+      "mean_cooperation": "49/64",
+      "mechanism_hash": "54fc52ed662f940ca65d7de8d3b7fef09c9653c3384d5b04c4359e30f816193d",
+      "mode": "pairwise",
+      "observed_curve": [
+        "7/8",
+        "3/4",
+        "3/4",
+        "3/4",
+        "3/4",
+        "3/4",
+        "3/4",
+        "3/4"
+      ],
+      "policy": "targeted",
+      "replay_verified": true,
+      "replicate": 0,
+      "run_id": "star-d-a2-targeted-r000",
+      "scenario_hash": "f3255781ceff0d98a08f6fae0dac45e62dcd107ed3d61245f5b33c53bff2b16b",
+      "scores": {
+        "a1": "79/4",
+        "a2": "12",
+        "a3": "24",
+        "a4": "24",
+        "a5": "24"
+      },
+      "seed_root": [
+        20261029,
+        "star-d-a2-targeted",
+        0
+      ],
+      "terminal_event_hash": "d1ff53600b241d3d1a9892a985fc7370da07e4dd48137f0f218844fa7e064eaf",
+      "topology": "star"
+    }
+  },
+  "episode_count": 18,
+  "execution_source": {
+    "clean_local_source_tree": "875823c171036dcf40a0b9f2834074bce7ad05f9",
+    "commit_kind": "local_source_checkout; remote GitHub identity is not asserted",
+    "domain": "chl.graph-topology.source-files.v1",
+    "files": {
+      "experiments/graph-topology/README.md": "9258db4060a2d5ce036e61f86df6949227dcef2c42e791ac943f69661e47da44",
+      "experiments/graph-topology/graph_experiment.py": "4c81e3831bb47fd57a2f42858a1319ed12d04d1dba851a5559877e0065a83105",
+      "experiments/graph-topology/scenarios/complete-d-a1-linked.json": "cdfe4b642e8b741d38bbb095f82e447e71a97b2b1b3531fbd2bbaba0bbb6a561",
+      "experiments/graph-topology/scenarios/complete-d-a1-quorum.json": "3cd2eef02bf4be428248de0bc068f1f6ae0ed7f1df8da85b7363dc26d01086a9",
+      "experiments/graph-topology/scenarios/complete-d-a1-targeted.json": "205a7d74ed135455885d3540871538c6e4c8966033749fcbd75bd28fc8609fcb",
+      "experiments/graph-topology/scenarios/complete-d-a2-linked.json": "d94661e2337f3fc546518e374ace668fd28a64da77c5eafef7aaf44822fded2e",
+      "experiments/graph-topology/scenarios/complete-d-a2-quorum.json": "18aa30f074accc0170a8409a4592764d47a7431ad138bf96bad618f9a3f1f922",
+      "experiments/graph-topology/scenarios/complete-d-a2-targeted.json": "9fdd7b39f77dba735eb31d18470002ec34bff814b4ef229d929a8668fe8159e0",
+      "experiments/graph-topology/scenarios/ring-d-a1-linked.json": "4000427d7df4a40451200182172cf8d0553081edfceb457c01c92a431d723641",
+      "experiments/graph-topology/scenarios/ring-d-a1-quorum.json": "1b3755eca41985213d791cfaa977eaa2fa7a2c7b4d8080f79bc891224ff9c2cc",
+      "experiments/graph-topology/scenarios/ring-d-a1-targeted.json": "77d4e900e75c3bc81274f8162189064b8685b568f7e2cf21f3498288f0b159f3",
+      "experiments/graph-topology/scenarios/ring-d-a2-linked.json": "1ed10d6bda41c37c2a23e1291d7ed9621388bbfa5439207f8d6716604c5e1cce",
+      "experiments/graph-topology/scenarios/ring-d-a2-quorum.json": "8beb045dd5ee2ebee3e9573a167186df334e4d3a6e49cf52ebe8218db584cb1e",
+      "experiments/graph-topology/scenarios/ring-d-a2-targeted.json": "df2ce6827bf980e4444db66b75a818b9d6c935df3b8d1aa82399ce3a7c5311da",
+      "experiments/graph-topology/scenarios/star-d-a1-linked.json": "5be1fc57a5791f79336cd9224990a6bd1e6914a8b304d08f1c09684c728ed0ef",
+      "experiments/graph-topology/scenarios/star-d-a1-quorum.json": "b0752a9ffee0aa09b870b2df4d8169a48d36b6e92b0a2fcd89e00971740303d3",
+      "experiments/graph-topology/scenarios/star-d-a1-targeted.json": "20df32ffeeb4f01da0fba97e9045ac4d0749332c32f34b53ba94938896c736b8",
+      "experiments/graph-topology/scenarios/star-d-a2-linked.json": "1441deb0aa7df2069710b2bdcaed671c9dd4910ceb7f0d5bc251ce68ebd69687",
+      "experiments/graph-topology/scenarios/star-d-a2-quorum.json": "00fa79fb9a2d1647cb80300dd94ccfc845aac169ba693c69faea7b054e1e4174",
+      "experiments/graph-topology/scenarios/star-d-a2-targeted.json": "0486f3b6c1d0abb2996b1d680c1e52140ba3c8b3d09b78a235ae40c569b7b432",
+      "experiments/graph-topology/skin.json": "2c75c26bab9283b438b1835025ed2c1b045669fadb9d179615d9b75e2dbc7aab",
+      "experiments/graph-topology/study.json": "1efec9612a57e495e038a9d1e7a147d3930d6a41369a38c6d1895f287ca69efd",
+      "pyproject.toml": "6e5137cac3a0f356b6c1f03c4ff443ea1fe58cfae7622e1947026dd85dc8fbbd",
+      "requirements-lock.txt": "500c146e66e3af9b483c2eaa348bccddc0165b0fcd101f03d9851769c0a6f280",
+      "src/collaborative_hill/__init__.py": "ba370f7bfcb44c922ec2199a31935a60545cfa357e3cc625ad48c9e958b2f996",
+      "src/collaborative_hill/agents/__init__.py": "a86995f4cf6123dc28ed5d95da40a9741a9df0ba553a7900fd974f9063d426d4",
+      "src/collaborative_hill/agents/llm/__init__.py": "f792a61bc7d5f19e1bb35e2a660e9625bdd8b1bcdbae00fe042932ce964ea89b",
+      "src/collaborative_hill/agents/llm/policy.py": "f6cbe17fc3ba6aa33e9022710db4f786a991668b35d94d199866541ccf32f50b",
+      "src/collaborative_hill/agents/llm/providers.py": "0c1dddcbae559f97502c9cb8ed14d8c2e52f905a25ad3b67ccd6adbab16f2b93",
+      "src/collaborative_hill/agents/llm/rendering.py": "1f9aa94fd87d919c5501bb3513241a2adc6c5287cf27ee27f2a9d6b92c4206b0",
+      "src/collaborative_hill/agents/replay.py": "e4956c2a153883e6b9910ff99041b6ee7fc554e4b33a6771047f4c74f24be56a",
+      "src/collaborative_hill/agents/scripted/__init__.py": "03dd087fa49a6670659a4bf184488c15ef61f4907b3c6c384af92d7ff8ab0f0b",
+      "src/collaborative_hill/agents/scripted/ec_policies.py": "ffcfa8ac232a730e8386a88154fc7612d381a1f0ffa437b83d81a98146aadb05",
+      "src/collaborative_hill/agents/scripted/graph_nipd_policies.py": "ea98757f37de32aab51913aeb9a8528b3a780eda7579041780f7f76a59a4d28f",
+      "src/collaborative_hill/agents/scripted/nipd_policies.py": "cff14ff7f0a4b84e1f5a1cda4fed8d7b294c6131c4d657b1f96546eb1e0b8516",
+      "src/collaborative_hill/agents/scripted/params.py": "00c56f7dedb5ca6650fdf5e4d85c8743983fd11e209ae2121e786b546c109244",
+      "src/collaborative_hill/cli.py": "5fca6fea1388b17ed64f7fd92949799b0d008f388f7a48fde5a1eab48b78eab0",
+      "src/collaborative_hill/domain/__init__.py": "144ddb2a8491dc2c2a0efbadd3ea5c2215983bf2d512a9c7911a695b74903b4d",
+      "src/collaborative_hill/domain/actions.py": "df77e9dae99f5c2e335cd2cae9281e4565cf01c2ae5c1836008e879329eb8156",
+      "src/collaborative_hill/domain/claims.py": "6000607a9fd5a19b1bb6244453526830d439d030340fe3433f3992c04cc27ee1",
+      "src/collaborative_hill/domain/evidence.py": "96e9c220bed65135b4a4fd9fbed07448180236f53bdb2da06d2ac64984080ff1",
+      "src/collaborative_hill/domain/institutions.py": "b4dd9c649124d311a51edc0e1e2cdff9d4a569474c82055687f6d39f89523980",
+      "src/collaborative_hill/domain/world/__init__.py": "e5255a1fd4b0c5a62ac71e5c7a68e56149bddabafa5cb965d851e7a2fef17325",
+      "src/collaborative_hill/domain/world/evidence_commons.py": "10e0f363f028e81b574cfa0eab331ffd88a838bdb95b3a10aa76f280f2aeaf77",
+      "src/collaborative_hill/domain/world/graph_nipd.py": "e2faeb62b15dfc94cb68d710d4ddfffa2c2e41f2d53b113d2666a90d72dbfb38",
+      "src/collaborative_hill/domain/world/nipd.py": "234d8ef39ad2e20efc180e074d253347b0dd390a38dc61cd976bb1e17943056d",
+      "src/collaborative_hill/engine/__init__.py": "215184c01f6aac3119df9c5b0e7751ad7c39646c0be29ba1155d03c1a7e70300",
+      "src/collaborative_hill/engine/branching.py": "5205dc6a25872775e68af2bf357a2cb524d9e227a37f777f14c015fcf9eda9f6",
+      "src/collaborative_hill/engine/events.py": "9f25ea6eae5abbadf5cdc2b74be02da31861436789c39a47f9fd51ff326871bd",
+      "src/collaborative_hill/engine/hashing.py": "e9051229b88a174e8c5d25f962d8fe38b77d3bd68450e8e65607ff9aa0a32448",
+      "src/collaborative_hill/engine/interfaces.py": "8b8bcc9d43ed1b84a5677e6a193eeab107ad43a3a47df7034898974314ae9030",
+      "src/collaborative_hill/engine/replay.py": "d5f71173dce69aff2343fb1fb761cd65376c16315b2a9f9ed1c30ded56fc03ee",
+      "src/collaborative_hill/engine/runner.py": "3fb03fca75d5d911a49de2efff9432d7eaf1fe2b4dd1286ac328e5230c1f8533",
+      "src/collaborative_hill/engine/seeds.py": "8c7c7087a30292c801659d0b0a6c697df30be3c50971d66943435c0ec5757dd7",
+      "src/collaborative_hill/engine/store.py": "661a26293a5a955bb6027359a4287897bf1f830e20db928e62acce1cda7adc47",
+      "src/collaborative_hill/engine/validation.py": "5f36d1dc672fdbaa159740902cdf5132c4ba18cbe88d32620f8ac3236fb268e6",
+      "src/collaborative_hill/experiments/__init__.py": "5045c70617997a53bc7d26eaf8a30a28b9213ebc73f80b2e00f0aedfb9d13825",
+      "src/collaborative_hill/experiments/manifests.py": "a1a2612daec3894ad6e10286552c9ae86af3e290af6c95a20ca22517a8124ffc",
+      "src/collaborative_hill/experiments/scenario.py": "d81a4683cfc2abf39d55d6c7e0392975ee81b4ffa250c1f9041361e75975a768",
+      "src/collaborative_hill/experiments/seed_audit.py": "b847fe686f015b103524809e65bf5167d9ac7e34b10d75cac1da9ca46e9b75fb",
+      "src/collaborative_hill/experiments/study.py": "51c68ba1f36d659d4ee9c3b3cf30a231e6eaf0e4d26f9e6af8009f67c60fbb01",
+      "src/collaborative_hill/metrics/__init__.py": "f86e505c3b9ca24eb205834a6dbbe72f562fb676d5aee8d996ab735c182ab195",
+      "src/collaborative_hill/metrics/cooperation.py": "ab3f267b8e55abcdf00c768ba48b706b64c9e99674e932860e93d07d9ef8a2d6",
+      "src/collaborative_hill/metrics/distribution.py": "deb02fe082f8e10b1f5bfb5fa951b053a18f61a24bce5a1444d211ca7c586e8b",
+      "src/collaborative_hill/metrics/epistemics.py": "d15613c80e7ed89349ce7e16ff61b220ee0a7d75957681272eb2e1a8f3ac4dc6",
+      "src/collaborative_hill/metrics/operations.py": "88d5cf6ac0152ed8e4f393903104ccde16aa03b096bf1de9c992cc502467735d",
+      "src/collaborative_hill/reporting/__init__.py": "cc2d2cc0a7db56109424f2e38082a3f46180e44022adb99f2335f422216b3a22",
+      "src/collaborative_hill/reporting/analysis.py": "570e3a21eb11863b01fdb7af9eace94e9d97b90eb9aeb3a00531c8e8d828bb6c",
+      "src/collaborative_hill/reporting/analysis_stats.py": "0ccb7a11704c3af09745ff98e9df2e2ef142a401ce57eeb3e560fcbc809c7b22",
+      "src/collaborative_hill/reporting/comparison.py": "7bcd40543775e9370480a0552966a407f9787b73747a3a722bf594139f1dcde0",
+      "src/collaborative_hill/reporting/report.py": "0e10c62a01235848e48ba4630afc1ad257de271082113704134943e6b3794dde"
+    },
+    "files_sha256": "e82eb752e391c1ff68c27af6aaccd2784c850b11a40b9f5eb0bd0f5764987422",
+    "local_source_commit": "873666aa9dfe1de7cc76d31275b4828fa44e065d",
+    "schema_version": 1,
+    "scope": "Package Python, dependencies, experiment program/design and canonical inputs.",
+    "worktree_dirty_before_run": false
+  },
+  "fixed_defectors": 1,
+  "matching_analytical_curves": 18,
+  "payoff_aggregation": "mean",
+  "population_size": 5,
+  "report_source_sha256": "4c81e3831bb47fd57a2f42858a1319ed12d04d1dba851a5559877e0065a83105",
+  "report_version": "graph_topology@1",
+  "rounds": 8,
+  "seed": 20261029,
+  "seed_protocol": "legacy-independent-v1",
+  "status": "unfrozen_exploratory_controls",
+  "study_hash": "8e4b5b5d2efc29c1e92918a21a74c2e0b590c4f1717a6c161890d571d512028a",
+  "unit_of_analysis": "one deterministic episode per condition; no inferential replication"
+}

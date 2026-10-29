@@ -74,6 +74,9 @@ jobs:
       - name: Verify responsive Evidence Commons experiment
         run: make check-responsive
 
+      - name: Verify graph topology inputs and exact controls
+        run: make check-graph
+
       - name: Verify the tested commit and clean workspace
         run: |
           test "$(git rev-parse HEAD)" = "$CHL_EXPECTED_SHA"

@@ -182,7 +182,7 @@ def branch(
     )
     from collaborative_hill.engine.branching import branch_run
     from collaborative_hill.engine.replay import load_run
-    from collaborative_hill.experiments.scenario import NIPDWorld
+    from collaborative_hill.experiments.scenario import GraphNIPDWorld, NIPDWorld
 
     try:
         _, resolved, manifest = load_run(run_dir)
@@ -192,7 +192,10 @@ def branch(
     overrides = {}
     for item in override:
         agent, name, params = _parse_override_item(item)
-        if isinstance(resolved.spec.world, NIPDWorld):
+        if isinstance(resolved.spec.world, NIPDWorld | GraphNIPDWorld):
+            from collaborative_hill.agents.scripted.graph_nipd_policies import (
+                build_graph_nipd_policy,
+            )
             from collaborative_hill.agents.scripted.nipd_policies import build_nipd_policy
 
             if name not in NIPD_POLICY_PARAMS:
@@ -201,9 +204,11 @@ def branch(
                 )
             try:
                 parsed = coerce_policy_params(name, params)
-                overrides[agent] = build_nipd_policy(
-                    name, resolved.spec.world.mode, parsed
+                builder = (
+                    build_graph_nipd_policy
+                    if isinstance(resolved.spec.world, GraphNIPDWorld) else build_nipd_policy
                 )
+                overrides[agent] = builder(name, resolved.spec.world.mode, parsed)
             except ValueError as exc:
                 raise typer.BadParameter(str(exc)) from exc
         else:
