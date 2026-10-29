@@ -1,4 +1,41 @@
-# HANDOFF — current checkpoint, 2026-10-28
+# HANDOFF — current checkpoint, 2026-10-29
+
+## Exact incentive-region experiment — bounded offline checkpoint
+
+Changed: `experiments/incentive-atlas/atlas.py` and its methods README provide an
+unfrozen exact atlas of `{contributor, freerider}^3` under the four institutions.
+The plane varies correct-slot benefit `b >= 0` and signed-credit multiplier `r >= 0`;
+all other weights, budgets and evidence stay fixed. C1 has a uniform lone-contributor
+witness; strict C2 requires `b+7r>39` for private evidence and `b+7r>45/2` for shared
+evidence. All-institution admissibility is their intersection. Every coefficient,
+deviation, failed-condition witness and selected boundary/interior check is retained.
+Four admissible designs are compared without selecting a production default.
+
+Verified on Python 3.14.3 / Windows at implementation commit `51ba8c4`, based on
+certificate repair merge `4cfd407`: 27 new oracle cases pass; `make check test validate`
+passes (Ruff, strict mypy in 45 source files, 320 unit/property and 628 full-suite
+passes, four existing filesystem skips). The experiment's separate Ruff/strict-mypy
+checks pass. Acceptance is 11/11, and a standard report reads an atlas baseline run.
+Two fresh generations each run 224 small engine episodes and six replays; their
+atlas JSON, report and all 224 event ledgers match byte-for-byte. Atlas SHA-256:
+`925596962b752f49a9f46cefe83bfda3332f7e40e98aba74c97b3a05e918310b`.
+Both original study hashes, JSON bytes and frozen=false states remain unchanged.
+One independent mathematical/methodological review found no blocking findings.
+The PR records final publication state; commands and evidence are in `BUILD_LOG.md`.
+
+NOT verified: the four skipped filesystem cases, other platforms, humans, real/paid
+providers, arbitrary strategies, behavioral improvement, statistical power or any
+published scientific finding. No persistent CI is configured. Rational probes use
+exact integer-unit rescaling, not a change to production `ECParams`.
+Residual risk: C1 is weak and existential; credit is created rather than budget-funded;
+C2 is neither a Pareto nor equilibrium guarantee. The scripts ignore incentives and
+attribution, so their invariant behavior supplies no evidence of improved cooperation.
+
+This completes only the owner-authorized bounded offline incentive experiment.
+The wider product park remains; no Study 002/pTFT work, freeze, release, deployment,
+participant data or paid run is included. The ten human-owned decisions below are
+unchanged, including final utility weights, hypotheses, models, budget and sample size.
+`human_todo=null`; that decision list remains the human-action home.
 
 ## Social-dilemma certificate correction
 

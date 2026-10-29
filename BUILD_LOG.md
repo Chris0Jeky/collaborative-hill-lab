@@ -449,3 +449,71 @@ hosted CI (none configured), or full-strategy-space incentives. Independent revi
 publication status are recorded on the PR. Residual risk: unchanged placeholder weights
 fail C2. The owner product-direction park and all ten HANDOFF decisions remain in force;
 this correctness repair neither unfreezes/freezes a study nor starts feature research.
+
+## 2026-10-29 — Exact incentive-region atlas (bounded offline experiment)
+
+Started from fresh `5a66e57` in an isolated detached worktree, then created
+`codex/incentive-atlas-20261028`. Incorporated the separate certificate repair by
+fast-forward to `4cfd4070f4f6d96346ec6625a056a9b2d153dca0`; this slice does not edit its
+certificate, generator, report or production engine. Implementation is `51ba8c4`.
+The owner-authorized exception covers this one offline experiment; the wider park
+and all human scientific decisions remain in force.
+
+The new experiment enumerates 32 ordered scripted profiles, extracts exact payoff
+vectors from completed chain-verified seals, and derives 48 strict unilateral gain
+inequalities plus four C2 comparisons. Wrong accepted slots retain the fixed public
+penalty, while both positive and negative private credit scale. C1 always holds via
+CFF->FFF; C2 gives private `b+7r>39`, shared `b+7r>45/2`. The README hand calculation,
+CCC-exit contrasts and four admissible examples distinguish collective sums from
+individual welfare, subsidy costs, equilibrium and behavioral response.
+
+Red/green: the literal misinformation coefficient test failed against the initial
+zero-vector stub, then passed with `U_i=(n_correct/3)b+k_i*r-4*n_wrong-effort_i`.
+27 focused cases now include strict ties and near-boundaries, negative domain and
+float refusal, C1 false/true controls, unchanged input identities, overwrite refusal,
+detected action/payoff drift, and all 32 profiles at six fresh-engine probe points.
+Each point also replays one standard run; denominators 2 and 3 are tested together.
+
+Proof commands, from the owned repository root, with its `src` on `PYTHONPATH` and
+the existing installed environment's Python 3.14.3 (no install or dependency change):
+
+```text
+python -m pip check
+python -m ruff check experiments/incentive-atlas tests/unit/test_incentive_atlas.py
+python -m mypy --strict --follow-imports=silent experiments/incentive-atlas/atlas.py
+make PY=<installed-python> SHELL=<Git-Bash-sh> check test validate
+python scripts/acceptance.py
+python experiments/incentive-atlas/atlas.py --out artifacts/atlas-first
+python experiments/incentive-atlas/atlas.py --out artifacts/atlas-repeat
+```
+
+All exit 0: no broken dependencies; Ruff/strict mypy clean; 320 unit/property and
+628 full-suite tests pass with the same four pre-existing filesystem skips;
+acceptance 11/11. Collection inventories are 324 and 632, including those skips.
+A standard `run_report` also reads `baseline/atlas-attr-priv-CCC` and reports its
+expected -6/-7/-7 utilities. The larger commands used the shared exclusive heavy-job
+helper and its 6 GiB admission guard (measured 8.07-9.33 GiB free at admission).
+Occupied-slot deferrals launched nothing and were not counted as test failures;
+the slot was released to the queued product lane after the finite proof.
+
+Each generation ran 224 fresh episodes and six replays. Compared both `atlas.json`
+and `REPORT.md` byte-for-byte, then all 224 `events.jsonl` files: identical. Atlas
+SHA-256 is `925596962b752f49a9f46cefe83bfda3332f7e40e98aba74c97b3a05e918310b`;
+report SHA-256 is `ab6554bfb849c03eabe6a4818ba7d616861abf89d3e06c7d12183f5329fd3cc6`.
+Generated operational artifacts remain outside Git; reproducible code and methods
+are committed. Original study JSON is byte-unchanged from `5a66e57` and all studies
+are unchanged from repair merge `4cfd407`. Both full validation snapshots agree:
+Study 000 `5dcde1a9b6c98c576ca71bc03ea65dcc96175b6d8803c4db89e6c56ac8a15e9f`;
+Study 001 `a3bffdfcf1715ebd65aa45b469f3e32c720d22633cfc80769b11020bcbd37bbe`;
+both frozen=false. No new lock or freeze was created.
+
+One fresh-context Terra high read-only review of `4cfd407..51ba8c4` and the generated
+artifact found no blocking mathematical/methodological or correctness findings.
+The reviewer checked quantifiers, complete coverage, strict boundaries, wrong-slot
+penalties, rational scaling, C3 and the literal oracles; it did not rerun generation
+or the full suite. PR publication/merge state is recorded on the PR, not inferred.
+
+NOT verified: other platforms, four skipped filesystem cases, real providers/humans,
+full-strategy-space incentives, behavioral effects, power or published findings.
+Residual risk: minted credit can buy C2 without improved quality; collective sums
+do not imply Pareto improvement or equilibrium. No default weights were selected.
