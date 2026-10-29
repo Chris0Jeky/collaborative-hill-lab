@@ -1,7 +1,7 @@
 # CLAUDE.md — Collaborative Hill Lab
 
 T1 sandbox · push/merge free · authority `.agent-harness/tier.json` (its notes carry the promotion
-criteria; return sessions are not one) · no CI · dual-runtime (Codex reads `AGENTS.md`; Claude does not load it, so read its §5 invariants before
+criteria; return sessions are not one) · persistent exact-commit CI · dual-runtime (Codex reads `AGENTS.md`; Claude does not load it, so read its §5 invariants before
 product changes). Start inline; a read-only review subagent is always allowed (global law 2g). No deny
 floor is guaranteed on this host: act as if nothing catches an irreversible command. Global laws are auto-injected. State, open questions, the 10 decisions: `HANDOFF.md`.
 
@@ -9,11 +9,24 @@ floor is guaranteed on this host: act as if nothing catches an irreversible comm
 A deterministic, fully offline laboratory for one thesis: which interaction, information and
 institutional structures move agent populations out of the **Tragic Valley** (free-riding,
 misinformation, coordination failure) onto the **Collaborative Hill** (accurate, sustained
-cooperation). It carries Tcaci & Huyck's N-person IPD result — targeted pairwise accountability
-breeds reciprocity, diffuse punishment collapses it — to LLM agents reasoning over evidence. First
-environment **Evidence Commons**. M0 is built; no real provider, no paid run, no human data.
+cooperation). Tcaci & Huyck's N-person IPD comparison motivates the question; Study 000/002
+show that both structure and reciprocity policy matter, so the legacy pattern is not a
+structure-only effect. The longer-term target is LLM agents reasoning over evidence.
+First environment **Evidence Commons**. M0 is built; no real provider, no paid run, no human data.
 
-## Proving checks (run from the repo root; `make` needs Git Bash; no CI — this is the gate)
+## Proving checks (run from the repo root; Windows `make` needs Git Bash)
+
+Persistent GitHub Actions runs `make check test validate acceptance check-atlas
+check-study002` on the exact PR head or main commit with the committed dependency
+lock. Read its job steps and logs for the current commit; green results on an older
+head are not evidence for a new one. Setup downloads dependencies, while the
+science gates make no model-provider calls. CI currently covers Ubuntu/Python 3.12.
+
+The measured counts below are a historical July checkpoint, not the current suite
+inventory. Its old C1-only certificate wording is superseded: current Study 001
+passes C1, fails C2 and is **not social-dilemma certified**; C3 integrity passes.
+Current verification evidence and research limitations live in `HANDOFF.md` and
+`BUILD_LOG.md`. `make validate` now covers four StudySpecs across three studies.
 
 | changed | narrowest command that exercises it | measured 2026-07-27 |
 |---|---|---|
@@ -37,5 +50,5 @@ environment **Evidence Commons**. M0 is built; no real provider, no paid run, no
   tune results toward the legacy paper, never present a simulation as a prediction about humans.
 - Human-only: freezing a study (`--yes`), any paid LLM run, the `HANDOFF.md` decision list.
 - **Synthetic data only** — real human-subject data needs `sensitive_data: true` in the tier file FIRST.
-- ADR-locked (`docs/adr/0001…0007`; change = new ADR, not a refactor): own kernel + Concordia
+- ADR-locked (`docs/adr/0001…0009`; change = new ADR, not a refactor): own kernel + Concordia
   cognition-only, hash-linked ledger + CoW branches, five planes, mechanism/skin hash separation.

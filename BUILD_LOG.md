@@ -517,3 +517,182 @@ NOT verified: other platforms, four skipped filesystem cases, real providers/hum
 full-strategy-space incentives, behavioral effects, power or published findings.
 Residual risk: minted credit can buy C2 without improved quality; collective sums
 do not imply Pareto improvement or equilibrium. No default weights were selected.
+
+## 2026-10-29 — Repository-wide research engine advancement
+
+The owner authorized broad inspection, implementation, parallel work, PR updates
+and merging safe changes. GitHub was authoritative throughout. On entry, main was
+`8f4e25e8861fe5ba85f2cc7d83ee9319c167914e`, with no open issues or PRs. The uploaded
+source ZIP's archive identity and all 206 file blob hashes matched its remote tree
+`44a304134490fab0afc09d150163e35a1acf5aa5`; executable modes were reconciled before
+local work. Remote reads and publication used the connected GitHub API. Local Git
+commits have different ancestry from the published commits and are identified as local.
+
+The Python 3.12.14 environment installed the committed 38-pin lock through
+`make setup`, followed by `pip check`. Initial local network restriction blocked
+the install; approved execution of the same setup command succeeded. No equivalent
+GitHub network workaround was attempted. Baseline `make check test validate` and
+acceptance passed: 632 tests and 11/11 scenarios. Studies 000/001 were unfrozen
+with the unchanged hashes recorded in HANDOFF.
+
+### Persistent verification and integrity repairs
+
+- **#69 / #64:** added persistent Ubuntu/Python 3.12 CI with immutable official
+  action refs, read-only token, exact-head checkout, lock installation, complete
+  quality/study/acceptance gates, atlas generation and a clean-workspace check.
+  The atlas gate generates under a temporary directory and removes it afterwards.
+- **#70 / #65:** fifteen pre-fix failing regressions reproduced non-treatment
+  confounds, contradictory retries, misplaced identities and failed-only protocol
+  loss. The analysis now compares declared populations, checks failed eligible
+  attempts, preserves identical-copy exclusions and rejects conflicting units.
+  Independent-run and paired-block scopes differ explicitly. Valid golden output
+  and statistical formulas remain unchanged; literal bootstrap-tail and Holm
+  expectations add an independent numerical check.
+- **#74 / #68:** shared built-in policy contracts reject unknown keys, invalid
+  epsilon/threshold ratios and denominator settings before execution. Validation
+  does not rewrite stored values or insert defaults. Forty-six new cases cover
+  direct configuration and CLI boundaries, including exact rational endpoints;
+  all 16 original resolved scenarios retain their serialization. Unknown policy
+  names remain schema extension points, subject to the existing execution registry.
+- **#75 / #67:** thirty initial failing cases reproduced invalid condition paths,
+  count coercion and escaping output links. Review then reproduced later static
+  file/dangling-link blockers, canonical aliases and nested run destinations.
+  All 35 new real-filesystem/validation cases pass after complete destination
+  preflight plus per-run rechecks. Explicit root symlinks and empty directories
+  remain supported; concurrent ancestor replacement is outside this static guard.
+
+The individual PRs passed exact-head Actions, with every job step and the logs
+inspected, and no unresolved threads/comments at merge. Their run URLs are in
+HANDOFF. The combined first five merges passed main CI at
+`bfd49d5c3e1e00bcfba2497b42ba05e04373bf9b`:
+[Actions 40803992791](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/40803992791).
+Local combined verification before the mathematical extension passed all 774 tests,
+Ruff, strict package mypy, study validation, 11/11 acceptance and the atlas gate.
+
+### Study 002 execution (#73 / #66)
+
+Local commit `cf08170937d7a0b50fc6b23bf02b2649bddeb154` recorded the analytical
+predictions before execution. Local implementation commit
+`d4b8de90fe8317a0522764ca53b86727db93179c` supplied the clean run source. The
+design has 29 deterministic cells × 1 episode plus six stochastic cells × 32,
+50 rounds per episode, independent condition streams and a predeclared final
+ten-round window. Canonical generation, plan mode, safe fresh-output execution
+and identity-bound sealed-ledger reporting are included.
+
+Commands executed in the study worktree with its source on `PYTHONPATH`:
+
+```text
+python studies/002-nipd-sensitivity/generate_study.py --check
+python studies/002-nipd-sensitivity/run_study.py --artifacts artifacts/study-002
+python studies/002-nipd-sensitivity/generate_report.py --artifacts artifacts/study-002 --output studies/002-nipd-sensitivity/RESULTS
+```
+
+All 221 episodes completed and sealed. All 29 full deterministic cooperation
+paths and exact payoff vectors match hand-derived predictions. The measured
+N=5,m=4 include-self replicate r000 replay verified 1,056 events; three deterministic
+replay integration cases also passed. Report regeneration was byte-identical.
+Review found a report-output overwrite gap; both destinations
+are now preflighted, identical output is a no-op, and divergent output is refused.
+The final isolated study branch passed 677 tests, explicit strict mypy for its
+four modules, all four StudySpec validations and 11/11 acceptance.
+
+All 192 observed stochastic episodes absorbed within the horizon and all final
+windows were zero. Positive analytical expectations are retained. The N=3,m=2
+include-self expectation outside its marginal bootstrap interval is reported
+explicitly; the original 32 episodes and 2,000-draw bootstrap settings were not
+changed. The report is exploratory and does not treat agents or rounds as replicates.
+
+To make source-content provenance remotely recoverable, published commit
+`16e7c45634eb2fdaa0d70e1933c7a966f3da6967` preserves the exact execution tree
+`4fb241428f18e8e4013324be6905d31b986edfe4`. Tree equality was checked through the
+GitHub API. SOURCE_PROVENANCE retains 88 file commitments and maps local to
+published identity. Publication timing is not represented as preregistration
+timing. The raw ledgers remain generated artifacts; the committed summary retains
+per-episode terminal commitments and outcomes.
+
+The original execution artifacts were subsequently packaged as
+`Study002_Original_Sealed_Runs_2026-10-29.zip`: 1,768 unchanged original files,
+12,362,482 compressed bytes, SHA-256
+`1a72382d9ca014b3856af4451c3c425b03fa3034a9a38674bf58627a49c3108d`.
+All 221 terminal hashes match RESULTS.json. The archive includes extraction and
+rederivation instructions plus per-file SHA-256 commitments; ZIP CRC and every
+included file checksum were verified. It is supplied separately to the owner,
+while generated raw ledgers remain outside Git.
+
+### Exact finite-population pTFT extension (#79 / #72)
+
+This deliberately post hoc extension derives transition probabilities and first/
+second moments using exact rational arithmetic. The episode/window variance
+includes both halves of the cross-round covariance sum. The report distinguishes
+F40 (a completely zero final window) from F49 (absorption by the last round),
+computes independent contrast variance by addition and keeps large probability
+powers as exact base/exponent expressions. Only displayed decimal approximations
+use Decimal. It changes no simulator sampling, original readout, source provenance,
+study input or bootstrap setting.
+
+Core local commit `9660902b39932fdd1966c0efbd426869217d0294` adds 55 tests,
+including literal moments and independent labelled-state/history enumeration.
+The independent reviewer separately enumerated N=5,m=3, four-round full/window
+moments and confirmed the six geometric mean curves. Report local commit
+`3468e936870cf25fe4de709a77eb4683b42a8fdf` adds 20 integration tests, Markdown,
+exact JSON and an SVG. Independent report review reproduced ambient Decimal
+rounding drift; the author also reproduced inherited Matplotlib style drift.
+Both failed before fixes and pass with isolated contexts and restoring style
+settings. The committed figure matches a freshly regenerated SVG byte-for-byte;
+its Inkscape PNG was visually inspected by two reviewers. No layout or misleading
+scale issue remained. The report lane's exact HEAD passed all 752 tests and
+11/11 acceptance independently of root integration.
+
+The report validates the two study hashes, all 221 episode identities, six fixed
+stochastic cells, 32 episodes per cell, and retained summary arithmetic. It records
+the original RESULTS.json SHA-256 and the benchmark source hash. This is a
+summary-level consistency audit, not a fresh replay of the original ledgers.
+For N=5,m=4 include-self, P(all 32 final windows zero) is approximately
+0.991638924269 under the ideal model. That event probability is not a p-value.
+
+### Integrated commands, documentation and verification
+
+The Makefile now exposes `study-002-plan`, `study-002` and `check-study002`;
+`STUDY002_ARTIFACTS` selects a fresh root, with paths quoted. Validation includes
+the two Study 002 components. CI additionally checks the six study modules and
+read-only byte regeneration of the benchmark JSON/Markdown/SVG. Dry-runs checked
+an artifact path containing spaces; `make study-002-plan` confirmed the 221-episode
+plan without creating output. Full execution/report behavior is covered by the
+study pipeline and report tests; no extra 221-episode exploratory sample was
+added merely to exercise a Make wrapper.
+
+At integrated local code commit `fe5c81d`, these commands completed successfully:
+
+```text
+make check test validate acceptance check-atlas check-study002
+python -m pytest --collect-only -o addopts='' -q tests
+make study-002-plan
+git diff --check
+```
+
+Result: Ruff clean; strict package mypy in 45 files; 438 unit/property cases and
+**849 total tests**, with no skips in this Linux run; all four unfrozen StudySpecs;
+11/11 acceptance; exact atlas verification; strict mypy in six study-local modules;
+canonical study bytes; and byte-identical benchmark/figure regeneration. The 438
+cases are part of the 849, not additional independent tests. Documentation and
+the published-provenance mapping were uncommitted at this local verification;
+this is not described as a clean study execution. Exact-head hosted evidence for
+the published integrated source is attached to #79; the documentation PR carries
+its own current check.
+
+README, NEXT, PLAN, HANDOFF and the contributor commands now describe the actual
+engine. The prior handoff was archived with identical SHA-256
+`dac1e69557d4fdc098defa8237adecc75f8919c149ae37cbf9e567edca14d647`.
+Scientific review corrected older structure-only causal claims, C3 overgeneralization,
+the false exclusion of institution from mechanism hashes, unconditional skin-chain
+equality, assumed original CRN pairing and blanket requirements for uncertainty
+intervals. A second review confirmed the revisions. The ten owner decisions are
+verbatim, and tier/hook/permission rules are unchanged.
+
+Issues #76–#78 provide bounded next increments: responsive Evidence Commons
+baselines, configurable provider transport with offline contract tests, and
+versioned graph semantics. The roadmap separates immediate engineering from a
+bounded pilot and the later pilot-dependent confirmatory design, removing the
+old circular sample-size/freeze dependency. No utility weights, confirmatory
+hypotheses, provider budget or publication claim were chosen. No study was frozen,
+and no real or paid provider or human-subject data was used.

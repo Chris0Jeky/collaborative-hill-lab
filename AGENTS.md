@@ -23,10 +23,12 @@ what was NOT verified.
 
 Which interaction structures, information structures, and institutional mechanisms move
 LLM-agent populations from a **Tragic Valley** (free-riding, misinformation, coordination
-failure) to a **Collaborative Hill** (accurate, sustainable cooperation)? Lineage: Tcaci &
-Huyck's N-person IPD result (targeted pairwise accountability sustains reciprocity; diffuse
-punishment collapses it), carried to LLM agents over evidence and institutions. First
-environment: **Evidence Commons**. Full charter: `docs/research/RESEARCH_CHARTER.md`.
+failure) to a **Collaborative Hill** (accurate, sustainable cooperation)? The motivating
+lineage is Tcaci & Huyck's N-person IPD comparison of targeted and diffuse reciprocity.
+Study 000/002 show that both structure and policy matter; the legacy comparison does
+not identify a structure-only effect. The longer-term target is LLM agents over
+evidence and institutions. First environment: **Evidence Commons**. Full charter:
+`docs/research/RESEARCH_CHARTER.md`.
 
 ## 3. Architecture map
 
@@ -34,7 +36,7 @@ Scenario (5 planes) → compiler (content hashes; mechanism ≠ narrative) → d
 MechanismEngine → runner (observe → propose typed action → validate → resolve → checkpoint
 → seal) → hash-linked `events.jsonl` → replay/branch → metrics → reports. LLMs act only
 through the typed-action gate; they never resolve or score world state. Decisions:
-`docs/adr/0001…0008`; synthesis: `docs/FOUNDATION_REVIEW.md`.
+`docs/adr/0001…0009`; synthesis: `docs/FOUNDATION_REVIEW.md`.
 
 ## 4. Repository map
 
@@ -45,9 +47,11 @@ through the typed-action gate; they never resolve or score world state. Decision
 | `src/collaborative_hill/agents/` | `scripted/` (TFT family, EC personas), `replay.py`, `llm/` (policy, providers, rendering) |
 | `src/collaborative_hill/experiments/` | scenario (5 planes + skins + compiler), study lifecycle, manifests |
 | `src/collaborative_hill/metrics/` | cooperation, epistemics, distribution, operations (versioned) |
-| `src/collaborative_hill/reporting/` | run/study markdown + parquet derivation |
-| `studies/000-…`, `studies/001-…` | executable studies (see their READMEs) |
+| `src/collaborative_hill/reporting/` | run/study reports, counterfactual comparison, sealed factorial analysis |
+| `studies/000-…`, `studies/001-…`, `studies/002-…` | executable studies, methods and research readouts |
+| `experiments/incentive-atlas/` | exact finite-strategy incentive-region exploration |
 | `tests/{unit,property,metamorphic,integration}` | the science-guarding suites |
+| `.github/workflows/ci.yml` | exact-commit offline verification on PRs and main |
 | `docs/adr/`, `docs/research/` | decisions; research documents |
 
 ## 5. Invariants (breaking any of these is a defect, not a style choice)
@@ -72,11 +76,20 @@ through the typed-action gate; they never resolve or score world state. Decision
 
 ## 6. Commands
 
-`make doctor | setup | check | test | validate | study-000 | study-001-smoke |
+`make doctor | setup | check | test | validate | acceptance | check-atlas |
+check-study002 | study-000 | study-001-smoke | study-002-plan | study-002 |
 replay-smoke | report | clean-generated`; CLI: `chl scenario validate`, `chl study
-validate|audit-seeds|freeze`, `chl run`, `chl replay`, `chl branch`, `chl report`, `chl doctor`.
+validate|audit-seeds|freeze`, `chl run`, `chl replay`, `chl branch`, `chl compare`,
+`chl analyze`, `chl report`, `chl doctor`.
 Venv python: `.venv/bin/python` on POSIX, `.venv/Scripts/python.exe` on Windows.
 Quote all paths (spaces).
+
+`make validate` checks all four shipped StudySpecs (Study 002 has two components).
+`make study-002` needs a fresh output root; choose another with
+`STUDY002_ARTIFACTS=artifacts/study-002-repeat`. Persistent CI runs
+`make check test validate acceptance check-atlas check-study002` on the exact
+published commit and checks that verification leaves the checkout clean.
+Setup downloads pinned dependencies; the science checks call no model provider.
 
 ## 7. How to add things
 
@@ -100,7 +113,8 @@ Quote all paths (spaces).
 ## 8. Handoff checklist (before ending any substantial session)
 
 1. `make check` and `make test` green (or failures explained in HANDOFF.md).
-2. `make validate` passes for both studies.
+2. `make validate` passes for all shipped StudySpecs; changed standalone research
+   code also passes `make check-atlas` or `make check-study002` as applicable.
 3. After any review fix, rerun the relevant gates on the new exact HEAD.
 4. HANDOFF.md updated: state, failures, open questions, next tasks, verify commands.
 5. BUILD_LOG.md appended with decisions + commands actually run.

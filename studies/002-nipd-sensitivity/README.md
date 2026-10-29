@@ -1,7 +1,8 @@
 # Study 002 — N-IPD quorum and denominator sensitivity
 
-**Status: unfrozen exploratory draft; scripted agents only.** These predictions are
-committed before this study is executed. This is the R3 follow-up in `NEXT.md`,
+**Status: executed, unfrozen exploratory draft; scripted agents only.** These
+predictions were recorded in a local commit before execution; their later GitHub
+publication is not an externally timestamped preregistration. This is the R3 follow-up in `NEXT.md`,
 extending Study 000's strategy/structure deconfound to N=5. No legacy result is an
 optimization target. No LLM provider, paid run, or human data is involved.
 
@@ -199,3 +200,37 @@ commit ID exists on GitHub. File-content commitments allow comparison after
 publication gives the same changes different commit metadata. Report generation
 refuses to replace differing existing output; choose a fresh prefix for a new
 readout, while byte-identical regeneration is a no-op.
+
+The [published execution snapshot](https://github.com/Chris0Jeky/collaborative-hill-lab/commit/16e7c45634eb2fdaa0d70e1933c7a966f3da6967)
+has exactly the execution tree `4fb241428f18e8e4013324be6905d31b986edfe4`.
+`SOURCE_PROVENANCE.json` maps the local identity to that published commit and
+retains 88 per-file SHA-256 commitments. Later validation and reporting changes
+do not retroactively become the source that generated these episodes.
+
+## Post hoc exact finite-population benchmark
+
+[EXACT_PTFT_BENCHMARK.md](EXACT_PTFT_BENCHMARK.md), its exact JSON and its SVG
+compare the original six stochastic cells with a finite-state count model. The
+benchmark derives the full trajectory's mean and variance, including cross-round
+covariance, the final-window variance, and all-D absorption probabilities.
+The event of an all-zero final ten-round window is absorption by **t=40**; absorption
+by the last observed round is **t=49**. These are distinct events.
+
+This analysis was added after inspecting the measured results. It preserves
+`RESULTS.json`, `RESULTS.md`, the source commitments, the original sample and all
+design settings. It supplies model-based Monte Carlo standard errors, not new
+significance tests or a replacement empirical interval. Its exact rational
+Bernoulli assumptions remain distinct from the simulator's finite-precision draws.
+
+From the repository root, with the environment active:
+
+```sh
+python studies/002-nipd-sensitivity/generate_exact_benchmark.py --check
+```
+
+This checks byte-identical JSON, Markdown and SVG regeneration using the retained
+result summary; it neither runs new episodes nor changes evidence. To create a
+separate copy, pass `--output artifacts/exact-ptft-benchmark`. The aggregate readout
+retains terminal commitments, but independent re-verification of the original
+ledgers requires those original run artifacts; a fresh run on newer source is a
+new execution.
