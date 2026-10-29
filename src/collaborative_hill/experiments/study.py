@@ -23,7 +23,7 @@ condition-specific. See ADR-0008 for compatibility and inference limits.
 import json
 import os
 import tempfile
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from typing import Any, Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -73,6 +73,17 @@ class ConditionSpec(BaseModel):
     skin: str
     scenario_block: str | None = None
 
+    @field_validator("condition_id")
+    @classmethod
+    def portable_output_component(cls, value: str) -> str:
+        # A condition is both a seed identity and a directory component. Reject
+        # ambiguous names instead of normalising them and changing their identity.
+        if (not value or value in {".", ".."} or value != value.strip()
+                or value.endswith(".") or PureWindowsPath(value).is_reserved()
+                or any(ord(char) < 32 or char in '<>:"/\\|?*' for char in value)):
+            raise ValueError("condition_id must be a portable, non-empty path component")
+        return value
+
     @field_validator("scenario_block")
     @classmethod
     def valid_scenario_block(cls, block: str | None) -> str | None:
@@ -88,19 +99,21 @@ class StudySpec(BaseModel):
     title: str = ""
     seed: int
     seed_protocol: SeedProtocol = LEGACY_SEED_PROTOCOL
-    replicates: int = Field(default=1, ge=1)
-    checkpoint_every: int = 0
+    replicates: int = Field(default=1, ge=1, strict=True)
+    checkpoint_every: int = Field(default=0, ge=0, strict=True)
     invalid_action_policy: InvalidActionPolicy = "fail"
-    conditions: tuple[ConditionSpec, ...]
+    conditions: tuple[ConditionSpec, ...] = Field(min_length=1)
 
     @field_validator("conditions")
     @classmethod
     def unique_condition_ids(
         cls, conditions: tuple[ConditionSpec, ...]
     ) -> tuple[ConditionSpec, ...]:
-        ids = [condition.condition_id for condition in conditions]
+        ids = [condition.condition_id.casefold() for condition in conditions]
         if len(ids) != len(set(ids)):
-            raise ValueError("condition IDs must be unique")
+            raise ValueError(
+                "condition IDs must be unique, including on case-insensitive filesystems"
+            )
         return conditions
 
     @model_validator(mode="after")
@@ -286,6 +299,21 @@ def _refuse_if_runs_exist(run_dirs: list[Path]) -> None:
             )
 
 
+def _require_output_within_root(run_dir: Path, artifacts_root: Path) -> Path:
+    """Respect an explicitly chosen root symlink, but not escaping descendants.
+
+    This checks the current filesystem layout; it is not protection against a
+    different process replacing directories concurrently after the check.
+    """
+    destination = run_dir.resolve()
+    if not destination.is_relative_to(artifacts_root.resolve()):
+        raise ValueError(f"run output resolves outside the selected artifacts root: {run_dir}")
+    for component in (run_dir, *run_dir.parents):
+        if (component.exists() or component.is_symlink()) and not component.is_dir():
+            raise FileExistsError(f"run output path is not a directory: {component}")
+    return destination
+
+
 def run_study(
     study_dir: Path,
     artifacts_root: Path,
@@ -306,6 +334,8 @@ def run_study(
             "a frozen study is immutable; create a new version instead"
         )
     replicates = replicates_override if replicates_override is not None else spec.replicates
+    if type(replicates) is not int:
+        raise ValueError(f"replicates must be an integer >= 1, got {replicates!r}")
     if replicates < 1:
         raise ValueError(f"replicates must be >= 1, got {replicates}")
     if only_condition is not None and all(
@@ -318,12 +348,19 @@ def run_study(
     env = environment_provenance()
     dep_hash = lock_hash(repo_root)
 
-    _refuse_if_runs_exist(
-        _planned_run_dirs(
-            Path(artifacts_root), locked or "DRAFT-" + h[:12],
-            spec, only_condition, replicates,
-        )
+    planned_dirs = _planned_run_dirs(
+        Path(artifacts_root), locked or "DRAFT-" + h[:12],
+        spec, only_condition, replicates,
     )
+    destinations: set[Path] = set()
+    for run_dir in planned_dirs:
+        destination = _require_output_within_root(run_dir, Path(artifacts_root))
+        if destination in destinations:
+            raise ValueError("planned run output directories overlap after resolving symlinks")
+        destinations.add(destination)
+    if any(parent in destinations for path in destinations for parent in path.parents):
+        raise ValueError("planned run output directories overlap after resolving symlinks")
+    _refuse_if_runs_exist(planned_dirs)
     results: list[RunResult] = []
     for cond in spec.conditions:
         if only_condition is not None and cond.condition_id != only_condition:
@@ -337,6 +374,7 @@ def run_study(
             )
             run_dir = (Path(artifacts_root) / (locked or "DRAFT-" + h[:12])
                        / cond.condition_id / run_id)
+            _require_output_within_root(run_dir, Path(artifacts_root))
             with RunPaths(run_dir).reserve() as paths:
                 (run_dir / "scenario.resolved.json").write_text(
                     scenario.model_dump_json(indent=2), encoding="utf-8"
