@@ -18,7 +18,8 @@ pytestmark = pytest.mark.integration
 GOLDEN = Path(__file__).parent / "golden" / "analysis_001.json"
 
 
-def make_fixture(directory, *, paired=False, fail=False, invalid=False, monkeypatch=None):
+def make_fixture(directory, *, paired=False, fail=False, invalid=False, monkeypatch=None,
+                 change=None):
     source = directory / "study"
     shutil.copytree(STUDY_001, source)
     path = source / "study.json"
@@ -31,6 +32,8 @@ def make_fixture(directory, *, paired=False, fail=False, invalid=False, monkeypa
         for condition in spec["conditions"]:
             condition["scenario_block"] = "fixture"
     path.write_text(json.dumps(spec), encoding="utf-8")
+    if change is not None:
+        change(source)
     if fail or invalid:
         build = study.build_policies
 
@@ -175,8 +178,81 @@ def test_mixed_study_hashes_are_refused(scripted_artifacts, tmp_path):
         analyze_study(root)
 
 
-def test_failed_runs_are_exclusions_with_cell_counts(tmp_path, monkeypatch):
-    root = make_fixture(tmp_path, fail=True, monkeypatch=monkeypatch)
+@pytest.mark.parametrize("paired", [False, True])
+@pytest.mark.parametrize("nuisance", ["population", "task", "skin"])
+def test_factorial_analysis_refuses_confounding_between_cells(tmp_path, paired, nuisance):
+    def change(source):
+        path = source / ("study.json" if nuisance == "skin" else "scenarios/attr-ledger.json")
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if nuisance == "population":
+            data["cognition"]["agents"][2]["policy"]["name"] = "ec_verifier"
+        elif nuisance == "task":
+            data["world"]["params"]["rounds"] = 11
+        else:
+            data["conditions"][3]["skin"] = "skins/newsroom-desk.json"
+        path.write_text(json.dumps(data), encoding="utf-8")
+
+    root = make_fixture(tmp_path, paired=paired, change=change)
+    with pytest.raises(ValueError, match="differ outside the two factorial axes"):
+        analyze_study(root)
+
+
+def test_failed_episodes_cannot_hide_a_confounding_population(tmp_path, monkeypatch):
+    def change(source):
+        path = source / "scenarios/attr-ledger.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        data["cognition"]["agents"][2]["policy"]["name"] = "ec_verifier"
+        path.write_text(json.dumps(data), encoding="utf-8")
+
+    root = make_fixture(tmp_path, fail=True, monkeypatch=monkeypatch, change=change)
+    with pytest.raises(ValueError, match="differ outside the two factorial axes"):
+        analyze_study(root)
+
+
+@pytest.mark.parametrize("field", ["providers", "prompt_template_hashes", "sampling"])
+def test_runtime_configuration_drift_is_not_pooled(scripted_artifacts, tmp_path, field):
+    root = tmp_path / "artifacts"
+    shutil.copytree(scripted_artifacts, root)
+    path = root / "agg-priv" / "agg-priv-r000" / "manifest.json"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data[field] = {"a1": {"temperature": "1/2"} if field == "sampling" else "changed"}
+    path.write_text(json.dumps(data), encoding="utf-8")
+    with pytest.raises(ValueError, match="differ outside the two factorial axes"):
+        analyze_study(root)
+
+
+@pytest.mark.parametrize("failed_first", [False, True])
+def test_conflicting_repeated_attempts_are_not_selected_by_directory_order(
+    scripted_artifacts, tmp_path, monkeypatch, failed_first,
+):
+    root = tmp_path / "artifacts"
+    shutil.copytree(scripted_artifacts, root)
+    failed_root = make_fixture(tmp_path / "failed", fail=True, monkeypatch=monkeypatch)
+    target = "00-retry" if failed_first else "zz-retry"
+    shutil.copytree(failed_root / "agg-priv" / "agg-priv-r000", root / "agg-priv" / target)
+    with pytest.raises(ValueError, match="conflicting artifacts for one episode"):
+        analyze_study(root)
+
+
+def test_misplaced_artifact_does_not_contaminate_the_selected_study(
+    scripted_artifacts, tmp_path,
+):
+    root = tmp_path / "artifacts"
+    shutil.copytree(scripted_artifacts, root)
+    extra = root / "attr-ledger" / "zz-misplaced"
+    shutil.copytree(root / "agg-priv" / "agg-priv-r000", extra)
+    path = extra / "manifest.json"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data["study_hash"] = "outside-study"
+    path.write_text(json.dumps(data), encoding="utf-8")
+    result = analyze_study(root)
+    assert len(result["episodes"]) == 12
+    assert [e["reason"] for e in result["exclusions"]] == ["condition_directory_mismatch"]
+
+
+@pytest.mark.parametrize("paired", [False, True])
+def test_failed_runs_are_exclusions_with_cell_counts(tmp_path, monkeypatch, paired):
+    root = make_fixture(tmp_path, fail=True, monkeypatch=monkeypatch, paired=paired)
     result = analyze_study(root)
     assert result["episodes"] == []
     assert len(result["exclusions"]) == 12
@@ -184,6 +260,30 @@ def test_failed_runs_are_exclusions_with_cell_counts(tmp_path, monkeypatch):
     assert all(c["failed"] == 3 and c["inclusion_rate"] == "0"
                for c in result["attrition"]["per_cell"].values())
     assert all(e["estimate"] is None for e in result["primary"]["family"].values())
+    assert result["seed_protocol"] == ("paired-policy-v2" if paired else "legacy-independent-v1")
+    assert result["bootstrap"]["resampling_unit"] == (
+        "scenario_block,replicate" if paired else "episode_within_cell"
+    )
+
+
+def test_separate_paired_blocks_may_declare_different_baseline_populations(tmp_path):
+    def change(source):
+        path = source / "study.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        # Each block is incomplete, so all inference must be unavailable. The
+        # different baseline is allowed in an explicitly different block.
+        data["conditions"][3]["scenario_block"] = "other-population"
+        path.write_text(json.dumps(data), encoding="utf-8")
+        path = source / "scenarios/attr-ledger.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        data["cognition"]["agents"][2]["policy"]["name"] = "ec_verifier"
+        path.write_text(json.dumps(data), encoding="utf-8")
+
+    result = analyze_study(make_fixture(tmp_path, paired=True, change=change))
+    assert len(result["episodes"]) == 12
+    assert all(effect["inference_unavailable"] == "incomplete_paired_blocks"
+               and effect["ci95"] is None and effect["p_holm"] is None
+               for effect in result["primary"]["family"].values())
 
 
 def test_completed_invalid_action_episodes_are_included_as_run(tmp_path, monkeypatch):
