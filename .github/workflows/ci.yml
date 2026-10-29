@@ -59,7 +59,7 @@ jobs:
       - name: Run the complete test suite
         run: make test
 
-      - name: Validate both studies
+      - name: Validate shipped study definitions
         run: make validate
 
       - name: Run offline acceptance scenarios
@@ -67,6 +67,9 @@ jobs:
 
       - name: Verify the incentive atlas
         run: make check-atlas
+
+      - name: Verify Study 002 inputs and exact benchmark
+        run: make check-study002
 
       - name: Verify the tested commit and clean workspace
         run: |

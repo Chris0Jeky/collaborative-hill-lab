@@ -9,8 +9,9 @@ else
 PY ?= .venv/bin/python
 endif
 CHL := "$(PY)" -m collaborative_hill.cli
+STUDY002_ARTIFACTS ?= artifacts/study-002
 
-.PHONY: doctor setup check check-atlas test validate acceptance study-000 study-001-smoke replay-smoke report clean-generated
+.PHONY: doctor setup check check-atlas check-study002 test validate acceptance study-000 study-001-smoke study-002-plan study-002 replay-smoke report clean-generated
 
 doctor:
 	$(CHL) doctor
@@ -32,12 +33,19 @@ check-atlas:
 	"$(PY)" -m mypy --strict --follow-imports=silent experiments/incentive-atlas/atlas.py scripts/check_atlas.py
 	"$(PY)" scripts/check_atlas.py
 
+check-study002:
+	"$(PY)" -m mypy --strict --follow-imports=silent studies/002-nipd-sensitivity/*.py
+	"$(PY)" studies/002-nipd-sensitivity/generate_study.py --check
+	"$(PY)" studies/002-nipd-sensitivity/generate_exact_benchmark.py --check
+
 test:
 	"$(PY)" -m pytest tests/ -q
 
 validate:
 	$(CHL) study validate "studies/000-legacy-reproduction"
 	$(CHL) study validate "studies/001-evidence-commons"
+	$(CHL) study validate "studies/002-nipd-sensitivity"
+	$(CHL) study validate "studies/002-nipd-sensitivity/stochastic"
 
 acceptance:
 	"$(PY)" scripts/acceptance.py
@@ -50,7 +58,14 @@ study-001-smoke:
 	$(CHL) run "studies/001-evidence-commons" --artifacts artifacts --replicates 1
 	"$(PY)" "studies/001-evidence-commons/certificate.py"
 
-# replays the first sealed run found under artifacts/ (both studies qualify)
+study-002-plan:
+	"$(PY)" studies/002-nipd-sensitivity/run_study.py --artifacts "$(STUDY002_ARTIFACTS)" --plan
+
+study-002:
+	"$(PY)" studies/002-nipd-sensitivity/run_study.py --artifacts "$(STUDY002_ARTIFACTS)"
+	"$(PY)" studies/002-nipd-sensitivity/generate_report.py --artifacts "$(STUDY002_ARTIFACTS)" --output "$(STUDY002_ARTIFACTS)/report"
+
+# Replays the first sealed run found under artifacts/.
 replay-smoke:
 	"$(PY)" scripts/replay_smoke.py
 
