@@ -136,24 +136,6 @@ def replay(run_dir: Path) -> None:
         raise typer.Exit(code=2)
 
 
-_ALLOWED_EC_OVERRIDE_PARAMS: dict[str, set[str]] = {
-    "ec_contributor": {"share_evidence"},
-    "ec_freerider": set(),
-    "ec_verifier": set(),
-    "ec_misinformer": set(),
-}
-
-_ALLOWED_NIPD_OVERRIDE_PARAMS: dict[str, set[str]] = {
-    "allc": set(),
-    "alld": set(),
-    "random": set(),
-    "tft_pairwise": {"epsilon"},
-    "tft_linked": {"epsilon"},
-    "ptft": {"denominator", "epsilon"},
-    "tft_threshold": {"threshold_num", "threshold_den", "epsilon"},
-}
-
-
 def _parse_override_item(item: str) -> tuple[str, str, dict[str, str]]:
     agent, sep, policy_expr = item.partition("=")
     if not sep or not agent or not policy_expr:
@@ -178,16 +160,6 @@ def _parse_override_item(item: str) -> tuple[str, str, dict[str, str]]:
     return agent, name, params
 
 
-def _reject_unknown_params(policy: str, params: dict[str, str],
-                           allowed: set[str], item: str) -> None:
-    unknown = sorted(set(params) - allowed)
-    if unknown:
-        raise typer.BadParameter(
-            f"unknown param(s) {unknown} for policy {policy!r} "
-            f"in --override {item!r}"
-        )
-
-
 @app.command("branch")
 def branch(
     run_dir: Path,
@@ -198,7 +170,11 @@ def branch(
     run_id: str | None = typer.Option(None, "--run-id"),
 ) -> None:
     """Fork a sealed run at a checkpoint with overridden agent policies."""
-    from collaborative_hill.agents.scripted.params import coerce_policy_params
+    from collaborative_hill.agents.scripted.params import (
+        EC_POLICY_PARAMS,
+        NIPD_POLICY_PARAMS,
+        coerce_policy_params,
+    )
     from collaborative_hill.engine.branching import branch_run
     from collaborative_hill.engine.replay import load_run
     from collaborative_hill.experiments.scenario import NIPDWorld
@@ -214,12 +190,10 @@ def branch(
         if isinstance(resolved.spec.world, NIPDWorld):
             from collaborative_hill.agents.scripted.nipd_policies import build_nipd_policy
 
-            allowed = _ALLOWED_NIPD_OVERRIDE_PARAMS.get(name)
-            if allowed is None:
+            if name not in NIPD_POLICY_PARAMS:
                 raise typer.BadParameter(
                     f"unknown NIPD policy {name!r} in --override {item!r}"
                 )
-            _reject_unknown_params(name, params, allowed, item)
             try:
                 parsed = coerce_policy_params(name, params)
                 overrides[agent] = build_nipd_policy(
@@ -230,12 +204,10 @@ def branch(
         else:
             from collaborative_hill.agents.scripted.ec_policies import build_ec_policy
 
-            allowed = _ALLOWED_EC_OVERRIDE_PARAMS.get(name)
-            if allowed is None:
+            if name not in EC_POLICY_PARAMS:
                 raise typer.BadParameter(
                     f"unknown EC policy {name!r} in --override {item!r}"
                 )
-            _reject_unknown_params(name, params, allowed, item)
             try:
                 overrides[agent] = build_ec_policy(
                     name, coerce_policy_params(name, params)
