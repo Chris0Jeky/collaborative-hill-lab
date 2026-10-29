@@ -2,9 +2,11 @@
 
 The scope contract for what the platform's outputs do and do not license. Each study
 states its own claim boundary; a confirmatory preregistration must restate it. This
-document is the standing cross-study boundary, updated 2026-10-29. It reflects the implemented
-N-IPD engine and **Evidence Commons v0 system**
-(`domain/world/evidence_commons.py`, `domain/institutions.py`, `engine/*`, `metrics/*`).
+document is the standing cross-study boundary, updated 2026-10-29. It reflects legacy
+N-IPD, the separately versioned local graph world, **Evidence Commons v0**, its
+observation-responsive policy baseline, and optional provider transport. All current
+measured scientific results use scripted agents and synthetic inputs; transport tests use
+mocked responses. No live provider pilot is claimed.
 
 ---
 
@@ -49,6 +51,26 @@ N-IPD engine and **Evidence Commons v0 system**
    form (the hand-derived payoff tables; the enumerated incentive checks, which do not
    certify a social dilemma for Study 001's current parameters because C2 fails).
 
+6. **A bounded observation-responsive institutional effect.** The separate
+   [responsive EC experiment](../../experiments/responsive-commons/RESULTS.md) fixes N=3,
+   12 rounds, two corpora, two institutional axes, five active-policy rules and all eight
+   labeled active/freerider profiles. Its 320 deterministic episodes yield 160 matched
+   attributable-minus-aggregate quality contrasts: 2 positive, 2 negative and 156 zero. All 160
+   controlled action replays preserve briefing, effort, quality and total utility.
+   The effect is specific to visible contribution history and this finite design;
+   the counts are not population probabilities. C1/C2 diagnostics over the two designated
+   strategies are separate from adaptive behavior and fixed-action C3 integrity.
+
+7. **Explicit graph contracts and controls.** The new `nipd_graph` world exposes only local
+   interactions, uses canonical undirected adjacency and requires sum/mean payoff
+   aggregation. Hand-derived ring/star/isolate tests and legacy complete-graph controls
+   check those semantics. The [18-condition design](../../experiments/graph-topology/README.md)
+   holds N, defector count, horizon and mean payoff fixed while separating topology,
+   reciprocity rule and defector placement. The [recorded results](../../experiments/graph-topology/RESULTS.md)
+   match all 18 pre-execution cooperation curves, with every sealed episode replayed.
+   Those exact finite controls establish no universal topology benefit or independent
+   replication from symmetry-equivalent seats.
+
 ---
 
 ## 2. What the platform CANNOT claim
@@ -69,7 +91,7 @@ N-IPD engine and **Evidence Commons v0 system**
    attributable accountability" is **not** "model M is aligned/honest/trustworthy." Absolute
    safety or alignment claims are outside the platform's evidentiary reach.
 
-5. **Cognition or intent.** Outcomes are token statistics realised as typed actions. Mentalistic
+5. **Cognition or intent.** Outcomes are typed actions, payoffs and environment metrics. Mentalistic
    language ("trust," "reciprocity," "intent") is interpretation, permitted only in a labelled
    section and only after an effect is shown mechanism-linked (survives re-skinning for LLM
    agents). Replay reproduces *actions*, not *minds* (§3.6).
@@ -94,12 +116,18 @@ N-IPD engine and **Evidence Commons v0 system**
    documented v1 extension point).
 
 3. **Scripted personas are not learned strategies.** The scripted policies
-   (`ec_contributor`, `ec_freerider`, `ec_verifier`, `ec_misinformer`, and the NIPD family)
-   are hand-specified reactive strategies, not trained or adaptive agents. They calibrate the
-   environment and bound the LLM readings; they are not claimed to be optimal or representative.
+   (`ec_contributor`, `ec_freerider`, `ec_verifier`, `ec_misinformer`,
+   `ec_conditional_contributor`, and the global/local N-IPD families) are hand-specified
+   observation-driven rules without learned parameters or hidden policy state. The legacy
+   contributor/freerider pair ignores attribution and monetary weights. The conditional
+   contributor can change behavior when identities make more distinct contributors visible,
+   but does not respond to utility coefficients, truth or evidence quality. Its cumulative
+   signal counts proposals and verification attempts, not current willingness or accuracy.
+   These controls are not claimed to be optimal, representative or performance bounds.
 
 4. **Small N and declared composition.** Current Evidence Commons fixtures use N=3;
-   the N-IPD studies cover N=3 and N=5 complete graphs. Findings are specific to the
+   the N-IPD studies cover N=3 and N=5 complete graphs, and the graph controls use N=5
+   complete/ring/star layouts. Findings are specific to the
    declared population and policy mixture. These unfrozen exploratory designs are not
    confirmatory preregistrations. Increasing N while retaining one defector also changes
    its population fraction; Study 002 includes a two-defector control to expose that issue.
@@ -108,9 +136,10 @@ N-IPD engine and **Evidence Commons v0 system**
    seal (`final_rewards`). There is no cross-episode reputation, memory, or carryover — an
    agent starts each episode fresh. Repeated-game reputation dynamics are not modelled.
 
-6. **LLM cognition is non-reproducible; replay covers actions, not minds.** Provider sampling
-   is a second RNG outside our control, and temp-0 is not guaranteed deterministic
-   (batching/MoE/float non-associativity). Replay (`agents/replay.py`) reproduces the
+6. **LLM cognition is not reproduced by the engine; replay covers recorded actions.**
+   Provider seed and temperature settings do not establish kernel-controlled randomness.
+   No live endpoint, billing behavior or provider determinism has been verified.
+   Replay (`agents/replay.py`) reproduces the
    *recorded actions* and re-derives the identical sealed ledger, but it does **not**
    reproduce the model's internal computation. An LLM run is reproducible as a *record*, not
    as a *cognitive process*.
@@ -125,10 +154,10 @@ N-IPD engine and **Evidence Commons v0 system**
    and (future) scrambled-incentive controls mitigate this, but for LLM agents recall-vs-
    reasoning is an unresolved confound. Scripted baselines are immune (no cognition).
 
-9. **No sanctions, reputation, commitments, audits, or human-gates yet.** `InstitutionConfig`
+9. **No sanctions, reputation, commitments or approval institutions inside episodes.** `InstitutionConfig`
    implements exactly two axes (accountability × evidence_topology). Sanctions, reputation
    scores, commitments, and approval gates are documented extension points, deliberately
-   unimplemented under the second-occurrence rule. Claims about those mechanisms are out of
+   unimplemented. Claims about those mechanisms are out of
    scope until they exist with their own ADRs.
 
 10. **Two-axis institution space.** The intervention space is the implemented 2×2. Richer
@@ -140,12 +169,18 @@ N-IPD engine and **Evidence Commons v0 system**
     not real information ecosystems.
 
 12. **Costs/tokens reported only when measured.** Operational metrics never fabricate token
-    or cost figures; a `None` means unmeasured. Cost-conditioned claims are only as good as the
-    measurement the manifest actually recorded.
+    or cost figures; a `None` means unmeasured. Each request dimension needs complete
+    coverage before its total is reported. Partial measured sums, unknown 429/timeout
+    usage and refusal/format-repair consumption remain visible. A completion-token cap is
+    not a dollar ceiling or remote cancellation. The transport supplies no price table;
+    child usage describes only its continuation. See [provider usage](../PROVIDER_USAGE.md).
 
 13. **Analysis identity checks are necessary, not sufficient.** `chl analyze` rejects
-    known non-treatment confounds and conflicting retries. It retains descriptive values
-    but withholds paired inference when coupling or complete blocks cannot be verified.
+    known non-treatment confounds and conflicting retries, including changed recorded
+    transport settings or known reported-model sets within a comparison block. Missing
+    model versions remain unknown; pre-response failures stay in attrition. It retains
+    descriptive values but withholds paired inference when coupling or complete blocks
+    cannot be verified.
     It cannot infer an entire missing run from absent artifacts, authenticate
     policy code from its label, or create paired provider randomness. Current analysis
     remains `sap_status: draft`; zero observed variance suppresses intervals and p-values.
@@ -162,7 +197,19 @@ N-IPD engine and **Evidence Commons v0 system**
     retained terminal commitment. It cannot authenticate a history against a writer who
     replaces the entire record and all commitments. Checked-in Study 002 summaries retain
     per-episode terminal hashes, but its original raw ledgers are generated artifacts;
-    independent ledger verification requires those artifacts.
+    independent ledger verification requires those artifacts. The responsive EC and graph
+    readouts likewise distinguish original execution/source commitments from later
+    regeneration. Repeating current source is a new run, even if outcomes agree exactly.
+
+16. **Graph statistics depend on their units.** Pairwise cooperation is a fraction of
+    directed edge votes; neighbourhood cooperation is a fraction of positive-degree
+    agents' broadcast votes. Isolates have zero reward and add no eligible votes; entirely
+    edgeless worlds are rejected. Pairwise rates weight agents by degree, while sum/mean
+    payoff aggregation is a separate explicit choice. On a star, moving AllD between hub
+    and leaf changes exposure and first-round vote weights before any response occurs.
+    Cross-policy comparisons can also change observation and action rules. Global
+    cooperator count is insufficient for general sparse-graph pTFT dynamics, so the Study
+    002 complete-population Markov benchmark is not a sparse-network oracle.
 
 ---
 

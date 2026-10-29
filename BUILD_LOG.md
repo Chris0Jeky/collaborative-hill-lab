@@ -815,3 +815,88 @@ also passed 14 workflow cases, 15 analysis provenance/golden cases and zero-
 request credential/selection probes. Exact published-head CI remains the merge
 gate. No live endpoint, billing, provider determinism or paid pilot was tested;
 all provider responses and failures were mocked.
+
+## 2026-10-29 — local graph semantics and original topology controls (#78 / #83)
+
+Added `nipd_graph` as a separately versioned world with canonical undirected
+adjacency, exact neighbor actions, local observations, explicit sum/mean edge
+payoffs and isolate/vote-denominator rules. Local pTFT and quorum policies use
+the actor's neighborhood; existing targeted/linked controls work through the
+same opponent interface. Legacy complete-population mechanics and all four
+historical StudySpec hashes are unchanged. Registry, CLI branches, seed audit
+and provider observation rendering recognize the graph world.
+
+ADR-0011 and the graph experiment README recorded analytical predictions before
+implementation tests and original execution. Clean local source
+`873666aa9dfe1de7cc76d31275b4828fa44e065d` has the identical full tree
+`875823c171036dcf40a0b9f2834074bce7ad05f9` as published source checkpoint
+`78caa2a98c62c1818227e90886525d6f2aa19eb0`, published before execution. All 18
+deterministic episodes completed (144 rounds, 3,114 events), all full curves
+matched their declared predictions and every original sealed run replayed.
+An independent implementation reproduced every action, vote and terminal score.
+Mean edge payoff, N=5, one AllD, eight rounds and zero exploration are fixed;
+complete/ring/star topology, defector seat and reciprocity rule are explicit.
+Symmetry-equivalent seats are controls, not independent replications.
+
+The graph source record's 71 named file commitments match execution-commit blobs.
+Original RESULTS.json, RESULTS.md and EXECUTION_SOURCE.json remain unchanged;
+SOURCE_PROVENANCE.json adds the published mapping separately. Original JSON
+SHA-256 is `69349116386452e913e1eabc546082a9d052d8993fc3a2dbb5f134658fe6a099`.
+A four-cycle exact counterexample has the same number of cooperators in two
+reachable configurations but different next-count laws, showing why the
+complete-graph pTFT count-state shortcut needs a new justification on sparse graphs.
+
+The integrated EC/provider/graph tree passed 1,167 tests, Ruff, strict package
+mypy in 50 files, all four historical StudySpec validations, 11/11 acceptance,
+atlas/Study 002 gates, the 480-run EC regeneration and all 18 graph regenerations.
+A focused review then demonstrated that the first graph checker could ignore a
+corrupted standalone source record and equate JSON `true` with integer `1`.
+The retained-record checker now validates byte commitments, self-commitments,
+cross-record source/tree/study/dependency links, inventory totals and original
+cleanliness before running; canonical comparison preserves JSON types. All 37
+focused cases pass, and the strengthened 18-run gate passes. The final suite
+contains 1,198 cases. Original provenance is checked against historical evidence,
+not against today's changed source, and no authenticity claim is added.
+
+`make check-graph` validates canonical inputs, strict standalone types, original
+records and fresh trajectories/payoffs/identities/seals. CI runs the same gate.
+Final graph publication preserves the original source checkpoint as a parent,
+merges current main after #81/#82 as another parent, and exactly matches the
+reviewed local full tree `bf0135cfa4a164fdd49becbb92dde79458a86543`.
+Hosted verification is attached to [PR #83](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/83)
+at exact head `535ad44062657023e50bc1ab48a714d823640abe`.
+
+## 2026-10-29 — research guidance, evidence retention and next increments
+
+Updated current README/contributor guidance, the foundation review, research
+charter, methods, claims, analysis inputs and study-input documentation for the
+implemented EC/provider/graph capabilities. The original Study 002 data and
+benchmark remain unchanged. The methodological review also corrected claims
+that every scripted seat permutation is inert, that replicate ledger hashes
+must match, or that equal stochastic observations imply a sample size of one.
+Budget shortfalls now preserve the declared confirmatory reference and incomplete
+record; adaptations must be predeclared, and later redesign belongs to a separate
+follow-up. Provider repair completions and HTTP 429 attempts are separate in the
+cost worksheet; historical measurements/formulas are retained.
+
+The 498 original EC/graph runs are preserved in
+`collaborative-hill-pass2-original-evidence-2026-10-29.zip` (7,073,568 bytes),
+SHA-256 `107ea42fd282130b9f8d4cb3899d828205b1e37337c9cb73d13bcc83e0522459`.
+Its 2,374 original files total 55,714,184 bytes. All 498 completed seals,
+66,714 event-chain records, 552 checkpoint bindings and 120 source-file
+commitments were checked; every terminal hash matches its retained report.
+The archive keeps original and enriched provenance distinct, includes a per-file
+manifest and repack script, and reproduces byte-for-byte after extraction/repack.
+Original on-disk source/run files and modification times were not changed;
+archive entries use fixed timestamps for reproducible packaging.
+
+PR #81 merged after exact-head CI 40811251496; PR #82 merged after exact-head CI
+40812620936. PR #83 merged after exact-head CI 40813963880/job 123250572911 passed
+the full 1,198-case suite and every experiment gate on Python 3.12.15 with a clean
+checkout. Merged main `1e759dd95b845a222ec65e95076c6d0d162f6403` has the exact
+reviewed graph tree. The final documentation PR carries its own exact-head
+check record. Follow-up issues #84–#86 define observable quality safeguards,
+labeled-state sparse-graph pTFT and cumulative provider request planning/budgets.
+The ten owner decisions, tier, hooks, licenses and unfrozen StudySpecs remain
+unchanged. No real or paid provider, human-subject data or new confirmatory claim
+was used. Verification reruns are regression checks, not added scientific samples.

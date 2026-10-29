@@ -2,6 +2,12 @@
 
 Status: **accepted** (2026-07-13)
 
+Extension (2026-10-29): [ADR-0010](0010-configurable-provider-transport.md) adds
+the configured transport and request accounting. The foundation's fake/custom
+provider retry default below remains unchanged; the real transport defaults to
+zero action-format repairs and zero HTTP 429 retries. Live endpoint/model/budget
+decisions remain separate from implementing and testing the adapter offline.
+
 ## Context
 
 Models must be able to act without ever becoming authoritative over world state, and their

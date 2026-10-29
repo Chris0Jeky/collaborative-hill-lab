@@ -17,8 +17,10 @@ different accountability and information rules.
 - **Reproducible engine.** Typed five-plane scenarios, exact-fraction payoffs,
   hierarchical seeds, hash-linked sealed ledgers, replay, checkpoint branching and
   read-only counterfactual comparison. Narrative skins cannot change the rules.
-- **Two mechanisms.** N-IPD supports pairwise and neighbourhood interaction;
-  Evidence Commons v0 supports provenance, budgets and a 2×2 institutional design.
+- **Versioned mechanisms.** Legacy N-IPD retains its complete-population pairwise
+  and neighbourhood rules. `nipd_graph` adds explicit undirected graphs, local
+  observations and sum/mean edge payoffs. Evidence Commons v0 supports provenance,
+  budgets and a 2×2 institutional design.
 - **Three studies.** Study 000 reproduces and deconfounds the legacy claims.
   Study 001 is an executable, unfrozen Evidence Commons draft. Study 002 adds an
   executed N=3/N=5 threshold and pTFT denominator sensitivity experiment.
@@ -27,15 +29,23 @@ different accountability and information rules.
   or explicitly paired designs. A standalone incentive atlas derives exact
   finite-strategy constraints. Study 002 includes exact finite-population pTFT
   benchmarks alongside the measured results.
+- **Observation-responsive EC baseline.** A versioned conditional contributor
+  uses visible contribution history. Its finite sensitivity experiment keeps
+  beneficial, harmful and null accountability contrasts, alongside separate
+  incentive and same-action integrity checks.
+- **Configurable provider transport.** An optional OpenAI-compatible Chat
+  Completions adapter records requested/reported models and measured request
+  usage. Explicit execution opt-in, bounded retries, redacted errors and
+  continuation accounting are covered by offline HTTP fixtures.
 - **Persistent verification.** GitHub Actions tests each exact PR head and `main`
   commit, including the complete suite, all shipped study definitions, acceptance
   scenarios and reproducible standalone research outputs. Inputs reject unsafe
   output paths, invalid execution counts and misspelled built-in policy parameters.
 
-The LLM policy adapter has typed actions, bounded retries and safe abstention, with
-offline fake-provider tests. A real provider transport and live pilot remain
-[planned work](NEXT.md). No real model call or human-subject experiment supports
-the current findings.
+No live provider call or human-subject experiment supports the current findings.
+The provider integration is implemented and tested offline; model selection, a live pilot and its
+scientific design remain open. See [provider usage](docs/PROVIDER_USAGE.md) for the
+execution boundary and [current priorities](NEXT.md) for the remaining work.
 
 ## What the experiments establish
 
@@ -46,6 +56,8 @@ the current findings.
 | Incentive atlas | For the enumerated contributor/freerider strategies, the common strict C2 region is `b + 7r > 39`, with nonnegative benefit and credit multipliers. This does not choose weights or establish a behavioral benefit. | [Methods and constraints](experiments/incentive-atlas/README.md) |
 | Study 002 | All 29 deterministic trajectories and score vectors match their predictions. The inclusive quorum boundary is `(m−1)/(N−1)`, so population composition matters. Six pTFT cells retain all 192 independent episode results, including a finite-sample bootstrap discrepancy. | [Measured results](studies/002-nipd-sensitivity/RESULTS.md) |
 | Exact pTFT benchmark | A finite-state model derives means, variances and absorption probabilities for the ideal rational Bernoulli process. It explains why positive late cooperation expectations can coexist with all-zero observed final windows. | [Post hoc benchmark](studies/002-nipd-sensitivity/EXACT_PTFT_BENCHMARK.md) |
+| Responsive EC | The 320 deterministic behavioral episodes give 160 matched contrasts: quality rises in 2, falls in 2 and is unchanged in 156. All 160 separate same-action replays preserve briefing, effort, quality and total utility. These are exact findings for the declared finite grid. | [Results and source record](experiments/responsive-commons/RESULTS.md) |
+| Graph topology controls | All 18 eight-round cooperation curves match their pre-execution predictions, and all sealed runs replay. The N=5 design fixes one AllD and mean edge payoff while separating complete/ring/star topology, defector placement and reciprocity rule. | [Exact readout](experiments/graph-topology/RESULTS.md) |
 
 ## Install and verify
 
@@ -54,7 +66,7 @@ From a checkout, using Python 3.12 or later:
 ```bash
 make setup
 make doctor
-make check test validate acceptance check-atlas check-study002
+make check test validate acceptance check-atlas check-study002 check-responsive check-graph
 ```
 
 `make setup` installs the committed `requirements-lock.txt`, builds the editable
@@ -67,6 +79,7 @@ Make selects `.venv/bin/python` on POSIX and `.venv/Scripts/python.exe` on Windo
 (run make from Git Bash). Use `make setup PYTHON="/path/to/python"` to select the
 interpreter. Without make, run that virtual environment's Python with the exact
 commands in [Makefile](Makefile); activating the environment also exposes `chl`.
+Use the virtual environment's Python for the direct commands below, or activate it first.
 
 ## Run an experiment
 
@@ -91,6 +104,48 @@ reproduces the checked-in exact benchmark and figure without changing evidence.
 See the [study methods](studies/002-nipd-sensitivity/README.md) for direct commands,
 the sampling plan and the distinction between local pre-execution predictions
 and the later published source snapshot.
+
+### Responsive Evidence Commons
+
+```bash
+python experiments/responsive-commons/responsive_commons.py --out artifacts/responsive-new
+make check-responsive
+```
+
+The first command requires a fresh directory and retains the 320 behavioral runs,
+160 controlled replays, inputs, readout and execution source record. The check
+regenerates the complete grid in a temporary directory and compares the committed
+JSON and Markdown byte for byte. The [design](experiments/responsive-commons/DESIGN.md)
+fixes both accurate and misleading corpora, all five policy rules and all eight
+labeled active/freerider profiles; no cell is selected by its outcome.
+
+### Local graph N-IPD
+
+```bash
+python experiments/graph-topology/graph_experiment.py --check
+python experiments/graph-topology/graph_experiment.py --run --artifacts artifacts/graph-topology-new
+```
+
+The graph fixture declares eight rounds and one deterministic episode per cell.
+The [original readout](experiments/graph-topology/RESULTS.md) retains all 18 curves,
+scores and prediction comparisons, including complete defection in several cells.
+The run command requires a fresh artifact root, records its source inputs,
+independently replays every run, and writes an exact readout. To derive another
+readout from those original artifacts, use `--report-from <artifact-root>` with
+`--output <fresh-prefix>`; a new execution is separate evidence. The
+[graph guide](experiments/graph-topology/README.md) explains the different vote
+denominators, hub/leaf placement and complete-graph equivalence controls.
+
+### Configured provider execution
+
+Validation and recorded-action replay stay offline. A study or continuation using
+`llm_openai_compatible` needs the explicit `--allow-provider-requests` flag;
+selected credentials are checked before execution creates artifacts or makes a
+request. Model, endpoint, token cap and any credential environment-variable name
+come from the declared configuration. The flag enables execution; the existing
+human-owned model, budget and study decisions still apply. See the
+[provider guide](docs/PROVIDER_USAGE.md) for the supported configuration and
+honest handling of unknown usage. Repository verification makes no live calls.
 
 ### Other engine workflows
 
@@ -132,16 +187,24 @@ flowchart TD
 
 The mechanism controls world truth, legality and payoffs. Policies see only allowed
 observations; scorers do not influence live execution. Decisions and rationale are
-in [ADRs 0001–0009](docs/adr/) and the [foundation review](docs/FOUNDATION_REVIEW.md).
+in [ADRs 0001–0012](docs/adr/) and the [foundation review](docs/FOUNDATION_REVIEW.md).
 
 ## Scientific limits
 
 All current measured results concern the specified scripted populations and
 mechanisms. They do not establish LLM behavior, human behavior or policy outcomes.
 Evidence Commons v0 verifies provenance through the engine; agents cannot yet
-falsify verification outcomes. The contributor/freerider baselines do not respond
-to attribution or utility weights, so incentive inequalities alone cannot
-demonstrate institutional improvement.
+falsify verification outcomes. The legacy contributor/freerider baselines ignore
+attribution and utility weights. The conditional contributor responds to visible
+history, but does not evaluate truth or monetary incentives. Its harmful as well
+as beneficial outcomes show why incentive inequalities and contribution counts
+alone cannot demonstrate institutional improvement.
+
+Graph comparisons must hold policy, defector placement and payoff aggregation
+explicit. Pairwise cooperation counts directed edge votes; neighbourhood
+cooperation counts one vote per nonisolated agent. These are different units,
+and irregular graphs weight agents differently. The complete-population pTFT
+count-state benchmark does not extend to arbitrary sparse graphs.
 
 Study 002 is an unfrozen exploratory sensitivity analysis. Agents and rounds are
 not independent replicates. A zero observed variance does not prove a zero
@@ -164,6 +227,9 @@ and current [handoff](HANDOFF.md) retain the remaining qualifications.
 | `studies/001-evidence-commons/` | Unfrozen 2×2 draft, skins, certificate, preregistration and cost worksheet |
 | `studies/002-nipd-sensitivity/` | Canonical sensitivity design, runner, measured results, exact benchmark and provenance |
 | `experiments/incentive-atlas/` | Exact finite-strategy incentive-region exploration |
+| `experiments/responsive-commons/` | Pre-execution design, full finite EC sensitivity readout and source commitments |
+| `experiments/graph-topology/` | Canonical local-graph controls, analytical predictions, measured readout and source commitments |
+| `docs/PROVIDER_USAGE.md` | Optional provider configuration, execution boundary and request accounting |
 | `docs/adr/`, `docs/research/` | Architecture decisions, methods, research context and analysis contract |
 | `tests/`, `.github/workflows/ci.yml` | Unit, property, metamorphic and integration checks; persistent CI |
 | `artifacts/` | Generated sealed runs and reports, ignored by Git |
