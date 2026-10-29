@@ -62,7 +62,8 @@ InvalidActionPolicy = Literal["fail", "abstain"]
 
 SCRIPTED_NIPD = {"allc", "alld", "random", "tft_pairwise", "tft_linked", "ptft",
                  "tft_threshold"}
-SCRIPTED_EC = {"ec_contributor", "ec_freerider", "ec_verifier", "ec_misinformer"}
+SCRIPTED_EC = {"ec_contributor", "ec_freerider", "ec_verifier", "ec_misinformer",
+               "ec_conditional_contributor"}
 
 
 class ConditionSpec(BaseModel):
