@@ -26,7 +26,7 @@ Wall-clock time and other environment facts go only into unhashed event meta.
 from copy import deepcopy
 from typing import Any, Literal, Self
 
-from pydantic import BaseModel, ConfigDict, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from collaborative_hill.domain.actions import AbstainAction, ActionProposal
 from collaborative_hill.engine.events import (
@@ -66,7 +66,7 @@ class RunConfig(BaseModel):
     seed_protocol: SeedProtocol = LEGACY_SEED_PROTOCOL
     policy_seed_root: SeedPath | None = None
     scenario_block: str | None = None
-    checkpoint_every: int = 0  # rounds; 0 = final checkpoint only
+    checkpoint_every: int = Field(default=0, ge=0, strict=True)  # 0 = final checkpoint only
     invalid_action_policy: InvalidActionPolicy = "fail"
 
     @model_validator(mode="after")
