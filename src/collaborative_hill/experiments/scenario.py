@@ -26,6 +26,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from collaborative_hill.agents.scripted.params import coerce_policy_params
 from collaborative_hill.domain.evidence import EvidenceSpec
 from collaborative_hill.domain.institutions import InstitutionConfig
 from collaborative_hill.domain.world.evidence_commons import (
@@ -88,6 +89,13 @@ class PolicySpec(BaseModel):
 
     name: str
     params: dict[str, int | str | bool] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def _check_scripted_params(self) -> "PolicySpec":
+        # Validate without normalizing stored strings or inserting defaults:
+        # the original exact representation participates in scenario hashes.
+        coerce_policy_params(self.name, self.params)
+        return self
 
 
 class AgentSpec(BaseModel):
