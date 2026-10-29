@@ -1,0 +1,60 @@
+{
+  "analytical_predictions_local_commit": "d22c65942b19ad90bd1dba51e2d933acbc0347a5",
+  "domain": "chl.graph-topology.published-source-mapping.v1",
+  "execution_file_verification": "All 71 named source/input SHA-256 commitments independently matched git blobs at local_execution_source_commit.",
+  "execution_source_files": 71,
+  "execution_source_files_sha256": "e82eb752e391c1ff68c27af6aaccd2784c850b11a40b9f5eb0bd0f5764987422",
+  "limitations": [
+    "The original reports assert local source identity only. This separate record adds the published source mapping without retroactively changing those bytes.",
+    "Original raw ledgers and checkpoints are generated artifacts outside Git; independent sealed replay requires those retained artifacts.",
+    "Checksums and matching trees establish consistency relative to retained evidence, not independent authenticity.",
+    "One deterministic episode per cell and symmetry controls add no independent sampling replication; all fixtures remain unfrozen."
+  ],
+  "local_execution_source_commit": "873666aa9dfe1de7cc76d31275b4828fa44e065d",
+  "local_execution_source_tree": "875823c171036dcf40a0b9f2834074bce7ad05f9",
+  "original_retained_files": {
+    "EXECUTION_SOURCE.json": {
+      "bytes": 9268,
+      "sha256": "dbd3426a24abd3d6ec42dabd9fe660c055fd4335cdfd04e5e0e3d58818471701"
+    },
+    "RESULTS.json": {
+      "bytes": 38464,
+      "sha256": "69349116386452e913e1eabc546082a9d052d8993fc3a2dbb5f134658fe6a099"
+    },
+    "RESULTS.md": {
+      "bytes": 4163,
+      "sha256": "1fbf1ff3063f8e38f825a81895507319096665c0518aca89e2565f70afa21cdf"
+    }
+  },
+  "prediction_status": "Local analytical predictions committed before implementation tests and original execution; not an external preregistration.",
+  "published_source": {
+    "branch": "research/graph-topology-v1",
+    "commit": "78caa2a98c62c1818227e90886525d6f2aa19eb0",
+    "commit_url": "https://github.com/Chris0Jeky/collaborative-hill-lab/commit/78caa2a98c62c1818227e90886525d6f2aa19eb0",
+    "publication_order": "Source checkpoint published and tree equality checked before original execution.",
+    "relationship": "Identical full Git tree to the local execution source; native GitHub commit has a different parent history.",
+    "repository": "Chris0Jeky/collaborative-hill-lab",
+    "tree": "875823c171036dcf40a0b9f2834074bce7ad05f9"
+  },
+  "report_generator_source_sha256": "4c81e3831bb47fd57a2f42858a1319ed12d04d1dba851a5559877e0065a83105",
+  "runtime": {
+    "matching_applicable_pinned_requirements": 38,
+    "python": "3.12.14",
+    "requirements_lock_sha256": "500c146e66e3af9b483c2eaa348bccddc0165b0fcd101f03d9851769c0a6f280",
+    "setuptools": "84.1.0",
+    "source_selection": "Current clean execution checkout supplied on PYTHONPATH; installed older project wheel was not used."
+  },
+  "schema_version": 1,
+  "scope": "Separate source mapping and retention record; original execution/source/readout bytes are unchanged.",
+  "study_hash": "8e4b5b5d2efc29c1e92918a21a74c2e0b590c4f1717a6c161890d571d512028a",
+  "verification": {
+    "all_manifest_worktree_dirty_false": true,
+    "completed_episodes": 18,
+    "full_analytical_curves_matched": 18,
+    "ledger_events": 3114,
+    "original_report_regeneration": "Both JSON and Markdown reproduced byte-for-byte from original sealed artifacts; identical output regeneration and original files preserve mtimes.",
+    "rounds": 144,
+    "sealed_replays_verified": 18
+  },
+  "worktree_dirty_before_execution": false
+}

@@ -51,6 +51,10 @@ class RunManifest(BaseModel):
     providers: dict[str, str] = Field(default_factory=dict)
     prompt_template_hashes: dict[str, str] = Field(default_factory=dict)
     sampling: dict[str, dict[str, Any]] = Field(default_factory=dict)
+    provider_metadata: dict[str, dict[str, Any]] = Field(default_factory=dict)
+    reported_models: dict[str, list[str]] = Field(default_factory=dict)
+    provider_usage: dict[str, dict[str, int | None]] = Field(default_factory=dict)
+    provider_usage_scope: Literal["episode", "continuation"] | None = None
 
     seed_root: list[str | int] = Field(default_factory=list)
     seed_protocol: SeedProtocol = LEGACY_SEED_PROTOCOL

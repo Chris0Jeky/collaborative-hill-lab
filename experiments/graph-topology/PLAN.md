@@ -63,8 +63,8 @@ Files: `experiments/graph-topology/README.md`, canonical fixture/generator, exac
 - [x] Commit analytical predictions before executing the experiment (`d22c659`).
 - [x] Hold N=5, one AllD, eight rounds and mean payoff fixed; cross complete/ring/star, defector a1/a2, and targeted/linked/quorum TFT.
 - [x] Use one episode per cell; distinguish role placement and policy from topology.
-- [ ] Verify exact report regeneration and retain compact results without raw ledger bulk.
-- [ ] Run focused tests, Ruff, strict package typing, full tests, validation and acceptance; obtain independent review and commit.
+- [x] Verify exact report regeneration and retain compact results without raw ledger bulk.
+- [x] Run focused tests, Ruff, strict package typing, full tests, validation and acceptance; obtain independent review and commit the execution source.
 
 Execution ruling: `--run` writes only its fixed `RESULTS` prefix under the fresh
 artifact root; custom prefixes belong to `--report-from`. A regression reproduced
@@ -85,6 +85,32 @@ every action, cooperation count and terminal score.
 Runtime ruling: the shared development environment has setuptools 84.0.0, whereas
 the committed lock specifies 84.1.0. Its broad regression gates are retained as
 development evidence, without claiming exact lock installation. The isolated
-84.1.0 environment matches all 38 lock pins and will run the recorded execution
-and final verification with this worktree's source explicitly on `PYTHONPATH`.
+84.1.0 environment matches all 38 lock pins. It ran the recorded execution and
+final verification with this worktree's source explicitly on `PYTHONPATH`.
+
+## Completed execution and verification
+
+Execution source commit `873666aa9dfe1de7cc76d31275b4828fa44e065d` was clean and
+mapped to native published source `78caa2a98c62c1818227e90886525d6f2aa19eb0`
+before the original execution; both trees are
+`875823c171036dcf40a0b9f2834074bce7ad05f9`. All 71 source/input file commitments
+match that local commit's blobs. Source mapping is recorded separately in
+`SOURCE_PROVENANCE.json`; original `EXECUTION_SOURCE.json` and `RESULTS.*` bytes
+remain unchanged.
+
+The original 18 episodes completed with 144 rounds and 3,114 ledger events. All
+18 full cooperation curves match the predictions. Every original run replayed
+successfully; regeneration reproduced both report files exactly and preserved
+identical-file mtimes. Every original per-run manifest reports a clean worktree.
+Only the compact report and source records are retained in Git, not raw ledgers.
+
+On the exact 38-pin environment, all 973 tests passed (including 532 unit/property
+tests), Ruff passed, strict mypy passed for 47 package files and the standalone
+experiment module, all four historical StudySpec hashes remained unchanged,
+11/11 acceptance scenarios passed, and the incentive atlas and Study 002 checks
+passed. The graph generator verified all 20 canonical inputs. The 124 new cases
+cover graph mechanics, policy controls, hashing, local observations, sealed
+execution, branch/CLI/seed-audit integration, invariances and the experiment.
+Independent review found no blocking issue and independently reproduced every
+action, vote count and terminal score in the 18-cell design.
 

@@ -99,13 +99,16 @@ def run(
     artifacts: Path = typer.Option(DEFAULT_ARTIFACTS, "--artifacts"),
     condition: str | None = typer.Option(None, "--condition"),
     replicates: int | None = typer.Option(None, "--replicates"),
+    allow_provider_requests: bool = typer.Option(
+        False, "--allow-provider-requests", help="Explicitly enable configured model requests"),
 ) -> None:
     """Run a study's conditions x replicates."""
     from collaborative_hill.experiments.study import run_study
 
     try:
         results = run_study(study_dir, artifacts, only_condition=condition,
-                            replicates_override=replicates)
+                            replicates_override=replicates,
+                            allow_provider_requests=allow_provider_requests)
     except (ValueError, FileExistsError) as exc:
         typer.echo(f"error: {exc}", err=True)
         raise typer.Exit(code=2) from exc
@@ -168,6 +171,8 @@ def branch(
                                        help="agent=policy[:key=value,...] (repeatable)"),
     out: Path = typer.Option(..., "--out", help="child run directory"),
     run_id: str | None = typer.Option(None, "--run-id"),
+    allow_provider_requests: bool = typer.Option(
+        False, "--allow-provider-requests", help="Enable model requests in the continuation"),
 ) -> None:
     """Fork a sealed run at a checkpoint with overridden agent policies."""
     from collaborative_hill.agents.scripted.params import (
@@ -224,6 +229,7 @@ def branch(
         result, branch_manifest = branch_run(
             parent_dir=run_dir, fork_seq=at_event, child_dir=out,
             child_run_id=child_run_id, policy_overrides=overrides,
+            allow_provider_requests=allow_provider_requests,
         )
     except (ValueError, OSError) as exc:
         typer.echo(f"error: {exc}", err=True)

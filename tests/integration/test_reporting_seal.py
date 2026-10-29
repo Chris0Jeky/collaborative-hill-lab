@@ -101,8 +101,9 @@ def test_branch_manifest_pins_child_seal(tmp_path, sealed_run):
 def test_failed_run_is_reported_as_failed_without_completed_outcomes(tmp_path, monkeypatch):
     build_policies = study.build_policies
 
-    def failing_policies(resolved):
-        policies = build_policies(resolved)
+    def failing_policies(resolved, *, allow_provider_requests=False, overrides=None):
+        policies = build_policies(resolved, allow_provider_requests=allow_provider_requests,
+                                   overrides=overrides)
         propose = policies["a1"].propose
         calls = 0
 

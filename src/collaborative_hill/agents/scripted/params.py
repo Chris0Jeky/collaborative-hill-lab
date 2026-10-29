@@ -21,6 +21,9 @@ NIPD_POLICY_PARAMS: dict[str, frozenset[str]] = {
 }
 EC_POLICY_PARAMS: dict[str, frozenset[str]] = {
     "ec_contributor": frozenset({"share_evidence"}),
+    "ec_conditional_contributor": frozenset({
+        "peer_threshold", "warmup_rounds", "share_evidence",
+    }),
     "ec_freerider": frozenset(),
     "ec_verifier": frozenset(),
     "ec_misinformer": frozenset(),
@@ -44,6 +47,10 @@ def coerce_policy_params(name: str, params: Mapping[str, object]) -> dict[str, o
     for key, value in params.items():
         if key == "epsilon":
             coerced[key] = _coerce_epsilon(key, value)
+        elif key == "peer_threshold":
+            coerced[key] = _coerce_exact_probability(key, value)
+        elif key == "warmup_rounds":
+            coerced[key] = _coerce_nonnegative_integer(key, value)
         elif key in ("threshold_num", "threshold_den"):
             coerced[key] = _coerce_threshold(key, value)
         elif key == "share_evidence":
@@ -59,6 +66,19 @@ def coerce_policy_params(name: str, params: Mapping[str, object]) -> dict[str, o
         if not 0 <= numerator <= denominator:
             raise ValueError("invalid threshold_num/threshold_den: ratio must be in [0, 1]")
     return coerced
+
+
+def _coerce_exact_probability(key: str, value: object) -> Fraction:
+    """Preserve rational quorum boundaries; binary floats are not accepted."""
+    if isinstance(value, bool) or not isinstance(value, int | str | Fraction):
+        raise ValueError(f"invalid {key}: {value!r} (expected an exact fraction)")
+    try:
+        exact = Fraction(value)
+    except (ValueError, ZeroDivisionError) as exc:
+        raise ValueError(f"invalid {key}: {value!r}") from exc
+    if not 0 <= exact <= 1:
+        raise ValueError(f"invalid {key}: {value!r} (must be in [0, 1])")
+    return exact
 
 
 def _coerce_epsilon(key: str, value: object) -> float:
@@ -92,6 +112,13 @@ def _coerce_denominator(key: str, value: object) -> str:
     if not isinstance(value, str) or value not in ("exclude_self", "include_self"):
         raise ValueError(f"invalid {key}: {value!r} (expected 'exclude_self'/'include_self')")
     return value
+
+
+def _coerce_nonnegative_integer(key: str, value: object) -> int:
+    result = _coerce_threshold(key, value)
+    if result < 0:
+        raise ValueError(f"invalid {key}: {value!r} (must be >= 0)")
+    return result
 
 
 def _coerce_bool(key: str, value: object) -> bool:

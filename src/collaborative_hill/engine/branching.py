@@ -43,6 +43,22 @@ class BranchManifest(BaseModel):
     unchanged_policies: dict[str, str]
 
 
+def _continuation_provenance(parent_dir: Path) -> dict[str, Any]:
+    from collaborative_hill.experiments.manifests import (
+        environment_provenance,
+        git_provenance,
+        lock_hash,
+        utc_now_iso,
+    )
+    from collaborative_hill.experiments.study import _find_repo_root
+
+    repo_root = _find_repo_root(parent_dir)
+    commit, dirty = git_provenance(repo_root)
+    return {"code_commit": commit, "worktree_dirty": dirty,
+            "dependency_lock_sha256": lock_hash(repo_root),
+            **environment_provenance(), "started_at": utc_now_iso()}
+
+
 def branch_run(
     *,
     parent_dir: Path,
@@ -50,6 +66,7 @@ def branch_run(
     child_dir: Path,
     child_run_id: str,
     policy_overrides: dict[str, Any],
+    allow_provider_requests: bool = False,
 ) -> tuple[RunResult, BranchManifest]:
     """Fork the run in ``parent_dir`` at checkpoint ``fork_seq``.
 
@@ -78,10 +95,16 @@ def branch_run(
     if not child_run_id.strip() or child_run_id in {e.run_id for e in parent_events}:
         raise ValueError("child run identity must be non-empty and different from every ancestor")
 
-    from collaborative_hill.experiments.study import build_policies  # cycle-free at runtime
+    from collaborative_hill.agents.llm import LLMPolicy, llm_manifest_fields
+    from collaborative_hill.experiments.manifests import utc_now_iso
+    from collaborative_hill.experiments.study import (
+        _write_llm_transcript,
+        build_policies,
+    )
 
     mechanism = resolved.build_mechanism()
-    policies = build_policies(resolved)
+    policies = build_policies(resolved, allow_provider_requests=allow_provider_requests,
+                               overrides=policy_overrides)
     original_ids = effective_policy_ids(parent_dir, parent_events, manifest)
     for agent, policy in policies.items():
         if agent not in policy_overrides and policy.policy_id != original_ids[agent]:
@@ -92,6 +115,11 @@ def branch_run(
             raise ValueError(f"override for unknown agent {agent}")
         policies[agent] = policy
         changed[agent] = policy.policy_id
+
+    usage_offsets = {a: p.call_count for a, p in policies.items() if isinstance(p, LLMPolicy)}
+    transcript_offsets = {a: len(p.transcript) for a, p in policies.items()
+                          if isinstance(p, LLMPolicy)}
+    provenance = _continuation_provenance(parent_dir)
 
     # copy-on-write prefix: byte-identical lines 0..fork_seq
     child_dir = Path(child_dir)
@@ -115,6 +143,7 @@ def branch_run(
             mechanism=mechanism, policies=policies, config=config, paths=child_paths,
             start_state=state,
         )
+        _write_llm_transcript(policies, child_dir, offsets=transcript_offsets)
 
         branch_manifest = BranchManifest(
             parent_run_id=manifest["run_id"],
@@ -134,18 +163,20 @@ def branch_run(
         )
         child_manifest = dict(manifest)
         child_manifest.update({
+            **llm_manifest_fields(policies, since=usage_offsets),
+            **provenance,
             "run_id": child_run_id,
+            "ended_at": utc_now_iso(),
             "policies": {a: p.policy_id for a, p in sorted(policies.items())},
             "parent_run": manifest["run_id"],
             "parent_event_hash_at_fork": record["last_event_hash"],
             "fork_seq": fork_seq,
             "status": result.status,
             "failure_reason": result.failure_reason,
-            # Usage of the child continuation has not been measured. Parent
-            # totals are not measurements of this counterfactual episode.
-            "input_tokens": None,
-            "output_tokens": None,
-            "cost_usd": None,
+            # Parent pricing and tokens do not describe the continuation.
+            # The helper above includes only this continuation's measured calls.
+            "pricing_table_version": None,
+            "pricing_table_date": None,
             "event_count": result.event_count,
             "final_event_hash": result.final_event_hash,
         })

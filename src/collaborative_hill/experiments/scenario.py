@@ -24,7 +24,7 @@ accepted by Fraction) — never floats — so every spec is canonically hashable
 from fractions import Fraction
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr, model_validator
 
 from collaborative_hill.agents.scripted.params import coerce_policy_params
 from collaborative_hill.domain.evidence import EvidenceSpec
@@ -98,16 +98,21 @@ class PolicySpec(BaseModel):
     """Cognition assignment. ``params`` values are int/str/bool only (rationals
     as strings) so specs stay hashable; builders parse with Fraction."""
 
-    model_config = ConfigDict(frozen=True, extra="forbid")
+    model_config = ConfigDict(frozen=True, extra="forbid", hide_input_in_errors=True)
 
     name: str
-    params: dict[str, int | str | bool] = Field(default_factory=dict)
+    params: dict[str, StrictInt | StrictStr | StrictBool] = Field(default_factory=dict)
 
     @model_validator(mode="after")
     def _check_scripted_params(self) -> "PolicySpec":
         # Validate without normalizing stored strings or inserting defaults:
         # the original exact representation participates in scenario hashes.
         coerce_policy_params(self.name, self.params)
+        if self.name == "llm_openai_compatible":
+            # Lazy import avoids the LLMPolicy -> NarrativeSkin import cycle.
+            from collaborative_hill.agents.llm.configuration import validate_provider_params
+
+            validate_provider_params(self.params)
         return self
 
 
@@ -148,7 +153,7 @@ class NarrativeSkin(BaseModel):
 
 
 class ScenarioSpec(BaseModel):
-    model_config = ConfigDict(frozen=True, extra="forbid")
+    model_config = ConfigDict(frozen=True, extra="forbid", hide_input_in_errors=True)
 
     schema_version: int = 1
     scenario_id: str
@@ -191,7 +196,7 @@ class ScenarioSpec(BaseModel):
 
 
 class ResolvedScenario(BaseModel):
-    model_config = ConfigDict(frozen=True, extra="forbid")
+    model_config = ConfigDict(frozen=True, extra="forbid", hide_input_in_errors=True)
 
     spec: ScenarioSpec
     skin: NarrativeSkin

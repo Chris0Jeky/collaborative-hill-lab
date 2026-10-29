@@ -75,13 +75,13 @@ def test_run_directory_is_reserved_before_policy_construction(tmp_path, monkeypa
     build = study.build_policies
     contended = False
 
-    def competing_run(resolved):
+    def competing_run(resolved, *, allow_provider_requests=False, overrides=None):
         nonlocal contended
         if not contended:
             contended = True
             with pytest.raises(FileExistsError):
                 run_study(STUDY_000, tmp_path, only_condition=CONDITION, replicates_override=1)
-        return build(resolved)
+        return build(resolved, allow_provider_requests=allow_provider_requests, overrides=overrides)
 
     monkeypatch.setattr(study, "build_policies", competing_run)
     results = run_study(STUDY_000, tmp_path, only_condition=CONDITION, replicates_override=1)
@@ -124,7 +124,7 @@ def test_pre_manifest_failure_releases_reservation_for_retry(tmp_path, monkeypat
     build = study.build_policies
     reserved = []
 
-    def fail(resolved):
+    def fail(resolved, **kwargs):
         reserved.append(_single_run_dir(tmp_path))
         assert not (reserved[0] / "manifest.json").exists()
         raise failure("synthetic setup failure")
