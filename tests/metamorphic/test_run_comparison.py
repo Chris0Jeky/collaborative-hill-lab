@@ -86,8 +86,9 @@ def test_failed_run_has_no_outcome_comparison(tmp_path, counterfactual, monkeypa
     parent, _, _ = counterfactual
     original = study_module.build_policies
 
-    def failing(resolved):
-        policies = original(resolved)
+    def failing(resolved, *, allow_provider_requests=False, overrides=None):
+        policies = original(resolved, allow_provider_requests=allow_provider_requests,
+                            overrides=overrides)
 
         class BrokenPolicy:
             policy_id = policies['a3'].policy_id

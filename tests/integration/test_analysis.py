@@ -37,8 +37,9 @@ def make_fixture(directory, *, paired=False, fail=False, invalid=False, monkeypa
     if fail or invalid:
         build = study.build_policies
 
-        def failing_policies(resolved):
-            policies = build(resolved)
+        def failing_policies(resolved, *, allow_provider_requests=False, overrides=None):
+            policies = build(resolved, allow_provider_requests=allow_provider_requests,
+                             overrides=overrides)
             original = policies["a1"].propose
             calls = 0
 
@@ -221,6 +222,135 @@ def test_runtime_configuration_drift_is_not_pooled(scripted_artifacts, tmp_path,
         analyze_study(root)
 
 
+def annotate_provider_provenance(root, *, reported_models):
+    """Keep sealed episode actions intact while supplying recorded run metadata."""
+    for path in root.glob("*/*/manifest.json"):
+        data = json.loads(path.read_text(encoding="utf-8"))
+        data["providers"] = {"a1": "requested-alias"}
+        data["provider_metadata"] = {"a1": {
+            "transport": "openai-compatible-chat@1",
+            "endpoint": "https://first.invalid/chat/completions",
+            "requested_model_id": "requested-alias",
+            "sampling": {"max_tokens": 8},
+        }}
+        data["reported_models"] = reported_models
+        path.write_text(json.dumps(data), encoding="utf-8")
+
+
+def test_same_provider_labels_cannot_hide_changed_transport(scripted_artifacts, tmp_path):
+    root = tmp_path / "artifacts"
+    shutil.copytree(scripted_artifacts, root)
+    annotate_provider_provenance(root, reported_models={"a1": ["reported-v1"]})
+    path = root / "attr-ledger" / "attr-ledger-r000" / "manifest.json"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data["provider_metadata"]["a1"]["endpoint"] = "https://second.invalid/chat/completions"
+    path.write_text(json.dumps(data), encoding="utf-8")
+    with pytest.raises(ValueError, match="differ outside the two factorial axes"):
+        analyze_study(root)
+
+
+@pytest.mark.parametrize("failed", [False, True])
+def test_known_reported_model_changes_are_not_pooled(tmp_path, monkeypatch, failed):
+    root = make_fixture(tmp_path, fail=failed, monkeypatch=monkeypatch)
+    annotate_provider_provenance(root, reported_models={"a1": ["reported-v1"]})
+    path = root / "attr-ledger" / "attr-ledger-r000" / "manifest.json"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data["reported_models"]["a1"] = ["reported-v2"]
+    path.write_text(json.dumps(data), encoding="utf-8")
+    with pytest.raises(ValueError, match="different provider models"):
+        analyze_study(root)
+
+
+def test_reported_models_are_compared_by_agent(scripted_artifacts, tmp_path):
+    root = tmp_path / "artifacts"
+    shutil.copytree(scripted_artifacts, root)
+    annotate_provider_provenance(root, reported_models={"a1": ["v1"], "a2": ["v2"]})
+    path = root / "agg-priv" / "agg-priv-r000" / "manifest.json"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    # The global union is unchanged, but the agent implementations have swapped.
+    data["reported_models"] = {"a1": ["v2"], "a2": ["v1"]}
+    path.write_text(json.dumps(data), encoding="utf-8")
+    with pytest.raises(ValueError, match="different provider models"):
+        analyze_study(root)
+
+
+def test_reported_models_are_sets_with_recorded_provenance(scripted_artifacts, tmp_path):
+    root = tmp_path / "artifacts"
+    shutil.copytree(scripted_artifacts, root)
+    annotate_provider_provenance(root, reported_models={"a1": ["v1", "v2"]})
+    path = root / "agg-priv" / "agg-priv-r000" / "manifest.json"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data["reported_models"] = {"a1": ["v2", "v1", "v1"], "a2": []}
+    path.write_text(json.dumps(data), encoding="utf-8")
+    result = analyze_study(root)
+    assert result["exclusions"] == []
+    assert len(result["episodes"]) == 12
+    assert all(row["reported_models"] == {"a1": ["v1", "v2"]}
+               and row["provider_metadata"]["a1"]["requested_model_id"] == "requested-alias"
+               for row in result["episodes"])
+
+
+@pytest.mark.parametrize("malformed", [None, [], {"a1": "v1"}, {"a1": [3]}, {"a1": [""]}])
+def test_malformed_reported_model_metadata_is_not_analyzable(
+    scripted_artifacts, tmp_path, malformed,
+):
+    root = tmp_path / "artifacts"
+    shutil.copytree(scripted_artifacts, root)
+    annotate_provider_provenance(root, reported_models={"a1": ["v1"]})
+    path = root / "agg-priv" / "agg-priv-r000" / "manifest.json"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data["reported_models"] = malformed
+    path.write_text(json.dumps(data), encoding="utf-8")
+    result = analyze_study(root)
+    assert len(result["episodes"]) == 11
+    assert [exclusion["reason"] for exclusion in result["exclusions"]] == [
+        "invalid_or_unsealed_artifact",
+    ]
+
+
+@pytest.mark.parametrize("unknown", [None, {}, {"a1": []}])
+def test_unknown_reported_model_failure_remains_an_exclusion(
+    scripted_artifacts, tmp_path, monkeypatch, unknown,
+):
+    root = tmp_path / "artifacts"
+    shutil.copytree(scripted_artifacts, root)
+    failed_root = make_fixture(tmp_path / "failed", fail=True, monkeypatch=monkeypatch)
+    target = root / "agg-priv" / "agg-priv-r000"
+    shutil.rmtree(target)
+    shutil.copytree(failed_root / "agg-priv" / "agg-priv-r000", target)
+    annotate_provider_provenance(root, reported_models={"a1": ["reported-v1"]})
+    path = target / "manifest.json"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if unknown is None:
+        del data["reported_models"]  # A legacy or pre-response record.
+    else:
+        data["reported_models"] = unknown
+    path.write_text(json.dumps(data), encoding="utf-8")
+    result = analyze_study(root)
+    assert len(result["episodes"]) == 11
+    assert [exclusion["reason"] for exclusion in result["exclusions"]] == ["run_failed"]
+    assert result["attrition"]["per_cell"]["agg-priv"]["failed"] == 1
+
+
+def test_reported_model_versions_may_differ_in_declared_blocks(tmp_path):
+    def change(source):
+        path = source / "study.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        data["conditions"][3]["scenario_block"] = "other-population"
+        path.write_text(json.dumps(data), encoding="utf-8")
+
+    root = make_fixture(tmp_path, paired=True, change=change)
+    annotate_provider_provenance(root, reported_models={"a1": ["reported-v1"]})
+    for path in (root / "attr-ledger").glob("*/manifest.json"):
+        data = json.loads(path.read_text(encoding="utf-8"))
+        data["reported_models"] = {"a1": ["reported-v2"]}
+        data["provider_metadata"]["a1"]["endpoint"] = "https://second.invalid/chat/completions"
+        path.write_text(json.dumps(data), encoding="utf-8")
+    result = analyze_study(root)
+    assert result["exclusions"] == []
+    assert len(result["episodes"]) == 12
+
+
 @pytest.mark.parametrize("failed_first", [False, True])
 def test_conflicting_repeated_attempts_are_not_selected_by_directory_order(
     scripted_artifacts, tmp_path, monkeypatch, failed_first,
@@ -309,7 +439,7 @@ def test_completed_invalid_action_episodes_are_included_as_run(tmp_path, monkeyp
 def test_parser_failure_abstentions_are_reported_separately(
     tmp_path, monkeypatch, script, parser_failures, rejections, rate,
 ):
-    def malformed_policies(resolved):
+    def malformed_policies(resolved, *, allow_provider_requests=False, overrides=None):
         return {a.agent_id: LLMPolicy(a.agent_id, FakeProvider(list(script)), resolved.skin,
                                       max_retries=1) for a in resolved.spec.cognition.agents}
 

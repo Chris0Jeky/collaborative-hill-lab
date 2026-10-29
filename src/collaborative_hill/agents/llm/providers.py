@@ -1,18 +1,30 @@
-"""Completion providers. Only a deterministic fake exists in the foundation.
-
-A real provider (Anthropic/OpenAI/...) is a later, human-approved addition:
-it must fill model_id exactly as reported by the API, pass through real token
-counts or leave them None, and never fabricate cost data (locked principle).
-"""
+"""Provider protocol and deterministic fixture; unavailable usage remains unknown."""
 
 from collections.abc import Callable
 from typing import Protocol, runtime_checkable
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
+
+
+class ProviderAttempt(BaseModel):
+    """Safe metadata for one HTTP request, including unsuccessful requests."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    outcome: str
+    http_status: int | None = None
+    model_id: str | None = None
+    input_tokens: int | None = Field(default=None, strict=True, ge=0)
+    output_tokens: int | None = Field(default=None, strict=True, ge=0)
 
 
 class ProviderError(RuntimeError):
     """Raised when a provider cannot return a completion (outage, refusal...)."""
+
+    def __init__(self, message: str, *,
+                 attempts: tuple[ProviderAttempt, ...] | None = None) -> None:
+        super().__init__(message)
+        self.attempts = attempts
 
 
 class ProviderResult(BaseModel):
@@ -20,13 +32,15 @@ class ProviderResult(BaseModel):
 
     text: str
     model_id: str
-    input_tokens: int | None = None
-    output_tokens: int | None = None
+    input_tokens: int | None = Field(default=None, strict=True, ge=0)
+    output_tokens: int | None = Field(default=None, strict=True, ge=0)
+    attempts: tuple[ProviderAttempt, ...] | None = None
 
 
 @runtime_checkable
 class CompletionProvider(Protocol):
-    model_id: str
+    @property
+    def model_id(self) -> str: ...
 
     def complete(self, prompt: str) -> ProviderResult: ...
 

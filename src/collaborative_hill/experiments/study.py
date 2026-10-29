@@ -28,7 +28,13 @@ from typing import Any, Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from collaborative_hill.agents.llm import FakeProvider, LLMPolicy
+from collaborative_hill.agents.llm import (
+    FakeProvider,
+    LLMPolicy,
+    OpenAICompatibleProvider,
+    build_openai_compatible_policy,
+    llm_manifest_fields,
+)
 from collaborative_hill.agents.scripted.ec_policies import build_ec_policy
 from collaborative_hill.agents.scripted.nipd_policies import build_nipd_policy
 from collaborative_hill.agents.scripted.params import coerce_policy_params
@@ -232,12 +238,28 @@ def frozen_hash(study_dir: Path) -> str | None:
     return str(data["study_hash"])
 
 
-def build_policies(resolved: ResolvedScenario) -> dict[str, Any]:
-    """Construct one policy object per agent from the cognition plane."""
+def build_policies(resolved: ResolvedScenario, *, allow_provider_requests: bool = False,
+                   overrides: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Construct policies; network-backed policies require explicit execution opt-in.
+
+    Explicit overrides are used before construction, so replacing a network
+    policy with a scripted counterfactual does not read credentials or call it.
+    """
     spec = resolved.spec
     mode = spec.world.mode if isinstance(spec.world, NIPDWorld) else None
     policies: dict[str, Any] = {}
+    replacements = overrides or {}
+    unknown = set(replacements) - {agent.agent_id for agent in spec.cognition.agents}
+    if unknown:
+        raise ValueError(f"override for unknown agent {sorted(unknown)[0]}")
     for agent in spec.cognition.agents:
+        if agent.agent_id in replacements:
+            replacement = replacements[agent.agent_id]
+            if (not allow_provider_requests and isinstance(replacement, LLMPolicy)
+                    and isinstance(replacement.provider, OpenAICompatibleProvider)):
+                raise ValueError("network-backed overrides require allow_provider_requests=True")
+            policies[agent.agent_id] = replacement
+            continue
         name = agent.policy.name
         params = dict(agent.policy.params)
         if name in SCRIPTED_NIPD:
@@ -259,6 +281,14 @@ def build_policies(resolved: ResolvedScenario) -> dict[str, Any]:
                 skin=resolved.skin,
                 max_retries=_require_non_negative_retries(params),
             )
+        elif name == "llm_openai_compatible":
+            if not allow_provider_requests:
+                raise ValueError(
+                    "network-backed policies require allow_provider_requests=True "
+                    "or --allow-provider-requests; validation and replay remain offline"
+                )
+            policies[agent.agent_id] = build_openai_compatible_policy(
+                agent.agent_id, resolved.skin, params)
         else:
             raise ValueError(f"unknown policy {name} for agent {agent.agent_id}")
     return policies
@@ -269,6 +299,40 @@ def _require_non_negative_retries(params: dict[str, Any]) -> int:
     if max_retries < 0:
         raise ValueError(f"max_retries must be >= 0, got {max_retries}")
     return max_retries
+
+
+def _require_provider_opt_in(resolved: dict[str, ResolvedScenario],
+                             only_condition: str | None, allowed: bool) -> None:
+    if not allowed and any(
+        agent.policy.name == "llm_openai_compatible"
+        for cid, scenario in resolved.items()
+        if only_condition is None or cid == only_condition
+        for agent in scenario.spec.cognition.agents
+    ):
+        raise ValueError(
+            "network-backed policies require allow_provider_requests=True "
+            "or --allow-provider-requests; no run output was created"
+        )
+    if allowed:
+        # Constructors make no requests. Check every selected credential/config
+        # before any episode can spend tokens or create an output directory.
+        for cid, scenario in resolved.items():
+            if only_condition is None or cid == only_condition:
+                for agent in scenario.spec.cognition.agents:
+                    if agent.policy.name == "llm_openai_compatible":
+                        build_openai_compatible_policy(
+                            agent.agent_id, scenario.skin, agent.policy.params)
+
+
+def _write_llm_transcript(policies: dict[str, Any], run_dir: Path, *,
+                          offsets: dict[str, int] | None = None) -> None:
+    starts = offsets or {}
+    transcript = [line for a, p in policies.items() if isinstance(p, LLMPolicy)
+                  for line in p.transcript[starts.get(a, 0):]]
+    if transcript:
+        with (run_dir / "llm_transcript.jsonl").open("w", encoding="utf-8") as stream:
+            for line in transcript:
+                stream.write(json.dumps(line, sort_keys=True) + "\n")
 
 
 def _planned_run_dirs(
@@ -321,6 +385,7 @@ def run_study(
     *,
     only_condition: str | None = None,
     replicates_override: int | None = None,
+    allow_provider_requests: bool = False,
 ) -> list[RunResult]:
     """Execute all (condition x replicate) runs. Study need not be frozen for
     smoke runs; the manifest records frozen status so sealed science is
@@ -344,6 +409,7 @@ def run_study(
     ):
         known = ", ".join(sorted(c.condition_id for c in spec.conditions))
         raise ValueError(f"unknown condition {only_condition!r}; known conditions: {known}")
+    _require_provider_opt_in(resolved, only_condition, allow_provider_requests)
     repo_root = _find_repo_root(study_dir)
     commit, dirty = git_provenance(repo_root)
     env = environment_provenance()
@@ -380,7 +446,8 @@ def run_study(
                 (run_dir / "scenario.resolved.json").write_text(
                     scenario.model_dump_json(indent=2), encoding="utf-8"
                 )
-                policies = build_policies(scenario)
+                policies = build_policies(scenario,
+                                           allow_provider_requests=allow_provider_requests)
                 manifest = RunManifest(
                     study_id=spec.study_id,
                     study_hash=h,
@@ -399,11 +466,7 @@ def run_study(
                     platform=env["platform"],
                     dependency_lock_sha256=dep_hash,
                     policies={a: p.policy_id for a, p in sorted(policies.items())},
-                    providers={a: p.provider.model_id for a, p in sorted(policies.items())
-                               if isinstance(p, LLMPolicy)},
-                    prompt_template_hashes={a: p.prompt_template_hash
-                                            for a, p in sorted(policies.items())
-                                            if isinstance(p, LLMPolicy)},
+                    **llm_manifest_fields(policies),
                     seed_root=list(seed_root),
                     seed_protocol=spec.seed_protocol,
                     policy_seed_root=list(policy_seed_root) if policy_seed_root else None,
@@ -436,16 +499,10 @@ def run_study(
                     "narrative_hash": scenario.narrative_hash,
                 },
             )
-            transcript = [
-                line for p in policies.values() if isinstance(p, LLMPolicy)
-                for line in p.transcript
-            ]
-            if transcript:
-                with (run_dir / "llm_transcript.jsonl").open("w", encoding="utf-8") as f:
-                    for line in transcript:
-                        f.write(json.dumps(line, sort_keys=True) + "\n")
+            _write_llm_transcript(policies, run_dir)
 
             manifest = manifest.model_copy(update={
+                **llm_manifest_fields(policies),
                 "ended_at": utc_now_iso(),
                 "status": result.status,
                 "failure_reason": result.failure_reason,

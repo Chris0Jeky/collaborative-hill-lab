@@ -61,10 +61,26 @@ def _comparison_configuration(resolved: ResolvedScenario,
     configuration["narrative_hash"] = resolved.narrative_hash
     configuration["execution"] = {
         field: manifest.get(field, {})
-        for field in ("policies", "providers", "prompt_template_hashes", "sampling")
+        for field in ("policies", "providers", "prompt_template_hashes", "sampling",
+                      "provider_metadata")
     }
     configuration["invalid_action_policy"] = manifest["invalid_action_policy"]
     return configuration
+
+
+def _reported_models(manifest: dict[str, Any]) -> dict[str, list[str]]:
+    """Canonical known model sets; no response is unknown, not a model identity."""
+    models = manifest.get("reported_models", {})
+    if not isinstance(models, dict):
+        raise ValueError("invalid reported model metadata")
+    known = {}
+    for agent, versions in models.items():
+        if (not isinstance(agent, str) or not isinstance(versions, list)
+                or any(not isinstance(version, str) or not version for version in versions)):
+            raise ValueError("invalid reported model metadata")
+        if versions:
+            known[agent] = sorted(set(versions))
+    return known
 
 
 def _episode(directory: Path) -> _Episode:
@@ -95,6 +111,14 @@ def _episode(directory: Path) -> _Episode:
         "input_tokens", "output_tokens", "cost_usd", "policies", "scenario_hash",
     )}
     row.update(run_status=manifest["status"], final_event_hash=events[-1].event_hash)
+    # Add recorded provider evidence only when available, preserving the legacy
+    # scripted artifact schema/bytes. These fields also distinguish copied
+    # attempts with conflicting metadata during duplicate detection.
+    if manifest.get("provider_metadata"):
+        row["provider_metadata"] = manifest["provider_metadata"]
+    reported_models = _reported_models(manifest)
+    if reported_models:
+        row["reported_models"] = reported_models
     episode = _Episode(directory, row, _comparison_configuration(resolved, manifest))
     if manifest["status"] != "completed":
         return episode
@@ -150,6 +174,7 @@ def _validate_population(episodes: list[_Episode]) -> None:
         raise ValueError("analysis requires one study identity, hash, seed and seed protocol")
     populations: dict[str | None, dict[str, Any]] = {}
     scenarios: dict[tuple[str | None, str], str] = {}
+    reported: dict[tuple[str | None, str], list[str]] = {}
     for episode in episodes:
         row = episode.row
         block = row["scenario_block"]
@@ -161,6 +186,16 @@ def _validate_population(episodes: list[_Episode]) -> None:
         if key in scenarios and scenarios[key] != row["scenario_hash"]:
             raise ValueError("analysis cannot pool different scenarios within a condition/block")
         scenarios[key] = row["scenario_hash"]
+        # Requested aliases can remain stable while the serving model changes.
+        # Compare observed versions by agent, including failed attempts with a
+        # response. Empty/absent sets do not establish a different identity and
+        # must not turn ordinary pre-response failures into population errors.
+        for agent, models in row.get("reported_models", {}).items():
+            model_key = (block, agent)
+            if model_key in reported and reported[model_key] != models:
+                raise ValueError("analysis inputs report different provider models "
+                                 "within a comparison population")
+            reported[model_key] = models
 
 
 def _collect(root: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any]], str | None]:
