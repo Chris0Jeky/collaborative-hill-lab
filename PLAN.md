@@ -1,45 +1,52 @@
 # PLAN — Collaborative Hill Lab
 
-Milestones with checked status. Detail per item: NEXT.md; current state: HANDOFF.md.
+Milestones as of 2026-10-29. [NEXT.md](NEXT.md) gives dependencies and acceptance
+criteria; [HANDOFF.md](HANDOFF.md) records evidence and remaining decisions.
 
-## M0 — Foundation (this phase)
+## M0 — Offline foundation
 
-- [x] Phase 0 discovery: six-lens adversarial review of legacy repo, paper, methodology,
-      architecture, security, related work (`docs/research/_discovery/`)
-- [x] Architecture decision: own deterministic kernel, Concordia behind adapter (ADR-0001)
-- [x] Kernel: canonical hashing (no floats), hierarchical stateless seeds, hash-linked
-      event ledger, file stores
-- [x] Five-plane ScenarioSpec + compiler; mechanism/narrative hash separation
-- [x] Mechanisms: N-IPD (pairwise + neighbourhood, exact fractions) and
-      Evidence Commons v0 (2×2 institutions, provenance verification)
-- [x] Agents: deconfounded TFT family, EC personas, replay policy, LLM adapter + fake provider
-- [x] Runner / replay / branching (copy-on-write prefix)
-- [x] Metrics families + manifests + study lifecycle + reports + `chl` CLI + Makefile
-- [x] Study 000 executed: 11/11 conditions reproduced (5 exact, 6 qualitative)
-- [x] Study 001 drafted: scenarios, two skins, certificate, DRAFT prereg, cost worksheet
-- [x] ADRs 0001–0007 + FOUNDATION_REVIEW
-- [x] Research docs: charter, legacy audit, related work, novelty matrix, methodology,
-      SAP, claims+limitations, threat model, prereg template, replication report
-- [x] Test suites: unit, property, metamorphic, integration
-- [x] Acceptance scenarios A–K executed
-- [x] Final adversarial pass + accurate handoff
+- [x] Legacy discovery, methodological review and research charter
+- [x] Own deterministic kernel; Concordia retained as a possible cognition adapter
+- [x] Exact payoffs, canonical hashing, hierarchical seeds and sealed event ledgers
+- [x] Five-plane scenarios and mechanism/narrative hash separation
+- [x] N-IPD and Evidence Commons v0 mechanisms
+- [x] Scripted policy family, replay policy and typed LLM adapter with fake provider
+- [x] Replay, counterfactual branches and read-only comparisons
+- [x] Metrics, manifests, study lifecycle, reports, CLI and reproducible setup
+- [x] Study 000 executed and policy/structure confound characterized
+- [x] Study 001 drafted; certificate correctly reports its failing collective stakes
+- [x] Independent and declared paired-policy analysis with input-integrity checks
+- [x] Finite-strategy incentive atlas with exact constraints and boundary controls
+- [x] Input/path safety and shared built-in policy parameter validation
+- [x] Persistent exact-commit CI, full regression suite and A–K acceptance checks
+- [x] Architecture records 0001–0009, research documentation and current handoff
 
-## M1 — First LLM pilot (needs human decisions)
+## M1 — First live pilot
 
-- [ ] Human: approve Study 001 prereg fields (hypotheses, primaries, weights, models,
-      ceiling); freeze study
-- [ ] Real provider adapter (one provider, pinned model), token/cost capture
-- [ ] 5-episode/cell pilot; variance + cost report; sample-size decision
-- [ ] Skin-robustness pilot check (both skins)
+- [ ] Observation-responsive scripted institutional baselines and controls (#76)
+- [ ] Configurable provider transport, offline contract tests and real usage capture (#77)
+- [ ] Human-approved pilot specification: institutions/weights, outcomes, model,
+      sampling settings, skins, cost ceiling and stopping rules
+- [ ] Declared pilot executed with measured variance, invalid-output rate and cost
+- [ ] Skin-robustness assessment and sample-size/effect-size alternatives
 
 ## M2 — Study 001 confirmatory run
 
-- [ ] Frozen study executed at decided replicate count; sealed; analysed per SAP
-- [ ] Negative-results-preserving write-up
+- [ ] Human finalizes hypotheses, primaries, weights, sample size, exclusions and SAP
+- [ ] Human freezes the final study after the pilot-dependent choices are complete
+- [ ] Frozen study executed, sealed and analyzed under the declared design
+- [ ] Negative-results-preserving write-up and human publication decision
 
-## M3 — Platform depth (as needed, second-occurrence rule)
+## M3 — Experimental depth
 
-- [ ] Deception-capable verification (agent-reported outcomes vs engine audit)
-- [ ] Reputation/sanction institutions (SanctSim lineage)
-- [ ] Concordia cognition adapter (behind observation firewall)
-- [ ] N=5 populations; graph topologies
+- [x] N=3/N=5 complete-graph threshold and composition sensitivity (Study 002)
+- [x] pTFT include/exclude-self sensitivity with independent episode uncertainty
+- [x] Exact finite-population pTFT means, variances and absorption benchmark
+- [ ] Versioned sparse graph semantics and complete-graph equivalence controls (#78)
+- [ ] Deception-capable verification, with unchanged v0 controls
+- [ ] Reputation/sanction institutions with responsive policies and integrity checks
+- [ ] Concordia cognition adapter behind the observation firewall
+- [ ] Serializable counterfactual policy-override specifications
+
+Additional infrastructure should follow a concrete experimental need. No current
+milestone changes Study 000/001 inputs or authorizes a freeze or paid run.

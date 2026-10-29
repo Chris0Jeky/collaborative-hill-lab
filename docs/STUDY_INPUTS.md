@@ -31,7 +31,7 @@ Before starting, `run_study` checks every selected run destination:
 An explicitly selected artifact root may itself be a symlink to a directory.
 Existing empty run directories remain supported. Preflight errors preserve
 existing files and avoid starting an earlier condition before a later static
-path error is discovered. The CLI reports invalid configuration with exit code 2.
+path error is discovered. The run CLI reports invalid configuration with exit code 2.
 
 The runner rechecks each destination before reserving it. Reservation still
 provides the existing exclusive-writer and cleanup behavior. These checks

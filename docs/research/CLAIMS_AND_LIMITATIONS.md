@@ -1,8 +1,9 @@
 # Claims and Limitations — Collaborative Hill Lab
 
-The scope contract for what the platform's outputs do and do not license. Every study's
-preregistration restates its own claim boundary (field 15); this document is the standing,
-cross-study boundary. It reflects the **implemented v0 system**
+The scope contract for what the platform's outputs do and do not license. Each study
+states its own claim boundary; a confirmatory preregistration must restate it. This
+document is the standing cross-study boundary, updated 2026-10-29. It reflects the implemented
+N-IPD engine and **Evidence Commons v0 system**
 (`domain/world/evidence_commons.py`, `domain/institutions.py`, `engine/*`, `metrics/*`).
 
 ---
@@ -13,25 +14,35 @@ cross-study boundary. It reflects the **implemented v0 system**
    scripted policy set), environment, and institution, the lab measures behavioural and
    epistemic outcomes — briefing quality (`accepted_correct − accepted_incorrect`),
    contribution/verification rates, free-rider advantage, payoff inequality — with episode-level
-   uncertainty. Claims take the form: "under model M, in Evidence Commons at N=3, mechanism A
+   uncertainty where estimable, or exact deterministic checks. A future measured claim
+   could take the form: "under model M, in Evidence Commons at N=3, mechanism A
    (`attributable`) produced higher briefing quality than mechanism B (`aggregate`), effect
    size E with 95% CI, at this scale."
 
-2. **Reproducible, content-addressed comparisons.** Every run is pinned by a hash chain and a
-   manifest (`experiments/manifests.py`): scenario/mechanism/narrative/evidence hashes, code
-   commit, dependency lock, seeds, provider and prompt-template hashes. Two people on two
-   machines can reproduce a scripted run **byte-for-byte** (identical `final_event_hash`) and
-   can audit exactly which model/version/config produced an LLM run.
+2. **Reproducible, content-addressed comparisons.** Sealed events and manifests record
+   scenario/mechanism/narrative/evidence identities, seed paths and available code, dependency
+   and provider metadata. Given the same inputs, code, seed protocol, run identity and start
+   metadata, the deterministic replay checks reproduce the event chain. Metadata supports
+   audit but does not authenticate executable code or a provider's internal sampling.
+   Unavailable provenance remains unavailable; a source label alone is not a full source snapshot.
 
-3. **Mechanism-attributable effects.** Because institution changes are proven to alter only
-   *who is seen* and *who is credited* — never the task, legal actions, or payoff totals for
-   identical behaviour (the mechanism certificate, `studies/001`, checks this by enumeration;
-   `mechanism_hash` excludes the institution's presentation) — a measured difference between
-   institutions is attributable to the institution, not to a confounded task change.
+3. **Controlled institutional comparisons.** The Study 001 C3 enumeration checks that
+   changing aggregate to attributable accountability preserves briefing, quality and total
+   utility for identical tested contributor/freerider profiles, within each evidence topology.
+   This is a bounded same-behavior integrity check, not proof of a behavioral causal effect
+   or an invariance claim across evidence topologies or arbitrary policies. Institution
+   configuration **is included** in `mechanism_hash`; narrative skin is excluded. Causal
+   interpretation additionally needs comparable non-treatment settings and a valid design.
+   See [the analysis contract](ANALYSIS_INPUT_VALIDATION.md),
+   [mechanism projection](../../src/collaborative_hill/experiments/scenario.py) and
+   [certificate](../../studies/001-evidence-commons/certificate.py).
 
-4. **Mechanism-invariance of narrative skins (scripted).** For scripted agents, skins are
-   proven pure-presentation: swapping a `NarrativeSkin` leaves `mechanism_hash` and the entire
-   event chain identical. So any scripted result is demonstrably not a prose artifact.
+4. **Mechanism-invariance of narrative skins (scripted).** Swapping a `NarrativeSkin`
+   preserves the mechanism identity and scripted world transitions. The metamorphic test
+   also proves identical event chains when run identity is held fixed and narrative-bearing
+   start metadata is omitted. A full study run may record different narrative identities in
+   its start metadata, so it need not have the same chain head. This check does not establish
+   skin-invariant LLM behavior. See [the exact test contract](../../tests/metamorphic/test_skin_isolation.py).
 
 5. **Comparative, not absolute, readings.** The lab compares mechanisms and models against
    each other and against analytical/scripted baselines whose behaviour is known in closed
@@ -87,8 +98,11 @@ cross-study boundary. It reflects the **implemented v0 system**
    are hand-specified reactive strategies, not trained or adaptive agents. They calibrate the
    environment and bound the LLM readings; they are not claimed to be optimal or representative.
 
-4. **Small N.** Groups are N=3–5 agents. Findings are scale-specific; nothing is claimed
-   about large populations, and N is a pre-registered factor, not a free knob.
+4. **Small N and declared composition.** Current Evidence Commons fixtures use N=3;
+   the N-IPD studies cover N=3 and N=5 complete graphs. Findings are specific to the
+   declared population and policy mixture. These unfrozen exploratory designs are not
+   confirmatory preregistrations. Increasing N while retaining one defector also changes
+   its population fraction; Study 002 includes a two-defector control to expose that issue.
 
 5. **Single-episode credit model.** Credit and scoring are computed within one episode at
    seal (`final_rewards`). There is no cross-episode reputation, memory, or carryover — an
@@ -101,11 +115,9 @@ cross-study boundary. It reflects the **implemented v0 system**
    reproduce the model's internal computation. An LLM run is reproducible as a *record*, not
    as a *cognitive process*.
 
-7. **Narrative-skin invariance is proven for scripted agents only.** The skin-is-presentation
-   invariant is a *proof* for scripted runs (identical event chain across skins). For LLM
-   agents, skins are the surface the model reads and behaviour may vary; LLM skin-invariance
-   is a **measurement target, not yet a result**. Until measured, "the effect is a mechanism
-   effect, not a prompt artifact" is asserted only for scripted agents.
+7. **Narrative-skin behavior is checked for scripted agents only.** The metamorphic
+   guarantees have the identity/metadata qualifications in §1.4. LLM agents read the skin
+   and may change their decisions; LLM skin robustness is a measurement target, not a result.
 
 8. **PD-literature contamination risk for LLM agents.** Models likely recognise the
    Prisoner's Dilemma, tragedy-of-the-commons, TFT, and Axelrod from training data and may
@@ -131,12 +143,34 @@ cross-study boundary. It reflects the **implemented v0 system**
     or cost figures; a `None` means unmeasured. Cost-conditioned claims are only as good as the
     measurement the manifest actually recorded.
 
+13. **Analysis identity checks are necessary, not sufficient.** `chl analyze` rejects
+    known non-treatment confounds and conflicting retries. It retains descriptive values
+    but withholds paired inference when coupling or complete blocks cannot be verified.
+    It cannot infer an entire missing run from absent artifacts, authenticate
+    policy code from its label, or create paired provider randomness. Current analysis
+    remains `sap_status: draft`; zero observed variance suppresses intervals and p-values.
+
+14. **Exact N-IPD mathematics has explicit model assumptions.** Study 002's exact
+    finite-state benchmark is post hoc and assumes independent rational Bernoulli decisions,
+    a complete graph, fixed AllD agents and zero exploration. The simulator still uses
+    finite-precision PRNG draws and binary-floating-point ratios. Exact model variances
+    include cross-round dependence; agents, rounds and votes are not extra replicates.
+    Model expectations and Monte Carlo errors do not replace the original empirical
+    intervals, including the reported finite-sample discrepancy.
+
+15. **Consistency is not authenticity.** Hash verification detects changes relative to a
+    retained terminal commitment. It cannot authenticate a history against a writer who
+    replaces the entire record and all commitments. Checked-in Study 002 summaries retain
+    per-episode terminal hashes, but its original raw ledgers are generated artifacts;
+    independent ledger verification requires those artifacts.
+
 ---
 
 ## 4. Standing rule
 
 Any result statement that survives review must name its **model(s), environment, N,
-institution cell, and scale**, attach an **effect size with an uncertainty interval**, and
-stay inside §1 while avoiding every item in §2. When in doubt, downgrade to the comparative,
-mechanism-linked, scale-qualified form.
-</content>
+institution cell, and scale**, state the unit and design, and distinguish measured values
+from analytical predictions. Report an effect size and uncertainty interval where the
+design supports one; report exact deterministic values or explicitly withheld inference
+where it does not. A zero empirical variance is not population certainty. Stay inside §1
+while avoiding every item in §2, and label exploratory and post hoc analyses as such.
