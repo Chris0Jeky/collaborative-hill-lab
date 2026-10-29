@@ -696,3 +696,45 @@ bounded pilot and the later pilot-dependent confirmatory design, removing the
 old circular sample-size/freeze dependency. No utility weights, confirmatory
 hypotheses, provider budget or publication claim were chosen. No study was frozen,
 and no real or paid provider or human-subject data was used.
+
+## 2026-10-29 — Review and refresh Dependabot PR #71
+
+The final open-PR sweep found Dependabot's setuptools 84.0.0→84.1.0 update.
+Its original head `662cad71e8f4954af6633899ea1d3c675c432d8b` has a one-line
+lock diff and green [CI 40802634286](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/40802634286),
+but that run predates Study 002. It had no comments or review threads. The
+source/test/workflow integration and documentation had since landed through #80.
+
+The [official release notes](https://setuptools.pypa.io/en/stable/history.html#v84-1-0)
+describe unsafe-archive rejection and legacy namespace-install hardening. The
+repository uses the PEP 517 `setuptools.build_meta` backend, with no inspected
+calls to `archive_util`, `install_as_egg` or `setup_requires`, no custom backend
+and no compiled extensions. A separate read-only compatibility review agreed
+that the inspected build path does not exercise the changed legacy APIs.
+
+Local review commit `abe311c1e17adc67f1005e79107051d9ab418d41`, based on the
+integrated `4cc9119` tree, changes only the same lock line as the bot PR. The
+reviewer created an isolated worktree/venv, leaving the shared environment at
+84.0.0. `make setup` initially hit the sandbox proxy restriction; the approved
+retry installed the new committed lock and editable package successfully.
+All 38 installed versions match their pins, including setuptools 84.1.0.
+
+Packaging proof used `setuptools.build_meta.build_sdist`, followed by pip wheel
+with `--no-index --no-deps --no-build-isolation` against that sdist. The first
+wheel invocation encountered the read-only default pip cache; an explicit
+task-specific cache under `/tmp` resolved that environment issue. The resulting
+wheel contains all 45 project Python files with source-identical bytes, the
+correct project metadata, Python requirement, GPL license file and `chl` entry
+point. It was installed only into the private venv. From `/tmp`, `python -I`
+loaded the installed package and entry point from `site-packages`; `chl --help`
+and Study 000 validation passed. `pip check` passed after both editable and wheel
+installation. The exact committed lock diff matches the connector's PR patch,
+and the review worktree is clean.
+
+The bot branch is refreshed without force, preserving its original head and
+current main as parents. The final PR retains the one-line dependency change
+plus this short maintenance/handoff record. Its exact-head CI and final merge
+state are recorded on [PR #71](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/71).
+The broad local scientific suite was not repeated for this build-only update;
+the refreshed hosted run checks all 849 tests, four StudySpecs, acceptance,
+atlas and benchmark regeneration with the new pinned backend.

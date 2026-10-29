@@ -119,6 +119,21 @@ integration/documentation PR carries its own current check; no human review is
 claimed from automated or agent reviews. CI covers Ubuntu/Python 3.12, not a native
 Windows/macOS or multi-version matrix.
 
+## Dependency maintenance following the integration checkpoint
+
+[PR #71](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/71) updates the
+setuptools lock pin from 84.0.0 to 84.1.0. Its original successful CI predated
+Study 002, so it was refreshed onto the integrated main branch for the complete
+current gate set. The PR retains the original bot commit, review evidence and
+exact-head checks; no force update was used.
+
+A separate venv passed fresh locked setup/editable installation, all 38 pin checks,
+sdist-to-wheel construction with the installed backend, wheel-content/license/
+entry-point checks, `pip check`, and isolated installed-package CLI/Study 000
+validation from outside the checkout. The original shared environment and run
+records were not rewritten. This follow-up changes the build dependency pin and
+the maintenance record, not simulator behavior or any scientific input/result.
+
 ## Remaining directions and limits
 
 The next concrete increments are
