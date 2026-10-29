@@ -24,7 +24,7 @@ accepted by Fraction) — never floats — so every spec is canonically hashable
 from fractions import Fraction
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr, model_validator
 
 from collaborative_hill.agents.scripted.params import coerce_policy_params
 from collaborative_hill.domain.evidence import EvidenceSpec
@@ -88,7 +88,7 @@ class PolicySpec(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     name: str
-    params: dict[str, int | str | bool] = Field(default_factory=dict)
+    params: dict[str, StrictInt | StrictStr | StrictBool] = Field(default_factory=dict)
 
     @model_validator(mode="after")
     def _check_scripted_params(self) -> "PolicySpec":

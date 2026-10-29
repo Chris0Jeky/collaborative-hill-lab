@@ -738,3 +738,40 @@ state are recorded on [PR #71](https://github.com/Chris0Jeky/collaborative-hill-
 The broad local scientific suite was not repeated for this build-only update;
 the refreshed hosted run checks all 849 tests, four StudySpecs, acceptance,
 atlas and benchmark regeneration with the new pinned backend.
+# 2026-10-29 — responsive Evidence Commons experiment (#76 / PR #81)
+
+Added the observation-only conditional contributor described in ADR-0012, with
+an exact inclusive peer quorum, declared warmup and conservative anonymous
+distinct-contributor bound. The original contributor/free-rider behavior and
+Study 001 inputs are unchanged. A review-found schema gap is closed: policy
+parameters retain strict integer/string/boolean types instead of normalizing
+float or byte inputs before hashing.
+
+The locally predeclared design is in `experiments/responsive-commons/DESIGN.md`.
+Its implementation was executed from clean local commit
+`25904e5ce84d9ed642bed5874192391ff1297729`, whose tree exactly matches published
+source commit `0e12c42fc8819e6d92c4153f06760c7996a5d237` in draft PR #81.
+All 320 behavioral episodes and 160 fixed-action controls completed. Across
+160 attributable-minus-aggregate comparisons, quality increased in 2, decreased
+in 2, and was unchanged in 156. Actions differed in 4 comparisons. All 160
+same-action controls preserved briefing, effort, quality and total utility.
+Nine of 40 finite two-strategy cells satisfied the declared strict C1/C2 pair.
+These are exact scripted outcomes of the declared grid, without sample-based
+intervals, live providers, final Study 001 weight selection or a study freeze.
+
+Independent review reproduced the positive/negative all-active trace arithmetic
+and found a collector configuration-binding gap. Collection now requires the
+declared policy IDs, study/run/replicate/seed metadata and fresh-run protocol in
+addition to verified seals and matching resolved scenarios. The complete readout
+retains every cell and deviation; `SOURCE_PROVENANCE.json` distinguishes original
+source commitments and the actual shared interpreter from later verification.
+
+Local validation: Ruff, strict package mypy (45 files), 907 tests, all four shipped
+StudySpec hashes, 11/11 acceptance, the incentive atlas, six Study 002 standalone
+modules/canonical inputs/exact benchmark, and the new `make check-responsive`
+480-episode byte-identical regeneration gate. A first broad invocation used the
+shared interpreter without the worktree's `PYTHONPATH`; it was discarded and
+replaced by the correct worktree invocation. A local mypy SQLite cache was then
+found malformed; the remaining standalone checks passed with a fresh cache.
+These were local execution-environment problems, not skipped checks. The final
+published head must pass the complete Actions gate with the full dependency lock.
