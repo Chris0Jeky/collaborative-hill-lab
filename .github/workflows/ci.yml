@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  offline:
+    name: Offline verification (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12"]
+    env:
+      CHL_EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      PYTHONUNBUFFERED: "1"
+      MPLBACKEND: Agg
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out the exact commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify checkout identity
+        run: |
+          test "$(git rev-parse HEAD)" = "$CHL_EXPECTED_SHA"
+          printf 'Verified commit: `%s`\n' "$CHL_EXPECTED_SHA" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: |
+            requirements-lock.txt
+            pyproject.toml
+
+      - name: Install the committed dependency lock
+        run: make setup PYTHON=python
+
+      - name: Lint, type-check, and run unit and property tests
+        run: make check
+
+      - name: Run the complete test suite
+        run: make test
+
+      - name: Validate both studies
+        run: make validate
+
+      - name: Run offline acceptance scenarios
+        run: make acceptance
+
+      - name: Verify the incentive atlas
+        run: make check-atlas
+
+      - name: Verify the tested commit and clean workspace
+        run: |
+          test "$(git rev-parse HEAD)" = "$CHL_EXPECTED_SHA"
+          if [ -n "$(git status --porcelain --untracked-files=normal)" ]; then
+            git status --short
+            echo "::error::Verification changed tracked files or left unexpected output."
+            exit 1
+          fi

@@ -10,7 +10,7 @@ PY ?= .venv/bin/python
 endif
 CHL := "$(PY)" -m collaborative_hill.cli
 
-.PHONY: doctor setup check test validate study-000 study-001-smoke replay-smoke report clean-generated
+.PHONY: doctor setup check check-atlas test validate acceptance study-000 study-001-smoke replay-smoke report clean-generated
 
 doctor:
 	$(CHL) doctor
@@ -26,12 +26,21 @@ check:
 	"$(PY)" -m mypy
 	"$(PY)" -m pytest tests/unit tests/property -q
 
+# The standalone experiment is outside the installed package's mypy scope.
+check-atlas:
+	"$(PY)" -m ruff check experiments/incentive-atlas
+	"$(PY)" -m mypy --strict --follow-imports=silent experiments/incentive-atlas/atlas.py scripts/check_atlas.py
+	"$(PY)" scripts/check_atlas.py
+
 test:
 	"$(PY)" -m pytest tests/ -q
 
 validate:
 	$(CHL) study validate "studies/000-legacy-reproduction"
 	$(CHL) study validate "studies/001-evidence-commons"
+
+acceptance:
+	"$(PY)" scripts/acceptance.py
 
 study-000:
 	$(CHL) run "studies/000-legacy-reproduction" --artifacts artifacts
