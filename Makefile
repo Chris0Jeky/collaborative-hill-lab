@@ -11,7 +11,7 @@ endif
 CHL := "$(PY)" -m collaborative_hill.cli
 STUDY002_ARTIFACTS ?= artifacts/study-002
 
-.PHONY: doctor setup quick lab check check-atlas check-study002 check-responsive check-graph test validate acceptance study-000 study-001-smoke study-002-plan study-002 replay-smoke report clean-generated
+.PHONY: doctor setup quick lab mutants check check-atlas check-study002 check-responsive check-graph test validate acceptance study-000 study-001-smoke study-002-plan study-002 replay-smoke report clean-generated
 
 doctor:
 	$(CHL) doctor
@@ -28,6 +28,10 @@ quick:
 
 lab:
 	"$(PY)" scripts/lab.py
+
+# Slow development probe: a survivor is a test gap or an equivalent change.
+mutants:
+	"$(PY)" scripts/mutants.py
 
 check:
 	"$(PY)" -m ruff check src tests studies scripts

@@ -322,5 +322,6 @@ def write_console(root: Path, out: Path | None, *, verify_replay: bool = False,
     traces = trace_runs(root, verify_replay=verify_replay)
     if out is not None:
         out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_text(render_html(traces, max_detail=max_detail), encoding="utf-8")
+        out.write_text(render_html(traces, max_detail=max_detail), encoding="utf-8",
+                       newline="\n")
     return render_text(traces), traces
