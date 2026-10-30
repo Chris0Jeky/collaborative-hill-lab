@@ -75,6 +75,9 @@ jobs:
       - name: Verify responsive Evidence Commons experiment
         run: make check-responsive
 
+      - name: Verify quality safeguards experiment
+        run: make check-quality-safeguards
+
       - name: Verify graph topology inputs and exact controls
         run: make check-graph
 
