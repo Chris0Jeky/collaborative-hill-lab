@@ -310,6 +310,16 @@ def test_challenge_cites_all_contradictions_and_precedes_my_own_proposal():
         ChallengeClaimAction(claim_id="c1", evidence_ids=("e3", "e4")))
 
 
+def test_rule_never_challenges_its_own_claim():
+    mechanism = custom(SUPPORT + [("e3", "s1-p", "contradicts", "src-3", "fresh")])
+    state = mechanism.initial_state()
+    state = step(mechanism, state, {"a1": ProposeClaimAction(
+        slot_id="s1", proposition_id="s1-p", evidence_ids=("e1",))})[0]
+    state["inspected"]["a1"] = ["e1", "e2", "e3"]
+    assert skeptical(peer_threshold="0").propose(mechanism.observe(state, "a1"), None).action == (
+        WithholdAction())
+
+
 def test_quorum_gate_matches_the_conditional_rule_after_warmup():
     mechanism = world(accountability="aggregate")
     state = mechanism.initial_state()

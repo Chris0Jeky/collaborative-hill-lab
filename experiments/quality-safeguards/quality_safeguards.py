@@ -418,6 +418,48 @@ def collect(root: Path) -> dict[str, Any]:
     return result
 
 
+# Follow-up F1, text only: written after the first execution at commit 139eb9a. No rule,
+# parameter, evidence, cell or RESULTS.json byte changed; only this text was added.
+READING = [
+    "## Reading (follow-up F1, written after execution)", "",
+    "Nothing was changed after the first execution at commit `139eb9a` except this text:",
+    "no rule, parameter, evidence or cell, and RESULTS.json is byte-identical. All predictions",
+    "held, which is expected of hand-traced deterministic rules and is not evidence of a",
+    "benefit. Figures are descriptive values of one synthetic grid at placeholder weights.", "",
+    "**The rule does not separate accurate from misleading evidence.** Matched corpora differ",
+    "only in hidden fields, so no observation-only rule can. Unanimous false corroboration",
+    "passes: `CCC` corroborated schedules equal the conditional control's everywhere, and",
+    "PR #81's +24/-24 attribution pattern reappears under the skeptical rule.", "",
+    "**It trades, in both directions.** Against the conditional control at `CCC` conflicted,",
+    "private, attributable, misleading quality goes -24 to 0 and total utility -79 to -24,",
+    "while accurate quality goes +24 to 0 and total utility -3 to -24. Across 36 conflicted",
+    "pairs per truth the screen raises quality in 18 misleading cells and lowers it in 18",
+    "accurate cells. The skeptical rule sums +24 aligned and -24 inverted, except 0 and 0 at",
+    "private aggregate, so its value depends on whether structure tracks truth, which this",
+    "laboratory cannot observe. No prevalence and no net value is claimed.", "",
+    "**Harmful and null findings.**", "",
+    "- Lost true slots: one named skeptic in `UUC` blocks every accurate conflicted claim at",
+    "  private attributable, quality +24 to 0.",
+    "- Paid reading with no return: skeptical `CCC` conflicted spends 24 effort at private",
+    "  for zero quality, so total utility is -24 under either truth.",
+    "- Hidden contradiction: when the contradiction holder free-rides (`CCF`), the screen never",
+    "  fires under private and quality is -12, equal to the control. A shared ledger gives 0.",
+    "- Attribution can reverse: in `UUC` conflicted private, anonymity delays the skeptic and",
+    "  one claim survives, so attribution moves quality +12 to 0 and -12 to 0, the opposite",
+    "  pattern to PR #81.",
+    "- Control quirk: at private aggregate the conditional control is more active on conflicted",
+    "  than corroborated evidence, because unshared contradictions let claims and verifications",
+    "  appear before warmup ends. Its aligned sum is -24 and inverted +24.",
+    "- Solo agents go silent: a lone skeptic cannot reach two sources, which changes actions",
+    "  in six corroborated pairs per truth but not quality.",
+    "- No group satisfies C1 and C2 at these placeholders.", "",
+    "The rule responds to evidential structure, never to quality or utility. A next step would",
+    "be a corpus model with declared noise rates or the audit channel sketched in ADR-0013,",
+    "each versioned separately. Neither is implied here, and nothing selects final weights.",
+    "",
+]
+
+
 def sign_counts(rows: list[dict[str, Any]]) -> tuple[int, int, int]:
     deltas = [row["quality_delta"] for row in rows]
     return (sum(d > 0 for d in deltas), sum(d < 0 for d in deltas), sum(d == 0 for d in deltas))
@@ -452,7 +494,7 @@ def render_report(result: dict[str, Any]) -> str:
         "The design and predictions precede execution in [DESIGN.md](DESIGN.md). The checked-in",
         "[RESULTS.json](RESULTS.json) retains every cell, terminal hash, contrast and unilateral",
         "deviation. Execution identity is in [SOURCE_PROVENANCE.json](SOURCE_PROVENANCE.json).",
-        "Post-execution reading is separate, in [FINDINGS.md](FINDINGS.md).", "",
+        "The closing reading was added after execution and is labelled as such.", "",
         f"**{result['behavioral_episodes']} behavioral episodes and "
         f"{result['fixed_action_episodes']} controlled action replays**, each {ROUNDS} rounds.",
         "Counts describe this finite grid. They are not frequencies or significance tests.", "",
@@ -532,6 +574,7 @@ def render_report(result: dict[str, Any]) -> str:
         f"All {len(result['same_action_integrity'])} replays of an aggregate action schedule "
         "under attributable preserve the schedule, briefing, effort, quality and total utility.",
         "Individual credit can redistribute.", "",
+        *READING,
         "## Reproduce", "", "```bash",
         "python experiments/quality-safeguards/quality_safeguards.py --out artifacts/quality-new",
         "python experiments/quality-safeguards/quality_safeguards.py --check", "```", "",
