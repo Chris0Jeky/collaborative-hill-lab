@@ -84,7 +84,7 @@ including vertex relabeling.
 
 T0 is the first all-D round, not entry into any absorbing/recurrent class.
 All-D is absorbing; F_t=P(T0<=t) equals its state probability. The record gives
-F_t, first-hit masses, right-censored survival and E[min(T0,R-1)] =
+F_t, first-hit masses and E[min(T0,R-1)] =
 sum(t=0,...,R-2)(1-F_t). This restricted time is not E[T0], a conditional mean
 among absorbed paths, or a claim of eventual absorption. All-pTFT starts at
 absorbing all-C, so F_t=0. Exclude-self bipartite graphs can have recurrent cycles

@@ -4968,17 +4968,9 @@
   "sample_minus_exact_discrepancies": null,
   "schema_version": 1,
   "source_files_sha256": {
-    "docs/adr/0011-versioned-graph-nipd.md": "2805bb9b1576cdfbd907a8c8c25b67ff12c6fc73d1063b93aa983930c3f95b01",
-    "experiments/sparse-ptft/DESIGN.md": "9bf16c697eb0f5c6ac1bb025bb7fa32126ea7d7f89886a307c4764795e208f5b",
-    "experiments/sparse-ptft/generate.py": "a92eeefc77ed50b74d093c9503551a398b44a6883146de91831f3f40c8560e35",
-    "experiments/sparse-ptft/sparse_ptft_exact.py": "41eb637960b3c093d3eb7ecf26c5d43185bc091fc76381196615543701a0ee7f",
-    "requirements-lock.txt": "500c146e66e3af9b483c2eaa348bccddc0165b0fcd101f03d9851769c0a6f280",
-    "src/collaborative_hill/agents/scripted/graph_nipd_policies.py": "ea98757f37de32aab51913aeb9a8528b3a780eda7579041780f7f76a59a4d28f",
-    "src/collaborative_hill/domain/world/graph_nipd.py": "e2faeb62b15dfc94cb68d710d4ddfffa2c2e41f2d53b113d2666a90d72dbfb38",
-    "src/collaborative_hill/engine/hashing.py": "e9051229b88a174e8c5d25f962d8fe38b77d3bd68450e8e65607ff9aa0a32448",
-    "studies/002-nipd-sensitivity/study002_markov.py": "0cf9533cc2380763e6cfc49269d3619e2ff0e7cbee78090324d9ff40b9cb09a1",
-    "tests/unit/_sparse_ptft_oracle.py": "aaba066d3e2999ab08453526d650a9accc86319d246a9a5f72b63e8060e7d449",
-    "tests/unit/test_sparse_ptft.py": "c150e65ab04e342bbe97686354953e8887a374cf943777d617eb619c042d3856"
+    "experiments/sparse-ptft/DESIGN.md": "3234f01b09e8542e52005895980ff2df8e2ea48325611213743b4610556faf1d",
+    "experiments/sparse-ptft/generate.py": "921a658e2ed32827679310a180d3a75e63d40dfd0d6c494b5d07d4b553df77ad",
+    "experiments/sparse-ptft/sparse_ptft_exact.py": "41eb637960b3c093d3eb7ecf26c5d43185bc091fc76381196615543701a0ee7f"
   },
   "status": "offline_exact_analytical_extension",
   "stochastic_samples": null

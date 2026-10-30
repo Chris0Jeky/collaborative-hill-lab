@@ -16,11 +16,7 @@ REPO = HERE.parents[1]
 ROUNDS = 8
 SOURCES = (
     "experiments/sparse-ptft/sparse_ptft_exact.py", "experiments/sparse-ptft/generate.py",
-    "experiments/sparse-ptft/DESIGN.md", "tests/unit/test_sparse_ptft.py",
-    "tests/unit/_sparse_ptft_oracle.py", "src/collaborative_hill/domain/world/graph_nipd.py",
-    "src/collaborative_hill/agents/scripted/graph_nipd_policies.py",
-    "src/collaborative_hill/engine/hashing.py", "docs/adr/0011-versioned-graph-nipd.md",
-    "studies/002-nipd-sensitivity/study002_markov.py", "requirements-lock.txt",
+    "experiments/sparse-ptft/DESIGN.md",
 )
 
 
