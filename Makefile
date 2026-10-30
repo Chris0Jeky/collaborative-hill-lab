@@ -11,7 +11,7 @@ endif
 CHL := "$(PY)" -m collaborative_hill.cli
 STUDY002_ARTIFACTS ?= artifacts/study-002
 
-.PHONY: doctor setup check check-atlas check-study002 check-responsive check-graph test validate acceptance study-000 study-001-smoke study-002-plan study-002 replay-smoke report clean-generated
+.PHONY: doctor setup check check-atlas check-study002 check-responsive check-graph check-sparse-ptft test validate acceptance study-000 study-001-smoke study-002-plan study-002 replay-smoke report clean-generated
 
 doctor:
 	$(CHL) doctor
@@ -49,6 +49,12 @@ check-graph:
 	"$(PY)" experiments/graph-topology/graph_experiment.py --check
 	$(CHL) study validate experiments/graph-topology
 	"$(PY)" scripts/check_graph.py
+
+check-sparse-ptft:
+	"$(PY)" -m ruff check experiments/sparse-ptft
+	"$(PY)" -m mypy --strict --follow-imports=silent experiments/sparse-ptft/*.py
+	"$(PY)" -m pytest tests/unit/test_sparse_ptft.py -q
+	"$(PY)" experiments/sparse-ptft/generate.py --check
 
 test:
 	"$(PY)" -m pytest tests/ -q
