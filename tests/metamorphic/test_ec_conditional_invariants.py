@@ -50,14 +50,14 @@ def execute(resolved, directory, policies):
 
 @pytest.mark.parametrize("accountability", ["aggregate", "attributable"])
 @pytest.mark.parametrize("topology", ["private", "shared_ledger"])
+@pytest.mark.parametrize("policy", ["ec_conditional_contributor", "ec_skeptical_contributor"])
 def test_skin_fresh_instance_and_recorded_action_replay_invariants(
-    tmp_path, accountability, topology,
+    tmp_path, accountability, topology, policy,
 ):
     spec = ec_spec(
         default_ec_evidence(),
         institution=InstitutionConfig(accountability=accountability, evidence_topology=topology),
-        agents=(("a1", "ec_conditional_contributor"),
-                ("a2", "ec_contributor"), ("a3", "ec_freerider")),
+        agents=(("a1", policy), ("a2", "ec_contributor"), ("a3", "ec_freerider")),
     )
     plain = compile_scenario(spec, plain_skin())
     rich = compile_scenario(spec, rich_ec_skin())
@@ -73,8 +73,9 @@ def test_skin_fresh_instance_and_recorded_action_replay_invariants(
         event.event_hash for event in original_events
     ]
     proposals = proposals_from_events(original_events)
-    assert any(proposal.action.type == "propose_claim"
-               for proposal in proposals["a1"].values())
+    assert policy == "ec_skeptical_contributor" or any(
+        proposal.action.type == "propose_claim"
+        for proposal in proposals["a1"].values())
     identities = policy_ids_from_events(original_events)
     recorded = {agent: ReplayPolicy(agent, identities[agent], proposals[agent])
                 for agent in identities}
