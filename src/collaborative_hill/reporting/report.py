@@ -68,7 +68,7 @@ def write_run_metrics(run_dir: Path) -> dict[str, Any]:
     metrics = compute_all_metrics(events, manifest)
     paths.metrics.mkdir(exist_ok=True)
     (paths.metrics / "metrics.json").write_text(
-        json.dumps(metrics, indent=2, sort_keys=True), encoding="utf-8"
+        json.dumps(metrics, indent=2, sort_keys=True), encoding="utf-8", newline="\n"
     )
     _try_parquet(events, paths.metrics / "events.parquet")
     return metrics
@@ -172,7 +172,7 @@ def run_report(run_dir: Path) -> Path:
         f" | cost: {o['cost_usd']} (None = not measured; never fabricated)",
         "",
     ]
-    paths.report.write_text("\n".join(lines), encoding="utf-8")
+    paths.report.write_text("\n".join(lines), encoding="utf-8", newline="\n")
     return paths.report
 
 
@@ -224,7 +224,7 @@ def study_report(artifacts_study_dir: Path) -> Path:
     else:
         lines.append("No runs found.")
     out = root / "report.md"
-    out.write_text("\n".join(lines), encoding="utf-8")
+    out.write_text("\n".join(lines), encoding="utf-8", newline="\n")
     return out
 
 

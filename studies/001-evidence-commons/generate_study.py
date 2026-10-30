@@ -200,9 +200,9 @@ def main() -> None:
     (output / "scenarios").mkdir(parents=True, exist_ok=True)
     (output / "skins").mkdir(exist_ok=True)
     (output / "skins/official-briefing.json").write_text(
-        SKIN_A.model_dump_json(indent=2), encoding="utf-8")
+        SKIN_A.model_dump_json(indent=2), encoding="utf-8", newline="\n")
     (output / "skins/newsroom-desk.json").write_text(
-        SKIN_B.model_dump_json(indent=2), encoding="utf-8")
+        SKIN_B.model_dump_json(indent=2), encoding="utf-8", newline="\n")
 
     cond_specs = []
     for cid, (acc, topo, cog) in CONDITIONS.items():
@@ -213,7 +213,7 @@ def main() -> None:
             "skins must not change the mechanism hash"
         assert resolved_a.narrative_hash != resolved_b.narrative_hash
         (output / f"scenarios/{cid}.json").write_text(
-            spec.model_dump_json(indent=2), encoding="utf-8")
+            spec.model_dump_json(indent=2), encoding="utf-8", newline="\n")
         cond_specs.append(ConditionSpec(
             condition_id=cid, scenario=f"scenarios/{cid}.json",
             skin="skins/official-briefing.json",
@@ -233,7 +233,7 @@ def main() -> None:
         "seed_protocol": True, "conditions": {"__all__": {"scenario_block"}},
     }
     (output / "study.json").write_text(
-        study.model_dump_json(indent=2, exclude=excluded), encoding="utf-8")
+        study.model_dump_json(indent=2, exclude=excluded), encoding="utf-8", newline="\n")
     print(f"study 001 written: {len(cond_specs)} conditions "
           f"(mechanism hash equality across skins asserted); "
           f"seed_protocol={study.seed_protocol}; unfrozen output={output}")
