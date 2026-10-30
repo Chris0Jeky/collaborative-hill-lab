@@ -201,7 +201,7 @@ def main() -> None:
         "to regenerate byte-identical results (deterministic seeds).",
     ]
     out = STUDY_DIR / "MECHANISM_CERTIFICATE.md"
-    out.write_text("\n".join(lines), encoding="utf-8")
+    out.write_text("\n".join(lines), encoding="utf-8", newline="\n")
     print(f"wrote {out}")
     print(f"C1 temptation everywhere: {c1_all}; C2 collective stakes everywhere: {c2_all}; "
           f"C3 violations: {len(violations)}")

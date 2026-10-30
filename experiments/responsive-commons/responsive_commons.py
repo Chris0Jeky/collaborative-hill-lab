@@ -132,12 +132,12 @@ def write_inputs(destination: Path) -> tuple[StudySpec, dict[str, ResolvedScenar
     destination.mkdir()
     (destination / "scenarios").mkdir()
     (destination / "study.json").write_text(spec.model_dump_json(indent=2) + "\n",
-                                            encoding="utf-8")
+                                            encoding="utf-8", newline="\n")
     (destination / "skin.json").write_text(SKIN.model_dump_json(indent=2) + "\n",
-                                           encoding="utf-8")
+                                           encoding="utf-8", newline="\n")
     for cid, item in resolved.items():
         (destination / "scenarios" / f"{cid}.json").write_text(
-            item.spec.model_dump_json(indent=2) + "\n", encoding="utf-8")
+            item.spec.model_dump_json(indent=2) + "\n", encoding="utf-8", newline="\n")
     return spec, resolved
 
 
@@ -194,7 +194,7 @@ def fixed_action_run(source: Path, target: ResolvedScenario, destination: Path) 
                        seed_root=(SEED, "fixed-actions", target.spec.scenario_id))
     with RunPaths(destination).reserve() as paths:
         (destination / "scenario.resolved.json").write_text(
-            target.model_dump_json(indent=2), encoding="utf-8")
+            target.model_dump_json(indent=2), encoding="utf-8", newline="\n")
         result = run_episode(mechanism=target.build_mechanism(), policies=policies,
                              config=config, paths=paths,
                              start_meta={"scenario_hash": target.scenario_hash,
@@ -428,9 +428,9 @@ def execute(root: Path) -> dict[str, Any]:
                                                    "accountability": "attributable"})):
         if not replay_run(path).chains_match:
             raise ValueError(f"recorded-ledger replay mismatch: {path}")
-    (root / "RESULTS.json").write_text(encode(result), encoding="utf-8")
-    (root / "RESULTS.md").write_text(render_report(result), encoding="utf-8")
-    (root / "SOURCE_PROVENANCE.json").write_text(encode(provenance), encoding="utf-8")
+    (root / "RESULTS.json").write_text(encode(result), encoding="utf-8", newline="\n")
+    (root / "RESULTS.md").write_text(render_report(result), encoding="utf-8", newline="\n")
+    (root / "SOURCE_PROVENANCE.json").write_text(encode(provenance), encoding="utf-8", newline="\n")
     return result
 
 
