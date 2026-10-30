@@ -206,7 +206,7 @@ def main() -> int:
 
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text("\n".join(lines), encoding="utf-8")
+    out.write_text("\n".join(lines), encoding="utf-8", newline="\n")
     print(f"wrote {out}")
     print(json.dumps(dict(verdicts.items()), indent=2))
     return 0

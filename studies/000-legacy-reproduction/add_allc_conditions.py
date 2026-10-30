@@ -49,7 +49,7 @@ def main() -> None:
         })
         compile_scenario(spec, skin)
         (STUDY_DIR / f"scenarios/{cid}.json").write_text(
-            spec.model_dump_json(indent=2), encoding="utf-8"
+            spec.model_dump_json(indent=2), encoding="utf-8", newline="\n"
         )
         if cid not in existing:
             added.append(ConditionSpec(
@@ -57,7 +57,8 @@ def main() -> None:
             ))
     if added:
         study = study.model_copy(update={"conditions": (*study.conditions, *added)})
-        (STUDY_DIR / "study.json").write_text(study.model_dump_json(indent=2), encoding="utf-8")
+        (STUDY_DIR / "study.json").write_text(study.model_dump_json(indent=2),
+                                              encoding="utf-8", newline="\n")
     print(f"conditions now: {len(study.conditions)} (added {len(added)})")
 
 

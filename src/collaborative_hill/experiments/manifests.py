@@ -126,5 +126,5 @@ def lock_hash(repo_root: Path) -> str | None:
 def write_manifest(manifest: RunManifest, path: Path) -> None:
     path.write_text(
         json.dumps(manifest.model_dump(mode="json"), indent=2, sort_keys=True),
-        encoding="utf-8",
+        encoding="utf-8", newline="\n",
     )
