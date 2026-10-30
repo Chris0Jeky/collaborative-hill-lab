@@ -98,6 +98,10 @@ def main() -> int:
     parser.add_argument("--seed", type=int, default=20261030)
     parser.add_argument("--timeout", type=int, default=600)
     args = parser.parse_args()
+    for target in args.targets:
+        # Relative src/ paths only: the mutant must land in the overlay, never the checkout.
+        if not target.startswith("src/") or Path(target).is_absolute() or ".." in target:
+            parser.error(f"target must be a relative src/ path: {target}")
     rng = random.Random(args.seed)
     survivors = killed = 0
     with tempfile.TemporaryDirectory(prefix="chl-mutants-") as temp:
@@ -120,6 +124,9 @@ def main() -> int:
             tests = tests_for(target)
             print(f"{target}: {len(sample)} of {len(options)} sites, "
                   f"{len(tests)} test files", flush=True)
+            if not tests:  # Bare pytest would fall back to every configured test path.
+                print("  no fast tests reach this file: every mutant is an unmeasured gap")
+                continue
             for mutation in sorted(sample):
                 started = time.monotonic()
                 verdict = run_mutant(overlay, target, apply(source, mutation), tests,

@@ -31,7 +31,7 @@ def _git(*args: str) -> list[str]:
 
 def changed_files(base: str) -> list[str]:
     merge_base = _git("merge-base", base, "HEAD")[0]
-    tracked = _git("diff", "--name-only", merge_base)
+    tracked = _git("diff", "--name-only", "--no-renames", merge_base)
     untracked = _git("ls-files", "--others", "--exclude-standard")
     return sorted(set(tracked + untracked))
 
@@ -54,7 +54,9 @@ def dependencies(path: Path, modules: dict[str, Path]) -> set[Path]:
     for node in ast.walk(ast.parse(path.read_bytes())):
         if isinstance(node, ast.Import):
             names.update(alias.name for alias in node.names)
-        elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
+        elif isinstance(node, ast.ImportFrom) and node.module and node.level == 1:
+            names.add(node.module)  # Test helpers: `from ._helpers import x` is a sibling.
+        elif isinstance(node, ast.ImportFrom) and node.module:
             names.add(node.module)
             names.update(f"{node.module}.{alias.name}" for alias in node.names)
         elif isinstance(node, ast.Constant) and isinstance(node.value, str):
@@ -105,30 +107,43 @@ def _gate_files(paths: list[str]) -> set[Path]:
     return files
 
 
+def _needs_everything(name: str) -> str | None:
+    """Why a path cannot be traced statically, so the safe selection is everything."""
+    if name in ALWAYS_FULL or name.startswith(".github/"):
+        return name
+    if not name.startswith(PY_ROOTS):
+        return f"unclassified {name}"
+    if not (REPO / name).exists():
+        return f"deleted or moved {name}"
+    if name.startswith(("src/", "tests/")) and not name.endswith(".py"):
+        return f"non-Python {name}"
+    return None
+
+
 def plan(changed: list[str]) -> tuple[list[str], list[str], list[str]]:
     """Return (test paths, make gates, reasons). ``tests/`` means the complete suite."""
     relevant = [name for name in changed if not NO_EFFECT.search(name)]
-    reasons = [f"full: {name}" for name in relevant if name in ALWAYS_FULL]
-    reasons += [f"full: unclassified {name}" for name in relevant
-                if not name.startswith((*PY_ROOTS, ".github/")) and name not in ALWAYS_FULL]
     gates = makefile_gates()
+    reasons = [f"full: {reason}" for name in relevant if (reason := _needs_everything(name))]
     if reasons:
         return ["tests/"], list(gates), reasons
     files = python_files()
     modules = {name: path for path in files if (name := module_name(path))}
     graph = {path: dependencies(path, modules) for path in files}
-    closure = affected({REPO / name for name in relevant if name.endswith(".py")}, graph)
     data_roots = {"/".join(name.split("/")[:2]) for name in relevant
                   if name.startswith(("studies/", "experiments/"))}
+    tokens = {root.split("/")[1] for root in data_roots}
+    tokens.update(Path(name).stem for name in relevant if name.startswith("scripts/"))
+    # Mentions count from helpers as well as tests, then reach importers via the closure.
+    mentions = {path for path in files if path.is_relative_to(REPO / "tests")
+                and any(token in path.read_text(encoding="utf-8") for token in tokens)}
+    closure = affected({REPO / name for name in relevant if name.endswith(".py")} | mentions,
+                       graph)
     selected_gates = [gate for gate, entries in gates.items()
                       if closure & _gate_files(entries)
                       or any(root in entry for root in data_roots for entry in entries)]
-    tokens = {root.split("/")[1] for root in data_roots}
-    tokens.update(Path(name).stem for name in relevant if name.startswith("scripts/"))
     tests = [path.relative_to(REPO).as_posix()
-             for path in sorted((REPO / "tests").rglob("test_*.py"))
-             if path in closure or any(token in path.read_text(encoding="utf-8")
-                                       for token in tokens)]
+             for path in sorted((REPO / "tests").rglob("test_*.py")) if path in closure]
     return tests, selected_gates, reasons
 
 

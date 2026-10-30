@@ -51,36 +51,47 @@ def _nipd_strips(transitions: list[dict[str, Any]], agents: list[str]) -> dict[s
     return strips
 
 
-def _ec_strips(events: list[Event], agents: list[str], rounds: int) -> dict[str, str]:
-    cells = {agent: [NO_ACTION] * rounds for agent in agents}
+def _ec_strips(events: list[Event], agents: list[str]) -> dict[str, str]:
+    cells: dict[str, dict[int, str]] = {agent: {} for agent in agents}
     for event in events:
-        accepted = event.event_type == EventType.ACTION_ACCEPTED
-        if (accepted or event.event_type == EventType.ACTION_REJECTED) \
-                and event.logical_time < rounds:
+        if event.event_type == EventType.ACTION_ACCEPTED:
             kind = event.payload.get("action", {}).get("type")
-            glyph = EC_GLYPHS.get(kind, "?") if accepted else REJECTED
-            cells[event.payload["agent_id"]][event.logical_time] = glyph
+            cells[event.payload["agent_id"]].setdefault(event.logical_time,
+                                                        EC_GLYPHS.get(kind, "?"))
+    rounds = 1 + max((t for row in cells.values() for t in row), default=-1)
+    return {agent: "".join(row.get(t, NO_ACTION) for t in range(rounds))
+            for agent, row in cells.items()}
+
+
+def _mark_rejections(strips: dict[str, str], events: list[Event]) -> dict[str, str]:
+    """A rejection stays visible over any fallback, including in a round that never resolved."""
+    rejected = [(event.payload["agent_id"], event.logical_time) for event in events
+                if event.event_type == EventType.ACTION_REJECTED]
+    rounds = 1 + max([len(strip) - 1 for strip in strips.values()]
+                     + [t for _, t in rejected])
+    cells = {agent: list(strip.ljust(rounds, NO_ACTION)) for agent, strip in strips.items()}
+    for agent, t in rejected:
+        cells[agent][t] = REJECTED
     return {agent: "".join(row) for agent, row in cells.items()}
 
 
-def run_trace(run_dir: Path, *, verify_replay: bool = False) -> dict[str, Any]:
-    """Verified film strip of one run; a broken ledger yields ``{"broken": reason}``."""
-    run_dir = Path(run_dir)
-    identity = {"run_id": run_dir.name, "condition_id": run_dir.parent.name,
-                "study_id": run_dir.parent.parent.name}
-    try:
-        events, manifest = _load_sealed_run(run_dir)
-        replay = replay_run(run_dir).chains_match if verify_replay else None
-    except (ChainError, ValueError, KeyError, OSError) as exc:
-        return {**identity, "broken": f"{type(exc).__name__}: {exc}"}
-
-    agents = list(events[0].payload["agents"])
+def _trace(events: list[Event], manifest: dict[str, Any],
+           replay: bool | None) -> dict[str, Any]:
+    started = events[0].payload
+    if manifest["policies"] != started["policies"]:
+        raise ChainError("manifest policies do not match the sealed RunStarted event")
+    agents = list(started["agents"])
     transitions = [event.payload for event in events
                    if event.event_type == EventType.WORLD_TRANSITIONED]
     votes = [payload for payload in transitions if "cooperative_votes" in payload]
+    mechanism = next((event.payload["observation"].get("mechanism") for event in events
+                      if event.event_type == EventType.OBSERVATION_ISSUED), None)
     terminal = events[-1]
+    condition = manifest["condition_id"]
+    if manifest.get("parent_run"):  # Branches share their parent's prefix: never pool them.
+        condition = f"{condition} (branch of {manifest['parent_run']})"
     trace: dict[str, Any] = {
-        "run_id": manifest["run_id"], "condition_id": manifest["condition_id"],
+        "run_id": manifest["run_id"], "condition_id": condition,
         "study_id": manifest["study_id"], "replicate": manifest["replicate"],
         "status": manifest["status"], "failure_reason": manifest.get("failure_reason"),
         "policies": {agent: manifest["policies"][agent] for agent in agents},
@@ -88,13 +99,13 @@ def run_trace(run_dir: Path, *, verify_replay: bool = False) -> dict[str, Any]:
         "parent_run": manifest.get("parent_run"), "fork_seq": manifest.get("fork_seq"),
         "replay_identical": replay,
     }
-    if votes:
+    if mechanism != "evidence_commons":
         trace["kind"] = "nipd"
-        trace["strips"] = _nipd_strips(votes, agents)
+        trace["strips"] = _mark_rejections(_nipd_strips(votes, agents), events)
         trace["cooperation"] = [p["cooperative_votes"] / p["total_votes"] for p in votes]
     else:
         trace["kind"] = "ec"
-        trace["strips"] = _ec_strips(events, agents, len(transitions))
+        trace["strips"] = _mark_rejections(_ec_strips(events, agents), events)
         if terminal.event_type == EventType.RUN_COMPLETED:
             payload = terminal.payload
             trace["quality"] = payload["collective_quality"]
@@ -108,16 +119,29 @@ def run_trace(run_dir: Path, *, verify_replay: bool = False) -> dict[str, Any]:
     return trace
 
 
+def run_trace(run_dir: Path, *, verify_replay: bool = False) -> dict[str, Any]:
+    """Verified film strip of one run; a broken ledger yields ``{"broken": reason}``."""
+    run_dir = Path(run_dir)
+    try:
+        events, manifest = _load_sealed_run(run_dir)
+        replay = replay_run(run_dir).chains_match if verify_replay else None
+        return _trace(events, manifest, replay)
+    except (ChainError, ValueError, KeyError, OSError) as exc:
+        return {"run_id": run_dir.name, "condition_id": run_dir.parent.name,
+                "study_id": run_dir.parent.parent.name,
+                "broken": f"{type(exc).__name__}: {exc}"}
+
+
 def trace_runs(root: Path, *, verify_replay: bool = False) -> list[dict[str, Any]]:
     return [run_trace(run_dir, verify_replay=verify_replay) for run_dir in find_runs(root)]
 
 
 def _mean_series(traces: list[dict[str, Any]]) -> list[float]:
-    series = [trace["cooperation"] for trace in traces if "cooperation" in trace]
-    if not series:
-        return []
-    length = min(len(row) for row in series)
-    return [sum(row[i] for row in series) / len(series) for i in range(length)]
+    """Per-round mean over the replicates that reached that round."""
+    series = [trace["cooperation"] for trace in traces if trace.get("cooperation")]
+    return [sum(row[i] for row in series if i < len(row))
+            / sum(i < len(row) for row in series)
+            for i in range(max((len(row) for row in series), default=0))]
 
 
 def _spark(values: list[float]) -> str:
@@ -195,7 +219,7 @@ margin:0 0 10px}
 .card h3{font-size:14px;margin:0;overflow-wrap:anywhere}.card p{margin:2px 0 8px;color:var(--dim)}
 .card.bad{border-color:var(--bad)}.broken{color:var(--bad);overflow-wrap:anywhere}
 .heat{display:grid;gap:1px;width:100%}.heat i{display:block;height:7px;
-background:color-mix(in srgb,var(--c) var(--p),var(--d))}
+background:color-mix(in srgb,var(--c) var(--p),var(--d))}.heat i.gap{background:var(--none)}
 .strip{display:grid;gap:1px;grid-template-columns:minmax(52px,150px) repeat(var(--n),minmax(0,1fr));
 align-items:center;margin-top:6px}
 .strip .who{font-size:12px;color:var(--dim);overflow:hidden;white-space:nowrap;
@@ -234,7 +258,7 @@ def _glyph_class(glyph: str) -> str:
 
 
 def _strip_html(trace: dict[str, Any]) -> str:
-    rounds = max(len(strip) for strip in trace["strips"].values())
+    rounds = max((len(strip) for strip in trace["strips"].values()), default=0)
     cells = []
     for agent, strip in trace["strips"].items():
         policy = escape(trace["policies"][agent])
@@ -247,12 +271,12 @@ def _strip_html(trace: dict[str, Any]) -> str:
 
 
 def _heat_html(rows: list[dict[str, Any]]) -> str:
-    series = [trace["cooperation"] for trace in rows if "cooperation" in trace]
+    series = [trace["cooperation"] for trace in rows if trace.get("cooperation")]
     if not series:
         return ""
     columns = max(len(row) for row in series)
-    cells = "".join(f'<i style="--p:{round(value * 100)}%"></i>'
-                    for row in series for value in row)
+    cells = "".join("".join(f'<i style="--p:{round(value * 100)}%"></i>' for value in row)
+                    + '<i class="gap"></i>' * (columns - len(row)) for row in series)
     return (f'<div class="heat" style="grid-template-columns:repeat({columns},minmax(0,1fr))" '
             f'role="img" aria-label="cooperation rate by round for each replicate">{cells}</div>')
 
@@ -320,7 +344,7 @@ def render_html(traces: list[dict[str, Any]], *, max_detail: int = 4) -> str:
 def write_console(root: Path, out: Path | None, *, verify_replay: bool = False,
                   max_detail: int = 4) -> tuple[str, list[dict[str, Any]]]:
     traces = trace_runs(root, verify_replay=verify_replay)
-    if out is not None:
+    if out is not None and traces:
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(render_html(traces, max_detail=max_detail), encoding="utf-8",
                        newline="\n")
