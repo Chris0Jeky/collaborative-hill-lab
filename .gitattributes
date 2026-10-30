@@ -1,2 +1,2 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# Evidence, hashes and provenance commit to exact bytes: every checkout uses LF.
+* text=auto eol=lf
