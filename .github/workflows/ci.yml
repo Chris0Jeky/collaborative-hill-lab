@@ -15,12 +15,13 @@ concurrency:
 
 jobs:
   offline:
-    name: Offline verification (Python ${{ matrix.python-version }})
-    runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    name: Offline verification (${{ matrix.os }}, Python ${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
+        os: [ubuntu-24.04, windows-2025]
         python-version: ["3.12"]
     env:
       CHL_EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}

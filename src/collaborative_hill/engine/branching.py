@@ -156,10 +156,10 @@ def branch_run(
             unchanged_policies={a: pid for a, pid in original_ids.items() if a not in changed},
         )
         (child_dir / "branch.json").write_text(
-            branch_manifest.model_dump_json(indent=2), encoding="utf-8"
+            branch_manifest.model_dump_json(indent=2), encoding="utf-8", newline="\n"
         )
         (child_dir / "scenario.resolved.json").write_text(
-            resolved.model_dump_json(indent=2), encoding="utf-8"
+            resolved.model_dump_json(indent=2), encoding="utf-8", newline="\n"
         )
         child_manifest = dict(manifest)
         child_manifest.update({
@@ -181,6 +181,6 @@ def branch_run(
             "final_event_hash": result.final_event_hash,
         })
         child_paths.manifest.write_text(
-            json.dumps(child_manifest, indent=2, sort_keys=True), encoding="utf-8"
+            json.dumps(child_manifest, indent=2, sort_keys=True), encoding="utf-8", newline="\n"
         )
     return result, branch_manifest
