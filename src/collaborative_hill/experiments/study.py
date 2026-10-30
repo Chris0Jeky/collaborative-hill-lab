@@ -208,7 +208,7 @@ def freeze_study(study_dir: Path) -> str:
     lock_path = Path(study_dir) / "study.lock.json"
     fd, temporary = tempfile.mkstemp(prefix=".study-lock-", suffix=".tmp", dir=study_dir)
     try:
-        with os.fdopen(fd, "w", encoding="utf-8") as stream:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as stream:
             json.dump(lock, stream, indent=2, sort_keys=True)
             stream.flush()
             os.fsync(stream.fileno())
@@ -334,7 +334,7 @@ def _write_llm_transcript(policies: dict[str, Any], run_dir: Path, *,
     transcript = [line for a, p in policies.items() if isinstance(p, LLMPolicy)
                   for line in p.transcript[starts.get(a, 0):]]
     if transcript:
-        with (run_dir / "llm_transcript.jsonl").open("w", encoding="utf-8") as stream:
+        with (run_dir / "llm_transcript.jsonl").open("w", encoding="utf-8", newline="\n") as stream:
             for line in transcript:
                 stream.write(json.dumps(line, sort_keys=True) + "\n")
 
@@ -448,7 +448,7 @@ def run_study(
             _require_output_within_root(run_dir, Path(artifacts_root))
             with RunPaths(run_dir).reserve() as paths:
                 (run_dir / "scenario.resolved.json").write_text(
-                    scenario.model_dump_json(indent=2), encoding="utf-8"
+                    scenario.model_dump_json(indent=2), encoding="utf-8", newline="\n"
                 )
                 policies = build_policies(scenario,
                                            allow_provider_requests=allow_provider_requests)

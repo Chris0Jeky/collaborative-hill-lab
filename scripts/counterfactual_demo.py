@@ -77,7 +77,7 @@ def main() -> int:
         summary = {"schema_version": 1, "scope": "offline_counterfactual_demonstration",
                    "mechanisms": mechanisms}
         (output / "summary.json").write_text(
-            json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8",
+            json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n",
         )
         lines = ["# Offline counterfactual demonstration", "",
                  "Six sealed runs, replayed from recorded actions. No study inputs were changed.",
@@ -92,7 +92,7 @@ def main() -> int:
                       "The second branch retains that policy; a new run ID alone changes hashes,",
                       "not actions. Utilities cover the entire episode,",
                       "including the common prefix."])
-        (output / "README.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+        (output / "README.md").write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
     except (ValueError, OSError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
