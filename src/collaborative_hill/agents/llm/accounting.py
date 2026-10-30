@@ -60,7 +60,7 @@ def llm_manifest_fields(policies: Mapping[str, Any], *,
         if selected else None,
         "cost_usd": None,
     }
-    if budget is not None:  # key absent otherwise: unbudgeted manifests are unchanged
+    if budget is not None:  # unbudgeted runs keep the manifest default of null
         fields["request_budget"] = budget.snapshot()
     requests = total("request_attempts")
     for dimension in ("input", "output"):

@@ -70,6 +70,6 @@ No default limit exists and none is chosen: omitting the flags keeps ADR-0010
 behaviour (unlimited). Endpoint/model, a cost ceiling, a stopping rule and any paid
 pilot remain owner decisions. The counters live in one process; two concurrent
 `chl run` invocations do not share a budget. The deadline starts at construction,
-so slow offline preparation before construction is not counted. Only the network
+and the CLI builds the budget first, so offline preparation counts against it. Only the network
 transport consumes the budget: the fake provider sends nothing, so budgets do not
 apply to it. See [provider usage](../PROVIDER_USAGE.md).
