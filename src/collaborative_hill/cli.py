@@ -10,6 +10,7 @@
     chl compare <left-run> <right-run> [--verify-replay]
     chl report <run-or-study-artifacts-dir>
     chl analyze <study-artifacts-dir> [--out FILE]
+    chl lab <run-or-artifacts-dir> [--out FILE] [--verify-replay]
     chl doctor
 """
 
@@ -266,6 +267,27 @@ def report(target: Path) -> None:
     else:
         out = study_report(target)
     typer.echo(str(out))
+
+
+@app.command("lab")
+def lab(
+    target: Path,
+    out: Path | None = typer.Option(None, "--out", help="Also write a one-file HTML console"),
+    verify_replay: bool = typer.Option(False, "--verify-replay",
+                                       help="Re-execute every ledger and show the verdict"),
+) -> None:
+    """Print each condition's film strip from sealed ledgers; exit 1 if any is broken."""
+    from collaborative_hill.reporting.lab import write_console
+
+    text, traces = write_console(target, out, verify_replay=verify_replay)
+    if not traces:
+        typer.echo(f"error: no run ledgers under {target}", err=True)
+        raise typer.Exit(code=2)
+    typer.echo(text, nl=False)
+    if out is not None:
+        typer.echo(f"wrote {out}")
+    if any("broken" in trace or trace.get("replay_identical") is False for trace in traces):
+        raise typer.Exit(code=1)
 
 
 @app.command("analyze")
