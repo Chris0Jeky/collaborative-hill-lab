@@ -145,6 +145,24 @@ def test_run_limit_propagates_to_later_episodes_without_resetting(tmp_path, wire
     assert RUN in results[1].failure_reason
 
 
+def test_run_level_stop_does_not_block_scripted_conditions(tmp_path, wire):
+    study = tmp_path / "study"
+    write_study(study)
+    scenario = json.loads((study / "scenario.json").read_text())
+    scenario["cognition"]["agents"][0]["policy"] = {"name": "ec_freerider"}
+    (study / "scripted.json").write_text(json.dumps(scenario))
+    spec = json.loads((study / "study.json").read_text())
+    spec["conditions"].append({"condition_id": "s", "scenario": "scripted.json",
+                               "skin": "skin.json"})
+    (study / "study.json").write_text(json.dumps(spec))
+    results, manifests, _ = execute(tmp_path, wire, RequestBudget(max_run_attempts=0))
+    assert {r.run_id: r.status for r in results} == {"c-r000": "failed", "s-r000": "completed"}
+    scripted = next(m for m in manifests if m["condition_id"] == "s")
+    assert scripted["request_budget"]["stop_reason"] is None
+    assert scripted["request_budget"]["admitted"] == {"episode": 0, "run": 0}
+    assert wire[1] == []
+
+
 def test_cancellation_is_checked_between_requests(tmp_path, wire):
     cancelled = []
     budget = RequestBudget(cancelled=lambda: bool(cancelled))
