@@ -57,7 +57,8 @@ def main() -> None:
             ))
     if added:
         study = study.model_copy(update={"conditions": (*study.conditions, *added)})
-        (STUDY_DIR / "study.json").write_text(study.model_dump_json(indent=2), encoding="utf-8", newline="\n")
+        (STUDY_DIR / "study.json").write_text(study.model_dump_json(indent=2),
+                                              encoding="utf-8", newline="\n")
     print(f"conditions now: {len(study.conditions)} (added {len(added)})")
 
 
