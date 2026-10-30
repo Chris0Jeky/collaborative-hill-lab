@@ -12,6 +12,7 @@ from urllib.parse import urlsplit
 from collaborative_hill.engine.hashing import frac_str
 
 if TYPE_CHECKING:
+    from collaborative_hill.agents.llm.budget import RequestBudget
     from collaborative_hill.agents.llm.policy import LLMPolicy
     from collaborative_hill.experiments.scenario import NarrativeSkin
 
@@ -125,8 +126,11 @@ def validate_provider_params(params: Mapping[str, Any]) -> OpenAICompatibleConfi
 
 
 def build_openai_compatible_policy(agent_id: str, skin: "NarrativeSkin",
-                                   params: Mapping[str, Any]) -> "LLMPolicy":
-    """Explicit construction; callers gate authorization before invoking the factory."""
+                                   params: Mapping[str, Any], *,
+                                   budget: "RequestBudget | None" = None) -> "LLMPolicy":
+    """Explicit construction; callers gate authorization before invoking the factory.
+
+    ``budget`` is an operational admission limit shared by every policy built with it."""
     from collaborative_hill.agents.llm.openai_compatible import OpenAICompatibleProvider
     from collaborative_hill.agents.llm.policy import LLMPolicy
 
@@ -134,5 +138,6 @@ def build_openai_compatible_policy(agent_id: str, skin: "NarrativeSkin",
     api_key = os.environ.get(config.api_key_env) if config.api_key_env is not None else None
     if config.api_key_env is not None and not api_key:
         raise ValueError("provider credential environment variable is unavailable")
-    return LLMPolicy(agent_id, OpenAICompatibleProvider(config, api_key=api_key), skin,
+    provider = OpenAICompatibleProvider(config, api_key=api_key, budget=budget)
+    return LLMPolicy(agent_id, provider, skin,
                      max_retries=config.max_retries, sampling=dict(config.sampling))

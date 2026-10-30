@@ -11,6 +11,7 @@ import urllib.request
 from collections.abc import Mapping
 from typing import Any, NoReturn
 
+from collaborative_hill.agents.llm.budget import RequestBudget, RequestBudgetExhausted
 from collaborative_hill.agents.llm.configuration import OpenAICompatibleConfig
 from collaborative_hill.agents.llm.providers import ProviderAttempt, ProviderError, ProviderResult
 
@@ -42,14 +43,18 @@ class OpenAICompatibleProvider:
     ``api_key`` is private process memory only. Passing None explicitly supports
     an unauthenticated compatible endpoint. The timeout is a socket I/O timeout;
     it neither cancels remote generation nor guarantees a wall-clock deadline.
+    An optional shared ``budget`` admits every HTTP attempt (first POST and each
+    429 retry) before it is sent; it is operational and not part of audit metadata.
     """
 
-    def __init__(self, config: OpenAICompatibleConfig, *, api_key: str | None) -> None:
+    def __init__(self, config: OpenAICompatibleConfig, *, api_key: str | None,
+                 budget: RequestBudget | None = None) -> None:
         if api_key is not None and (not isinstance(api_key, str) or not api_key
                                     or any(ord(c) <= 32 or ord(c) >= 127 for c in api_key)):
             raise ValueError("provider credential must be a nonempty printable bearer token")
         self._config = config
         self._api_key = api_key
+        self.budget = budget
         if api_key is not None and self._contains_secret(self.audit_metadata()):
             raise ValueError("provider credentials must not appear in public configuration")
         self._opener = urllib.request.build_opener(_NoRedirect())
@@ -108,7 +113,15 @@ class OpenAICompatibleProvider:
             headers["Authorization"] = "Bearer " + self._api_key
         body = json.dumps(payload, ensure_ascii=True, allow_nan=False).encode("utf-8")
         attempts: list[ProviderAttempt] = []
+        delay = 0
         for index in range(self.config.rate_limit_retries + 1):
+            if self.budget is not None:
+                try:
+                    self.budget.admit(after_seconds=delay)
+                except RequestBudgetExhausted as exc:
+                    raise ProviderError(str(exc), attempts=tuple(attempts)) from None
+            if index:
+                time.sleep(delay)
             request = urllib.request.Request(self.config.endpoint, body, headers, method="POST")
             try:
                 with self._opener.open(request, timeout=self.config.timeout_seconds) as response:
@@ -119,7 +132,7 @@ class OpenAICompatibleProvider:
                 exc.close()
                 attempts.append(ProviderAttempt(outcome="http_error", http_status=status))
                 if status == 429 and index < self.config.rate_limit_retries:
-                    time.sleep(self.config.retry_delay_seconds)
+                    delay = self.config.retry_delay_seconds
                     continue
                 raise ProviderError(f"provider HTTP error ({status})", attempts=tuple(attempts)) \
                     from None

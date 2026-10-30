@@ -3,6 +3,7 @@
 from collections.abc import Mapping, Sequence
 from typing import Any
 
+from collaborative_hill.agents.llm.budget import RequestBudget
 from collaborative_hill.agents.llm.providers import ProviderAttempt
 
 
@@ -21,10 +22,12 @@ def summarize_attempts(attempts: Sequence[ProviderAttempt]) -> dict[str, int | N
 
 
 def llm_manifest_fields(policies: Mapping[str, Any], *,
-                        since: Mapping[str, int] | None = None) -> dict[str, Any]:
+                        since: Mapping[str, int] | None = None,
+                        budget: RequestBudget | None = None) -> dict[str, Any]:
     """Manifest updates for an episode or an explicitly offset continuation.
 
     Snapshot each LLMPolicy.call_count before continuing reused policy objects.
+    A ``budget`` adds its settings, charged attempts and stable stop reason.
     Transcript slicing uses its own length because legacy failures have no raw
     completion transcript. Costs remain unavailable; token counts are not prices.
     """
@@ -57,6 +60,8 @@ def llm_manifest_fields(policies: Mapping[str, Any], *,
         if selected else None,
         "cost_usd": None,
     }
+    if budget is not None:  # key absent otherwise: unbudgeted manifests are unchanged
+        fields["request_budget"] = budget.snapshot()
     requests = total("request_attempts")
     for dimension in ("input", "output"):
         fields[f"{dimension}_tokens"] = (
