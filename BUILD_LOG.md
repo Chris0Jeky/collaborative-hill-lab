@@ -900,3 +900,21 @@ labeled-state sparse-graph pTFT and cumulative provider request planning/budgets
 The ten owner decisions, tier, hooks, licenses and unfrozen StudySpecs remain
 unchanged. No real or paid provider, human-subject data or new confirmatory claim
 was used. Verification reruns are regression checks, not added scientific samples.
+
+## 2026-10-31 portability, feedback tooling and issues #84–#86
+
+Local Windows 3.12 first showed 10 failures in `pytest tests/` over 6 minutes: nine were
+CRLF byte differences, and one came from the desktop app's virtualized `AppData` Temp and
+passes with `--basetemp` on a real path. Hosted Windows then exposed text-mode generator
+writes. #88 merged at exact-head CI 41146442106 on Ubuntu and windows-2025.
+
+Slices ran in worktrees outside OneDrive with one shared venv and `PYTHONPATH=src`: #85 by
+GPT-6.1 Sol, #86 by a Sonnet worker, #84 by an Opus worker, and the fuzzer drafted by Muse
+and repaired by the driver. Every substantive PR received a fresh-context review. Codex
+confirmed one real defect in #90: a retry sent after cancellation during its delay. A
+driver slip pushed conflict markers to the #91 branch; they were removed before merge and
+never reached main.
+
+`make mutants` with seed 20261030 and 6 mutants per file killed 55 of 72 using fast tests
+only. After the metric oracles, a sample of 16 metric mutants killed 15, and the last
+survivor gained its own test. Verification reruns add no scientific samples.

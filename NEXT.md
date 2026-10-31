@@ -1,6 +1,6 @@
 # NEXT — research and engineering direction
 
-Current checkpoint: 2026-10-29. Engineering can advance with scripted agents while
+Current checkpoint: 2026-10-31. Engineering can advance with scripted agents while
 model, budget and confirmatory-study decisions remain open. The unchanged
 [human-owned decisions](HANDOFF.md#human-owned-decisions--unchanged) are the home
 for those choices.
@@ -39,42 +39,27 @@ for those choices.
 
 ## Next useful increments
 
-### 1. Quality safeguards grounded in visible evidence
+Issues #84, #85 and #86 are complete; see [HANDOFF](HANDOFF.md). Their results set
+the next offline work.
 
-[Issue #84](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/84).
-The new conditional contributor responds to visible participation, but attribution
-can sustain harmful activity on misleading evidence. Specify a new versioned rule
-using only declared observable evidence/provenance/contradiction signals, with an
-explicit negative control when those observations cannot distinguish false support.
-Any new truth or credit feedback requires a separately versioned observation
-contract. Hold budgets and evidence access fixed within each planned contrast;
-retain all existing controls and original results. Report quality, activity,
-effort, utility, finite-strategy incentives and identical-action integrity
-separately. No final Study 001 weight choice or live provider is needed.
+### 1. Separate the components of the skeptical rule
 
-### 2. Exact labeled-state pTFT on small sparse graphs
+[Issue #95](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/95). The quality-safeguards contrast bundles the screen,
+disclosure of contradicting items, challenges and the read-citation requirement.
+A labelled follow-up should vary them independently on the same fixed inputs, with
+hand-derived predictions first.
 
-[Issue #85](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/85).
-ADR-0011 gives two reachable four-cycle configurations with the same cooperator
-count and different next-count distributions. A sparse-graph benchmark must keep
-enough labeled state to recover those local transition probabilities. Begin with
-small connected graphs, fixed AllD actors, neighborhood broadcast and no
-exploration. Check exact transition rows, complete-graph projections, relabeling
-and an independent labeled-history oracle. Keep ideal rational-Bernoulli results
-distinct from the finite-precision simulator and declare any new stochastic
-sampling plan before execution.
+### 2. Give structure a declared relation to truth
 
-### 3. Offline request planning and cumulative attempt budgets
+[Issue #96](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/96). Observation-only rules cannot separate corpora that differ
+only in hidden truth. A corpus model with declared source noise rates, or a
+separately versioned audit channel (ADR-0013), would make a quality-sensitive rule
+testable.
 
-[Issue #86](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/86).
-The transport's token cap and socket timeout do not enforce a whole-episode
-budget or deadline. Add an offline plan that counts action-format repair and
-HTTP 429 attempts separately, then an explicit cumulative admission limit with
-recorded scope and stopping reasons. Failed/unknown attempts still consume the
-declared attempt budget. Keep partial measurements and unknown dollar totals
-honest; define continuation behavior and preflight failure before requests.
-Use mocked transports. Live provider/version, cost and stopping choices remain
-human-owned.
+### 3. Provider-budget follow-ups
+
+[Issue #92](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/92) holds the remaining non-blocking items. Whether network
+runs must declare a budget is an owner decision.
 
 ## Path to a live Study 001 result
 
@@ -96,7 +81,7 @@ human-owned.
    randomness. Publication and novelty claims remain human decisions.
 
 The analysis implementation and offline provider contract tests already work.
-The three engineering/research increments above can proceed before a live pilot;
+The engineering/research increments above can proceed before a live pilot;
 pilot-dependent power and confirmatory choices cannot. Stop according to a
 declared rule and preserve incomplete results if a budget binds. A revised design
 is a separately declared follow-up, not a retroactive confirmation of the original.

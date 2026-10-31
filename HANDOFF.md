@@ -1,4 +1,43 @@
-# HANDOFF — current checkpoint, 2026-10-29
+# HANDOFF — current checkpoint, 2026-10-31
+
+## Portability, feedback tooling and issues #84–#86
+
+Native Windows reproduction was broken and invisible: `core.autocrlf` plus text-mode
+writes changed bytes that evidence commits to. [#88](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/88) forces LF, fixes
+every text write and runs the full gate on Windows in CI. No evidence byte or Linux
+output changed.
+
+Feedback tools from [#89](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/89) and [#93](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/93): `make quick`
+(diff-selected checks), `chl lab` / `make lab` (film strips from verified ledgers,
+terminal and HTML), `make mutants` (reproducible token-mutant sampler) and a
+Hypothesis whole-episode fuzzer. A one-off 500-example fuzz search found no engine
+defect. The first 72-mutant sample killed 55 using fast tests only; survivors
+clustered in reported metrics, now pinned by `tests/unit/test_metric_oracles.py`.
+
+[#90](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/90) (closes #86) adds `chl study plan` and `RequestBudget` (ADR-0015):
+attempts are charged at admission, scopes never reset on a retry or fork, stops seal
+`RunFailed` and replay offline, deadlines apply between requests only, and budget
+configuration enters no hash. There is no default limit. All verification is mocked.
+
+[#91](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/91) (closes #85) adds the
+[exact sparse pTFT benchmark](experiments/sparse-ptft/EXACT.md): 16 exact cells,
+complete-graph agreement with Study 002, an independent history oracle and the
+four-cycle non-lumpability witness. An independent review re-derived key values by hand.
+
+[#94](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/94) (closes #84) adds `ec_skeptical_contributor@1` (ADR-0013) and the
+unfrozen [quality-safeguards experiment](experiments/quality-safeguards/RESULTS.md):
+440 behavioral episodes and 220 same-action controls. **The rule does not separate
+accurate from misleading evidence**: all 220 truth pairs have identical actions and
+opposite quality, and unanimous false corroboration passes. Its bundled rule effect
+trades on conflicted evidence, gaining where structure tracks truth and losing where
+it inverts. One named skeptic blocks every accurate conflicted claim. C1 and C2 hold
+together in 0 of 48 groups; C3 holds in all 220 replays. Sealed raw runs are local at
+`C:/Users/Cristian3/chl-wt/kept-artifacts/quality-safeguards/`, outside Git and not
+archived elsewhere; the checked-in readout retains terminal hashes.
+
+Exact-head hosted CI passed on Ubuntu and Windows for every PR in this section. No study was
+frozen, no provider was called, and the ten human decisions below are unchanged.
+Follow-ups: [#92](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/92), [#95](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/95), [#96](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/96).
 
 ## Research engine advancement
 
@@ -174,7 +213,7 @@ times are unchanged; ZIP entries use fixed timestamps for reproducible packaging
 
 ```bash
 make setup
-make check test validate acceptance check-atlas check-study002 check-responsive check-graph
+make check test validate acceptance check-atlas check-study002 check-responsive check-quality-safeguards check-graph check-sparse-ptft
 make study-002-plan
 make study-002 STUDY002_ARTIFACTS=artifacts/study-002-fresh
 ```
@@ -202,8 +241,8 @@ It separately checks the untouched original source and published-mapping records
 
 Exact published-head Actions logs are the hosted verification record. The final
 integration/documentation PR carries its own current check; no human review is
-claimed from automated or agent reviews. CI covers Ubuntu/Python 3.12, not a native
-Windows/macOS or multi-version matrix.
+claimed from automated or agent reviews. CI now covers Ubuntu and Windows on Python 3.12,
+not macOS or a multi-version matrix.
 
 ## Dependency maintenance following the integration checkpoint
 
@@ -222,11 +261,7 @@ the maintenance record, not simulator behavior or any scientific input/result.
 
 ## Remaining directions and limits
 
-Issues #76–#78 are implemented through PRs #81–#83. The next bounded increments
-are [observable quality safeguards (#84)](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/84),
-[labeled-state sparse pTFT (#85)](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/85)
-and [provider request plans/budgets (#86)](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/86).
-NEXT separates these offline engineering/research tasks from pilot-dependent
+Issues #76–#78 and #84–#86 are implemented. NEXT separates these offline engineering/research tasks from pilot-dependent
 hypotheses, weights, sample size and freeze decisions.
 
 The legacy C/F baselines do not respond to incentives or attribution; the new

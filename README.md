@@ -12,7 +12,7 @@ Prisoner's Dilemma lineage, then tests its assumptions and extends the laborator
 to **Evidence Commons**: agents contribute, share and verify evidence under
 different accountability and information rules.
 
-## Current capabilities — 2026-10-29
+## Current capabilities — 2026-10-31
 
 - **Reproducible engine.** Typed five-plane scenarios, exact-fraction payoffs,
   hierarchical seeds, hash-linked sealed ledgers, replay, checkpoint branching and
@@ -37,8 +37,14 @@ different accountability and information rules.
   Completions adapter records requested/reported models and measured request
   usage. Explicit execution opt-in, bounded retries, redacted errors and
   continuation accounting are covered by offline HTTP fixtures.
+- **Provider request limits.** `chl study plan` shows worst-case completions and HTTP
+  attempts offline. An explicit cumulative attempt budget charges each attempt before
+  sending; a stop seals `RunFailed` and replays offline. No default limit is implied.
+- **Fast, visible feedback.** `make quick` selects checks from the diff, `chl lab` shows
+  per-agent film strips from verified ledgers, `make mutants` samples test gaps, and a
+  Hypothesis fuzzer checks whole-episode invariants on random small scenarios.
 - **Persistent verification.** GitHub Actions tests each exact PR head and `main`
-  commit, including the complete suite, all shipped study definitions, acceptance
+  commit on Ubuntu and Windows, including the complete suite, all shipped study definitions, acceptance
   scenarios and reproducible standalone research outputs. Inputs reject unsafe
   output paths, invalid execution counts and misspelled built-in policy parameters.
 
@@ -57,6 +63,8 @@ execution boundary and [current priorities](NEXT.md) for the remaining work.
 | Study 002 | All 29 deterministic trajectories and score vectors match their predictions. The inclusive quorum boundary is `(m−1)/(N−1)`, so population composition matters. Six pTFT cells retain all 192 independent episode results, including a finite-sample bootstrap discrepancy. | [Measured results](studies/002-nipd-sensitivity/RESULTS.md) |
 | Exact pTFT benchmark | A finite-state model derives means, variances and absorption probabilities for the ideal rational Bernoulli process. It explains why positive late cooperation expectations can coexist with all-zero observed final windows. | [Post hoc benchmark](studies/002-nipd-sensitivity/EXACT_PTFT_BENCHMARK.md) |
 | Responsive EC | The 320 deterministic behavioral episodes give 160 matched contrasts: quality rises in 2, falls in 2 and is unchanged in 156. All 160 separate same-action replays preserve briefing, effort, quality and total utility. These are exact findings for the declared finite grid. | [Results and source record](experiments/responsive-commons/RESULTS.md) |
+| Quality safeguards | Across 220 accurate/misleading pairs the skeptical rule acts identically with opposite quality, so it cannot separate truth from unanimous false support. On conflicted evidence it trades: it gains where structure tracks truth and loses where structure inverts it. For its two designated strategies and placeholder settings, C1 and C2 hold together in 0 of 48 groups. | [Results](experiments/quality-safeguards/RESULTS.md) |
+| Sparse exact pTFT | Sixteen exact cells on small graphs match an independent history oracle, and the Study 002 benchmark on complete graphs. Total cooperator count is not a sufficient state on the four-cycle. No topology ranking follows. | [Readout](experiments/sparse-ptft/EXACT.md) |
 | Graph topology controls | All 18 eight-round cooperation curves match their pre-execution predictions, and all sealed runs replay. The N=5 design fixes one AllD and mean edge payoff while separating complete/ring/star topology, defector placement and reciprocity rule. | [Exact readout](experiments/graph-topology/RESULTS.md) |
 
 ## Install and verify
@@ -66,7 +74,7 @@ From a checkout, using Python 3.12 or later:
 ```bash
 make setup
 make doctor
-make check test validate acceptance check-atlas check-study002 check-responsive check-graph
+make check test validate acceptance check-atlas check-study002 check-responsive check-quality-safeguards check-graph check-sparse-ptft
 ```
 
 `make setup` installs the committed `requirements-lock.txt`, builds the editable
@@ -228,6 +236,8 @@ and current [handoff](HANDOFF.md) retain the remaining qualifications.
 | `studies/002-nipd-sensitivity/` | Canonical sensitivity design, runner, measured results, exact benchmark and provenance |
 | `experiments/incentive-atlas/` | Exact finite-strategy incentive-region exploration |
 | `experiments/responsive-commons/` | Pre-execution design, full finite EC sensitivity readout and source commitments |
+| `experiments/quality-safeguards/` | Skeptical rule design, truth negative control and full finite readout |
+| `experiments/sparse-ptft/` | Exact labeled-state pTFT on small graphs and its history oracle |
 | `experiments/graph-topology/` | Canonical local-graph controls, analytical predictions, measured readout and source commitments |
 | `docs/PROVIDER_USAGE.md` | Optional provider configuration, execution boundary and request accounting |
 | `docs/adr/`, `docs/research/` | Architecture decisions, methods, research context and analysis contract |
