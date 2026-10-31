@@ -16,7 +16,7 @@ from collaborative_hill.agents.scripted.ec_policies import build_ec_policy
 from collaborative_hill.domain.institutions import InstitutionConfig
 from collaborative_hill.engine.runner import RunConfig, run_episode
 from collaborative_hill.engine.store import FileEventStore, RunPaths
-from collaborative_hill.experiments.scenario import compile_scenario
+from collaborative_hill.experiments.scenario import PolicySpec, compile_scenario
 
 from ._helpers import default_ec_evidence, ec_spec, plain_skin, rich_ec_skin
 
@@ -59,6 +59,12 @@ def test_skin_fresh_instance_and_recorded_action_replay_invariants(
         institution=InstitutionConfig(accountability=accountability, evidence_topology=topology),
         agents=(("a1", policy), ("a2", "ec_contributor"), ("a3", "ec_freerider")),
     )
+    if policy == "ec_skeptical_contributor":
+        # Default quorum and corroboration would keep a1 silent on this small corpus.
+        a1 = spec.cognition.agents[0].model_copy(update={"policy": PolicySpec(
+            name=policy, params={"min_sources": 1, "peer_threshold": "0"})})
+        spec = spec.model_copy(update={"cognition": spec.cognition.model_copy(update={
+            "agents": (a1, *spec.cognition.agents[1:])})})
     plain = compile_scenario(spec, plain_skin())
     rich = compile_scenario(spec, rich_ec_skin())
     assert plain.mechanism_hash == rich.mechanism_hash
@@ -73,9 +79,8 @@ def test_skin_fresh_instance_and_recorded_action_replay_invariants(
         event.event_hash for event in original_events
     ]
     proposals = proposals_from_events(original_events)
-    assert policy == "ec_skeptical_contributor" or any(
-        proposal.action.type == "propose_claim"
-        for proposal in proposals["a1"].values())
+    assert any(proposal.action.type == "propose_claim"
+               for proposal in proposals["a1"].values())
     identities = policy_ids_from_events(original_events)
     recorded = {agent: ReplayPolicy(agent, identities[agent], proposals[agent])
                 for agent in identities}

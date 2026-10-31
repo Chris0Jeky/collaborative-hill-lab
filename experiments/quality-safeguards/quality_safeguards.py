@@ -418,23 +418,34 @@ def collect(root: Path) -> dict[str, Any]:
     return result
 
 
-# Follow-up F1, text only: written after the first execution at commit 139eb9a. No rule,
-# parameter, evidence, cell or RESULTS.json byte changed; only this text was added.
+# Follow-ups F1 and F2 are report text only: no rule, parameter, evidence, cell or
+# RESULTS.json byte changed after execution.
 READING = [
-    "## Reading (follow-up F1, written after execution)", "",
-    "Nothing was changed after the first execution at commit `139eb9a` except this text:",
-    "no rule, parameter, evidence or cell, and RESULTS.json is byte-identical. All predictions",
-    "held, which is expected of hand-traced deterministic rules and is not evidence of a",
-    "benefit. Figures are descriptive values of one synthetic grid at placeholder weights.", "",
+    "## Reading (follow-ups F1 and F2, written after execution)", "",
+    "**F1.** The grid was executed twice from clean commits: first at `139eb9a`, then at",
+    "`cd64244`, after adding this reading. Both gave a byte-identical RESULTS.json.",
+    "SOURCE_PROVENANCE.json names the second. Between them only report text changed:",
+    "`git diff 139eb9a cd64244 -- src experiments/quality-safeguards/DESIGN.md` is empty.", "",
+    "**F2.** After review, later commits reworded this report and merged `main` into the",
+    "branch, including `src` changes outside the EC policies and engine.",
+    "SOURCE_PROVENANCE.json stays the record of the execution commit. `--check` still",
+    "reproduces RESULTS.json byte for byte. No rule, parameter, evidence or cell changed.", "",
+    "All predictions held, which is expected of hand-traced deterministic rules and is not",
+    "evidence of a benefit. Figures are descriptive values of one synthetic grid at",
+    "placeholder weights.", "",
     "**The rule does not separate accurate from misleading evidence.** Matched corpora differ",
     "only in hidden fields, so no observation-only rule can. Unanimous false corroboration",
     "passes: `CCC` corroborated schedules equal the conditional control's everywhere, and",
-    "PR #81's +24/-24 attribution pattern reappears under the skeptical rule.", "",
+    "the +24/-24 attribution pattern seen in PR #81 has an analogue under the skeptical rule.",
+    "This is a cross-design analogy, not a replication: rounds, budgets, slots and evidence",
+    "all differ from PR #81.", "",
     "**It trades, in both directions.** Against the conditional control at `CCC` conflicted,",
     "private, attributable, misleading quality goes -24 to 0 and total utility -79 to -24,",
     "while accurate quality goes +24 to 0 and total utility -3 to -24. Across 36 conflicted",
-    "pairs per truth the screen raises quality in 18 misleading cells and lowers it in 18",
-    "accurate cells. The skeptical rule sums +24 aligned and -24 inverted, except 0 and 0 at",
+    "pairs per truth the rule raises quality in 18 misleading cells and lowers it in 18",
+    "accurate cells. This rule effect bundles the screen, sharing contradicting items,",
+    "challenges and the read-citation requirement. No ablation isolates any one of them,",
+    "so it must not be read as the screen's effect. The skeptical rule sums +24 aligned and -24 inverted, except 0 and 0 at",
     "private aggregate, so its value depends on whether structure tracks truth, which this",
     "laboratory cannot observe. No prevalence and no net value is claimed.", "",
     "**Harmful and null findings.**", "",
@@ -446,12 +457,12 @@ READING = [
     "  fires under private and quality is -12, equal to the control. A shared ledger gives 0.",
     "- Attribution can reverse: in `UUC` conflicted private, anonymity delays the skeptic and",
     "  one claim survives, so attribution moves quality +12 to 0 and -12 to 0, the opposite",
-    "  pattern to PR #81.",
+    "  pattern to the analogous PR #81 cells.",
     "- Control quirk: at private aggregate the conditional control is more active on conflicted",
     "  than corroborated evidence, because unshared contradictions let claims and verifications",
     "  appear before warmup ends. Its aligned sum is -24 and inverted +24.",
-    "- Solo agents go silent: a lone skeptic cannot reach two sources, which changes actions",
-    "  in six corroborated pairs per truth but not quality.",
+    "- Solo agents go silent: under private topology a lone skeptic cannot reach two sources,",
+    "  which changes actions in six corroborated pairs per truth but not quality.",
     "- No group satisfies C1 and C2 at these placeholders.", "",
     "The rule responds to evidential structure, never to quality or utility. A next step would",
     "be a corpus model with declared noise rates or the audit channel sketched in ADR-0013,",
@@ -467,12 +478,12 @@ def sign_counts(rows: list[dict[str, Any]]) -> tuple[int, int, int]:
 
 def episode_rows(result: dict[str, Any], profile: str, structures: tuple[str, ...]) -> list[str]:
     lines = ["| Truth | Structure | Topology | Accountability | Rule | Correct/wrong | Quality | "
-             "Contribution | Effort | Utility a1/a2/a3 | Total utility |",
+             "Contribution | Effort | Utility a1, a2, a3 | Total utility |",
              "|---|---|---|---|---|---:|---:|---:|---:|---:|---:|"]
     for record in result["episodes"].values():
         item = record["cell"]
         if item["profile"] == profile and item["structure"] in structures:
-            utility = "/".join(record["utility"][agent] for agent in AGENTS)
+            utility = ", ".join(record["utility"][agent] for agent in AGENTS)
             lines.append(
                 f"| {item['truth']} | {item['structure']} | {item['topology']} | "
                 f"{item['accountability']} | {item['rule']} | "
@@ -509,7 +520,10 @@ def render_report(result: dict[str, Any]) -> str:
         "Quality is signed accepted-slot value. Contribution is the fraction of agent-rounds",
         "not withheld. Effort and total utility sum over agents.", "",
         *episode_rows(result, "CCC", (*CORE_STRUCTURES, "echo")), "",
-        "## Screen effect: skeptical minus conditional", "", "Same quorum, same cell otherwise.",
+        "## Rule effect: skeptical minus conditional", "",
+        "Same quorum, same cell otherwise. This bundles the screen, sharing contradicting items,",
+        "challenges and the read-citation requirement; DESIGN.md's label \"screen effect\" and",
+        "the JSON key `screen_contrasts` are retained names for this whole-rule contrast.",
         "", "| Truth | Structure | Pairs | Quality up | Quality down | Quality unchanged | "
         "Actions equal |", "|---|---|---:|---:|---:|---:|---:|",
     ]
