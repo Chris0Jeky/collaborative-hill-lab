@@ -21,10 +21,10 @@ paid run or human-subject experiment supports them; see `docs/PROVIDER_USAGE.md`
 ## Proving checks (run from the repo root; Windows `make` needs Git Bash)
 
 Persistent GitHub Actions runs `make check test validate acceptance check-atlas
-check-study002 check-responsive check-graph` on the exact PR head or main commit with the committed dependency
+check-study002 check-responsive check-quality-safeguards check-graph check-sparse-ptft` on the exact PR head or main commit with the committed dependency
 lock. Read its job steps and logs for the current commit; green results on an older
 head are not evidence for a new one. Setup downloads dependencies, while the
-science gates make no model-provider calls. CI currently covers Ubuntu/Python 3.12.
+science gates make no model-provider calls. CI covers Ubuntu and Windows on Python 3.12; every text write fixes its newline because evidence commits to bytes.
 
 Current Study 001 passes C1, fails C2 and is **not social-dilemma certified**; C3
 integrity passes. The responsive EC experiment is a separate unfrozen design with
@@ -37,6 +37,9 @@ Python commands below.
 
 Start with `make quick` (diff-selected checks) and `make lab` (film strips of real runs in
 the terminal and `artifacts/lab/console.html`); the table below is the manual equivalent.
+`make mutants` samples token mutants in science-critical modules: a survivor is a test gap or
+an equivalent change, so triage it. Whole-episode invariants are fuzzed in
+`tests/property/test_engine_fuzz.py`.
 
 | Changed area | Narrow check |
 |---|---|
@@ -44,6 +47,8 @@ the terminal and `artifacts/lab/console.html`); the table below is the manual eq
 | Kernel | `python -m pytest tests/property tests/unit/test_event_chain.py tests/metamorphic/test_replay_determinism.py tests/metamorphic/test_branch_prefix.py` |
 | Graph mechanism | `python -m pytest tests/unit/test_graph_nipd.py tests/unit/test_graph_scenario.py tests/unit/test_graph_policies.py tests/metamorphic/test_graph_invariance.py tests/integration/test_graph_pipeline.py`; `make check-graph` |
 | Responsive EC | `python -m pytest tests/unit/test_ec_conditional_contributor.py tests/metamorphic/test_ec_conditional_invariants.py`; `make check-responsive` |
+| Skeptical EC rule | `python -m pytest tests/unit/test_ec_skeptical_contributor.py`; `make check-quality-safeguards` |
+| Sparse exact pTFT | `make check-sparse-ptft` |
 | Provider transport/workflow | `python -m pytest tests/unit/test_openai_compatible_provider.py tests/unit/test_provider_accounting.py tests/integration/test_provider_workflow.py tests/metamorphic/test_replay_provider_failure.py` (mocked transport only) |
 | Scenario, skin or study JSON | `make validate` and the affected standalone experiment check |
 | Sealed artifacts and replay | `make acceptance`; `make replay-smoke` additionally needs a generated run under `artifacts/` |
@@ -62,5 +67,5 @@ the terminal and `artifacts/lab/console.html`); the table below is the manual eq
   tune results toward the legacy paper, never present a simulation as a prediction about humans.
 - Human-only: freezing a study (`--yes`), any paid LLM run, the `HANDOFF.md` decision list.
 - **Synthetic data only** — real human-subject data needs `sensitive_data: true` in the tier file FIRST.
-- ADR-locked (`docs/adr/0001…0012`; change = new ADR, not a refactor): own kernel + Concordia
+- ADR-locked (`docs/adr/0001…0015`; change = new ADR, not a refactor): own kernel + Concordia
   cognition-only, hash-linked ledger + CoW branches, five planes, mechanism/skin hash separation.

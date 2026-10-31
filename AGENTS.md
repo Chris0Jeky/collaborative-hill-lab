@@ -36,7 +36,7 @@ Scenario (5 planes) → compiler (content hashes; mechanism ≠ narrative) → d
 MechanismEngine → runner (observe → propose typed action → validate → resolve → checkpoint
 → seal) → hash-linked `events.jsonl` → replay/branch → metrics → reports. LLMs act only
 through the typed-action gate; they never resolve or score world state. Decisions:
-`docs/adr/0001…0012`; synthesis: `docs/FOUNDATION_REVIEW.md`. Legacy `nipd` keeps
+`docs/adr/0001…0015`; synthesis: `docs/FOUNDATION_REVIEW.md`. Legacy `nipd` keeps
 its complete-population contract; `nipd_graph` explicitly selects local graph rules.
 
 ## 4. Repository map
@@ -52,10 +52,12 @@ its complete-population contract; `nipd_graph` explicitly selects local graph ru
 | `studies/000-…`, `studies/001-…`, `studies/002-…` | executable studies, methods and research readouts |
 | `experiments/incentive-atlas/` | exact finite-strategy incentive-region exploration |
 | `experiments/responsive-commons/` | deterministic contribution-history sensitivity, finite incentives and fixed-action controls |
+| `experiments/quality-safeguards/` | skeptical EC rule, truth negative control, finite incentives and fixed-action controls |
+| `experiments/sparse-ptft/` | exact labeled-state pTFT on small connected graphs with an independent history oracle |
 | `experiments/graph-topology/` | explicit graph/placement/policy controls and original-artifact readout tooling |
 | `docs/PROVIDER_USAGE.md` | optional network transport, explicit opt-in, redaction and measured usage contract |
 | `tests/{unit,property,metamorphic,integration}` | the science-guarding suites |
-| `.github/workflows/ci.yml` | exact-commit offline verification on PRs and main |
+| `.github/workflows/ci.yml` | exact-commit offline verification on PRs and main, Ubuntu and Windows |
 | `docs/adr/`, `docs/research/` | decisions; research documents |
 
 ## 5. Invariants (breaking any of these is a defect, not a style choice)
@@ -81,8 +83,8 @@ its complete-population contract; `nipd_graph` explicitly selects local graph ru
 
 ## 6. Commands
 
-`make doctor | setup | quick | lab | check | test | validate | acceptance | check-atlas |
-check-study002 | check-responsive | check-graph | study-000 | study-001-smoke | study-002-plan | study-002 |
+`make doctor | setup | quick | lab | mutants | check | test | validate | acceptance | check-atlas |
+check-study002 | check-responsive | check-quality-safeguards | check-graph | check-sparse-ptft | study-000 | study-001-smoke | study-002-plan | study-002 |
 replay-smoke | report | clean-generated`; CLI: `chl scenario validate`, `chl study
 validate|audit-seeds|freeze`, `chl run`, `chl replay`, `chl branch`, `chl compare`,
 `chl analyze`, `chl report`, `chl lab`, `chl doctor`.
@@ -99,7 +101,7 @@ root and exits 1 on a broken ledger. Neither replaces the complete CI gate.
 `make validate` checks all four shipped StudySpecs (Study 002 has two components).
 `make study-002` needs a fresh output root; choose another with
 `STUDY002_ARTIFACTS=artifacts/study-002-repeat`. Persistent CI runs
-`make check test validate acceptance check-atlas check-study002 check-responsive check-graph` on the exact
+`make check test validate acceptance check-atlas check-study002 check-responsive check-quality-safeguards check-graph check-sparse-ptft` on the exact
 published commit and checks that verification leaves the checkout clean.
 Setup downloads pinned dependencies; the science checks call no model provider.
 `chl run` and `chl branch` require `--allow-provider-requests` for effective network
@@ -130,8 +132,8 @@ boundary does not select a live model, authorize spend or freeze a study.
 
 1. `make check` and `make test` green (or failures explained in HANDOFF.md).
 2. `make validate` passes for all shipped StudySpecs; changed standalone research
-   code also passes `make check-atlas`, `make check-study002`, `make check-responsive`
-   or `make check-graph` as applicable.
+   code also passes `make check-atlas`, `make check-study002`, `make check-responsive`,
+   `make check-quality-safeguards`, `make check-graph` or `make check-sparse-ptft` as applicable.
 3. After any review fix, rerun the relevant gates on the new exact HEAD.
 4. HANDOFF.md updated: state, failures, open questions, next tasks, verify commands.
 5. BUILD_LOG.md appended with decisions + commands actually run.
