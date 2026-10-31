@@ -55,6 +55,8 @@ class RunManifest(BaseModel):
     reported_models: dict[str, list[str]] = Field(default_factory=dict)
     provider_usage: dict[str, dict[str, int | None]] = Field(default_factory=dict)
     provider_usage_scope: Literal["episode", "continuation"] | None = None
+    # Operational admission record (ADR-0015); None = no budget was configured.
+    request_budget: dict[str, Any] | None = None
 
     seed_root: list[str | int] = Field(default_factory=list)
     seed_protocol: SeedProtocol = LEGACY_SEED_PROTOCOL

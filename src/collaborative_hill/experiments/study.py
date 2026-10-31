@@ -32,6 +32,7 @@ from collaborative_hill.agents.llm import (
     FakeProvider,
     LLMPolicy,
     OpenAICompatibleProvider,
+    RequestBudget,
     build_openai_compatible_policy,
     llm_manifest_fields,
 )
@@ -241,8 +242,11 @@ def frozen_hash(study_dir: Path) -> str | None:
 
 
 def build_policies(resolved: ResolvedScenario, *, allow_provider_requests: bool = False,
-                   overrides: dict[str, Any] | None = None) -> dict[str, Any]:
+                   overrides: dict[str, Any] | None = None,
+                   budget: RequestBudget | None = None) -> dict[str, Any]:
     """Construct policies; network-backed policies require explicit execution opt-in.
+
+    ``budget`` (operational, never hashed) is shared by every network policy built here.
 
     Explicit overrides are used before construction, so replacing a network
     policy with a scripted counterfactual does not read credentials or call it.
@@ -292,7 +296,7 @@ def build_policies(resolved: ResolvedScenario, *, allow_provider_requests: bool 
                     "or --allow-provider-requests; validation and replay remain offline"
                 )
             policies[agent.agent_id] = build_openai_compatible_policy(
-                agent.agent_id, resolved.skin, params)
+                agent.agent_id, resolved.skin, params, budget=budget)
         else:
             raise ValueError(f"unknown policy {name} for agent {agent.agent_id}")
     return policies
@@ -326,6 +330,22 @@ def _require_provider_opt_in(resolved: dict[str, ResolvedScenario],
                     if agent.policy.name == "llm_openai_compatible":
                         build_openai_compatible_policy(
                             agent.agent_id, scenario.skin, agent.policy.params)
+
+
+def select_replicates(spec: StudySpec, only_condition: str | None,
+                      replicates_override: int | None) -> int:
+    """Validate a run/plan selection and return the replicate count."""
+    replicates = replicates_override if replicates_override is not None else spec.replicates
+    if type(replicates) is not int:
+        raise ValueError(f"replicates must be an integer >= 1, got {replicates!r}")
+    if replicates < 1:
+        raise ValueError(f"replicates must be >= 1, got {replicates}")
+    if only_condition is not None and all(
+        c.condition_id != only_condition for c in spec.conditions
+    ):
+        known = ", ".join(sorted(c.condition_id for c in spec.conditions))
+        raise ValueError(f"unknown condition {only_condition!r}; known conditions: {known}")
+    return replicates
 
 
 def _write_llm_transcript(policies: dict[str, Any], run_dir: Path, *,
@@ -390,10 +410,16 @@ def run_study(
     only_condition: str | None = None,
     replicates_override: int | None = None,
     allow_provider_requests: bool = False,
+    request_budget: RequestBudget | None = None,
 ) -> list[RunResult]:
     """Execute all (condition x replicate) runs. Study need not be frozen for
     smoke runs; the manifest records frozen status so sealed science is
-    distinguishable from exploration."""
+    distinguishable from exploration.
+
+    ``request_budget`` is shared by the whole call: its episode counter resets at
+    each episode, its run counter never does. After a run-level stop every later
+    network episode is still sealed ``RunFailed`` with zero requests and the same
+    stable reason; scripted episodes are unaffected. It is not hashed (ADR-0015)."""
     study_dir = Path(study_dir)
     spec, resolved = load_study(study_dir)
     h = study_hash(spec, resolved)
@@ -403,16 +429,7 @@ def run_study(
             f"study content changed after freeze: lock={locked[:12]} current={h[:12]} — "
             "a frozen study is immutable; create a new version instead"
         )
-    replicates = replicates_override if replicates_override is not None else spec.replicates
-    if type(replicates) is not int:
-        raise ValueError(f"replicates must be an integer >= 1, got {replicates!r}")
-    if replicates < 1:
-        raise ValueError(f"replicates must be >= 1, got {replicates}")
-    if only_condition is not None and all(
-        c.condition_id != only_condition for c in spec.conditions
-    ):
-        known = ", ".join(sorted(c.condition_id for c in spec.conditions))
-        raise ValueError(f"unknown condition {only_condition!r}; known conditions: {known}")
+    replicates = select_replicates(spec, only_condition, replicates_override)
     _require_provider_opt_in(resolved, only_condition, allow_provider_requests)
     repo_root = _find_repo_root(study_dir)
     commit, dirty = git_provenance(repo_root)
@@ -450,8 +467,12 @@ def run_study(
                 (run_dir / "scenario.resolved.json").write_text(
                     scenario.model_dump_json(indent=2), encoding="utf-8", newline="\n"
                 )
-                policies = build_policies(scenario,
-                                           allow_provider_requests=allow_provider_requests)
+                budget_args: dict[str, Any] = {}
+                if request_budget is not None:
+                    request_budget.begin("episode")
+                    budget_args = {"budget": request_budget}
+                policies = build_policies(
+                    scenario, allow_provider_requests=allow_provider_requests, **budget_args)
                 manifest = RunManifest(
                     study_id=spec.study_id,
                     study_hash=h,
@@ -470,7 +491,7 @@ def run_study(
                     platform=env["platform"],
                     dependency_lock_sha256=dep_hash,
                     policies={a: p.policy_id for a, p in sorted(policies.items())},
-                    **llm_manifest_fields(policies),
+                    **llm_manifest_fields(policies, budget=request_budget),
                     seed_root=list(seed_root),
                     seed_protocol=spec.seed_protocol,
                     policy_seed_root=list(policy_seed_root) if policy_seed_root else None,
@@ -506,7 +527,7 @@ def run_study(
             _write_llm_transcript(policies, run_dir)
 
             manifest = manifest.model_copy(update={
-                **llm_manifest_fields(policies),
+                **llm_manifest_fields(policies, budget=request_budget),
                 "ended_at": utc_now_iso(),
                 "status": result.status,
                 "failure_reason": result.failure_reason,
