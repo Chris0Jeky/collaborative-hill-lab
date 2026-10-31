@@ -116,8 +116,8 @@ regenerates both in memory and byte-compares without rewriting evidence or
 creating a missing output directory. JSON contains exact fraction strings,
 integers, nulls and source SHA-256 commitments, with no floats or timestamps.
 Markdown displays exact fractions as well. The source manifest binds this model,
-generator, design, tests, relevant shipped semantics, reference benchmark and
-lock file. It is a consistency commitment, not an external timestamp or proof
+generator and design; tests guard the shipped semantics and reference benchmark.
+It is a consistency commitment, not an external timestamp or proof
 of an independently published source revision. No historical execution source
 or readout is rewritten; existing Study 002 and graph provenance gates remain
 part of final verification. Human-owned decisions remain in HANDOFF.md.

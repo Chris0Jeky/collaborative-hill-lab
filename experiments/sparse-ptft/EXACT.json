@@ -4968,7 +4968,7 @@
   "sample_minus_exact_discrepancies": null,
   "schema_version": 1,
   "source_files_sha256": {
-    "experiments/sparse-ptft/DESIGN.md": "3234f01b09e8542e52005895980ff2df8e2ea48325611213743b4610556faf1d",
+    "experiments/sparse-ptft/DESIGN.md": "7f5eda0dd72dd42ffd92a987b5ff63e745cfe58ac79005f55fe79345eecaa928",
     "experiments/sparse-ptft/generate.py": "921a658e2ed32827679310a180d3a75e63d40dfd0d6c494b5d07d4b553df77ad",
     "experiments/sparse-ptft/sparse_ptft_exact.py": "41eb637960b3c093d3eb7ecf26c5d43185bc091fc76381196615543701a0ee7f"
   },
