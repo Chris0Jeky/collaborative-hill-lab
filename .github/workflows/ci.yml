@@ -81,6 +81,9 @@ jobs:
       - name: Verify graph topology inputs and exact controls
         run: make check-graph
 
+      - name: Verify exact labeled-state sparse pTFT
+        run: make check-sparse-ptft
+
       - name: Verify the tested commit and clean workspace
         run: |
           test "$(git rev-parse HEAD)" = "$CHL_EXPECTED_SHA"
