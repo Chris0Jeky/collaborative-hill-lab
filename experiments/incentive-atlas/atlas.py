@@ -117,7 +117,7 @@ def run_profile(root: Path, cell: str, profile: str,
                        seed_root=(0, run_id, 0))
     with RunPaths(root / run_id).reserve() as paths:
         (paths.root / "scenario.resolved.json").write_text(
-            resolved.model_dump_json(indent=2), encoding="utf-8")
+            resolved.model_dump_json(indent=2), encoding="utf-8", newline="\n")
         result = run_episode(mechanism=resolved.build_mechanism(), policies=policies,
                              config=config, paths=paths)
         if result.status != "completed":

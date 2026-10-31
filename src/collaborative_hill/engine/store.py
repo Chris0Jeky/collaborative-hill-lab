@@ -68,7 +68,7 @@ class RunPaths:
             )
         reservation = None
         try:
-            with self.events.open("x", encoding="utf-8") as stream:
+            with self.events.open("x", encoding="utf-8", newline="\n") as stream:
                 try:
                     reservation = os.fstat(stream.fileno())
                 except OSError:
@@ -177,7 +177,7 @@ class FileCheckpointStore:
         path = self.directory / f"ckpt-{seq:06d}.json"
         path.write_text(
             json.dumps(record, sort_keys=True, separators=(",", ":"), ensure_ascii=True),
-            encoding="utf-8",
+            encoding="utf-8", newline="\n",
         )
         return path
 
