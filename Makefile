@@ -11,11 +11,7 @@ endif
 CHL := "$(PY)" -m collaborative_hill.cli
 STUDY002_ARTIFACTS ?= artifacts/study-002
 
-<<<<<<< HEAD
-.PHONY: doctor setup check check-atlas check-study002 check-responsive check-graph check-sparse-ptft test validate acceptance study-000 study-001-smoke study-002-plan study-002 replay-smoke report clean-generated
-=======
-.PHONY: doctor setup quick lab mutants check check-atlas check-study002 check-responsive check-graph test validate acceptance study-000 study-001-smoke study-002-plan study-002 replay-smoke report clean-generated
->>>>>>> origin/main
+.PHONY: doctor setup quick lab mutants check check-atlas check-study002 check-responsive check-graph check-sparse-ptft test validate acceptance study-000 study-001-smoke study-002-plan study-002 replay-smoke report clean-generated
 
 doctor:
 	$(CHL) doctor
