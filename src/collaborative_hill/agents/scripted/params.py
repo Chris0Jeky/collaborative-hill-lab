@@ -24,6 +24,9 @@ EC_POLICY_PARAMS: dict[str, frozenset[str]] = {
     "ec_conditional_contributor": frozenset({
         "peer_threshold", "warmup_rounds", "share_evidence",
     }),
+    "ec_skeptical_contributor": frozenset({
+        "min_sources", "peer_threshold", "warmup_rounds", "share_evidence",
+    }),
     "ec_freerider": frozenset(),
     "ec_verifier": frozenset(),
     "ec_misinformer": frozenset(),
@@ -49,8 +52,8 @@ def coerce_policy_params(name: str, params: Mapping[str, object]) -> dict[str, o
             coerced[key] = _coerce_epsilon(key, value)
         elif key == "peer_threshold":
             coerced[key] = _coerce_exact_probability(key, value)
-        elif key == "warmup_rounds":
-            coerced[key] = _coerce_nonnegative_integer(key, value)
+        elif key in ("warmup_rounds", "min_sources"):
+            coerced[key] = _coerce_integer_at_least(key, value, int(key == "min_sources"))
         elif key in ("threshold_num", "threshold_den"):
             coerced[key] = _coerce_threshold(key, value)
         elif key == "share_evidence":
@@ -114,10 +117,10 @@ def _coerce_denominator(key: str, value: object) -> str:
     return value
 
 
-def _coerce_nonnegative_integer(key: str, value: object) -> int:
+def _coerce_integer_at_least(key: str, value: object, minimum: int) -> int:
     result = _coerce_threshold(key, value)
-    if result < 0:
-        raise ValueError(f"invalid {key}: {value!r} (must be >= 0)")
+    if result < minimum:
+        raise ValueError(f"invalid {key}: {value!r} (must be >= {minimum})")
     return result
 
 
