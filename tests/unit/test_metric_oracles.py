@@ -65,12 +65,14 @@ def test_epistemic_action_counts_each_event_once():
          {"agent_id": "a3", "claim_id": "c1", "outcome": "not_supported"}),
         (EventType.CLAIM_CHALLENGED,
          {"agent_id": "a3", "claim_id": "c1", "evidence_ids": ["e3"], "valid": False}),
+        (EventType.CLAIM_CHALLENGED,
+         {"agent_id": "a2", "claim_id": "c1", "evidence_ids": ["e2"], "valid": True}),
     )
     metrics = epistemic_metrics(events)
     assert metrics["action_counts"] == {"inspect": 3, "share": 1, "propose": 1, "verify": 2,
-                                        "challenge": 1}
+                                        "challenge": 2}
     assert metrics["verifications_supported"] == 1
-    assert metrics["challenges_valid"] == 0
+    assert metrics["challenges_valid"] == 1
 
 
 def test_one_wrong_accepted_claim_is_a_false_acceptance():

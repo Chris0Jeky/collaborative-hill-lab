@@ -16,8 +16,8 @@ clustered in reported metrics, now pinned by `tests/unit/test_metric_oracles.py`
 
 [#90](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/90) (closes #86) adds `chl study plan` and `RequestBudget` (ADR-0015):
 attempts are charged at admission, scopes never reset on a retry or fork, stops seal
-`RunFailed` and replay offline, deadlines apply between requests only, and the budget
-enters no hash or ledger. There is no default limit. All verification is mocked.
+`RunFailed` and replay offline, deadlines apply between requests only, and budget
+configuration enters no hash. There is no default limit. All verification is mocked.
 
 [#91](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/91) (closes #85) adds the
 [exact sparse pTFT benchmark](experiments/sparse-ptft/EXACT.md): 16 exact cells,
@@ -35,7 +35,7 @@ together in 0 of 48 groups; C3 holds in all 220 replays. Sealed raw runs are loc
 `C:/Users/Cristian3/chl-wt/kept-artifacts/quality-safeguards/`, outside Git and not
 archived elsewhere; the checked-in readout retains terminal hashes.
 
-Exact-head hosted CI passed on Ubuntu and Windows for every merged PR. No study was
+Exact-head hosted CI passed on Ubuntu and Windows for every PR in this section. No study was
 frozen, no provider was called, and the ten human decisions below are unchanged.
 Follow-ups: [#92](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/92), [#95](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/95), [#96](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/96).
 
