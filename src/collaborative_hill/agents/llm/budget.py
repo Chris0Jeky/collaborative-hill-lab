@@ -13,7 +13,7 @@ Scopes (all counters live on one shared object; nothing resets on a retry):
                 any counter, so reusing the object keeps charging the same limits
 
 The deadline uses ``time.monotonic`` (or the injected clock) and is checked only
-BETWEEN requests, before each admission (and before a 429 retry delay). It is not
+BETWEEN requests: before and after a 429 retry delay, and at each admission. It is not
 an in-flight bound: a request admitted just before the deadline can still run for
 up to the transport's socket timeout (and longer if DNS or the server stalls).
 """
@@ -73,12 +73,16 @@ class RequestBudget:
             self._episode = 0
             self._before["episode"] = 0
 
-    def admit(self, *, after_seconds: int = 0) -> None:
-        """Charge one attempt or raise; ``after_seconds`` is a delay about to be slept."""
+    def check(self, *, after_seconds: int = 0) -> None:
+        """Raise if a request would be refused, ``after_seconds`` from now, without charging."""
         reason = self._refusal(after_seconds)
         if reason is not None:
             self._stop = reason
             raise RequestBudgetExhausted(reason)
+
+    def admit(self) -> None:
+        """Charge one attempt immediately before sending, or raise."""
+        self.check()
         self._episode += 1
         self._run += 1
 

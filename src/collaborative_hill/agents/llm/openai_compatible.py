@@ -115,13 +115,15 @@ class OpenAICompatibleProvider:
         attempts: list[ProviderAttempt] = []
         delay = 0
         for index in range(self.config.rate_limit_retries + 1):
-            if self.budget is not None:
-                try:
-                    self.budget.admit(after_seconds=delay)
-                except RequestBudgetExhausted as exc:
-                    raise ProviderError(str(exc), attempts=tuple(attempts)) from None
-            if index:
-                time.sleep(delay)
+            try:
+                if index and self.budget is not None:
+                    self.budget.check(after_seconds=delay)  # Never sleep toward a refusal.
+                if index:
+                    time.sleep(delay)
+                if self.budget is not None:
+                    self.budget.admit()  # Rechecks after the delay; only this charges.
+            except RequestBudgetExhausted as exc:
+                raise ProviderError(str(exc), attempts=tuple(attempts)) from None
             request = urllib.request.Request(self.config.endpoint, body, headers, method="POST")
             try:
                 with self._opener.open(request, timeout=self.config.timeout_seconds) as response:

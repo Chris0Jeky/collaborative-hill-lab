@@ -193,6 +193,28 @@ def test_deadline_that_the_retry_delay_would_pass_refuses_the_retry_before_sleep
     assert manifest["request_budget"]["stop_reason"] == "deadline_exceeded"
 
 
+@pytest.mark.parametrize(("stop", "reason"), [("cancel", "cancelled"),
+                                              ("overrun", "deadline_exceeded")])
+def test_stop_during_the_retry_delay_refuses_the_retry_without_charging_it(
+        tmp_path, wire, monkeypatch, stop, reason):
+    state = {"cancelled": False, "now": 0.0}
+
+    def sleep(seconds):
+        state["cancelled"] = stop == "cancel"
+        state["now"] += 100.0 if stop == "overrun" else seconds  # A sleep may overrun.
+
+    monkeypatch.setattr("time.sleep", sleep)
+    params = {**PARAMS, "rate_limit_retries": 1, "retry_delay_seconds": 1}
+    budget = RequestBudget(deadline_seconds=5, cancelled=lambda: state["cancelled"],
+                           clock=lambda: state["now"])
+    results, (manifest,), _ = execute(tmp_path, wire, budget, params=params,
+                                      replies=[too_many(429)])
+    assert results[0].status == "failed"
+    assert len(wire[1]) == 1
+    assert manifest["request_budget"]["admitted"]["episode"] == 1
+    assert manifest["request_budget"]["stop_reason"] == reason
+
+
 def test_budget_never_enters_hashes_ledgers_or_policy_identity(tmp_path, wire):
     for name in ("a", "b"):
         (tmp_path / name).mkdir()
