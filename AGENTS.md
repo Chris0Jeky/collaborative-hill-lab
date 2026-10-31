@@ -81,13 +81,20 @@ its complete-population contract; `nipd_graph` explicitly selects local graph ru
 
 ## 6. Commands
 
-`make doctor | setup | check | test | validate | acceptance | check-atlas |
+`make doctor | setup | quick | lab | check | test | validate | acceptance | check-atlas |
 check-study002 | check-responsive | check-graph | study-000 | study-001-smoke | study-002-plan | study-002 |
 replay-smoke | report | clean-generated`; CLI: `chl scenario validate`, `chl study
 validate|audit-seeds|freeze`, `chl run`, `chl replay`, `chl branch`, `chl compare`,
-`chl analyze`, `chl report`, `chl doctor`.
+`chl analyze`, `chl report`, `chl lab`, `chl doctor`.
 Venv python: `.venv/bin/python` on POSIX, `.venv/Scripts/python.exe` on Windows.
 Quote all paths (spaces).
+
+Feedback loop: `make quick` runs ruff, mypy, tests and gates selected from the diff
+against `origin/main` by import graph and path mentions (`scripts/quick.py --plan`
+shows the selection; unclassified files select everything). `make lab` regenerates a
+small sealed sample and renders per-agent film strips to the terminal and
+`artifacts/lab/console.html`; `chl lab <dir>` does the same for any run or artifacts
+root and exits 1 on a broken ledger. Neither replaces the complete CI gate.
 
 `make validate` checks all four shipped StudySpecs (Study 002 has two components).
 `make study-002` needs a fresh output root; choose another with
