@@ -16,7 +16,7 @@ from collaborative_hill.agents.scripted.ec_policies import build_ec_policy
 from collaborative_hill.domain.institutions import InstitutionConfig
 from collaborative_hill.engine.runner import RunConfig, run_episode
 from collaborative_hill.engine.store import FileEventStore, RunPaths
-from collaborative_hill.experiments.scenario import compile_scenario
+from collaborative_hill.experiments.scenario import PolicySpec, compile_scenario
 
 from ._helpers import default_ec_evidence, ec_spec, plain_skin, rich_ec_skin
 
@@ -50,15 +50,21 @@ def execute(resolved, directory, policies):
 
 @pytest.mark.parametrize("accountability", ["aggregate", "attributable"])
 @pytest.mark.parametrize("topology", ["private", "shared_ledger"])
+@pytest.mark.parametrize("policy", ["ec_conditional_contributor", "ec_skeptical_contributor"])
 def test_skin_fresh_instance_and_recorded_action_replay_invariants(
-    tmp_path, accountability, topology,
+    tmp_path, accountability, topology, policy,
 ):
     spec = ec_spec(
         default_ec_evidence(),
         institution=InstitutionConfig(accountability=accountability, evidence_topology=topology),
-        agents=(("a1", "ec_conditional_contributor"),
-                ("a2", "ec_contributor"), ("a3", "ec_freerider")),
+        agents=(("a1", policy), ("a2", "ec_contributor"), ("a3", "ec_freerider")),
     )
+    if policy == "ec_skeptical_contributor":
+        # Default quorum and corroboration would keep a1 silent on this small corpus.
+        a1 = spec.cognition.agents[0].model_copy(update={"policy": PolicySpec(
+            name=policy, params={"min_sources": 1, "peer_threshold": "0"})})
+        spec = spec.model_copy(update={"cognition": spec.cognition.model_copy(update={
+            "agents": (a1, *spec.cognition.agents[1:])})})
     plain = compile_scenario(spec, plain_skin())
     rich = compile_scenario(spec, rich_ec_skin())
     assert plain.mechanism_hash == rich.mechanism_hash

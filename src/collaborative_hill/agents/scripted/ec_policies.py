@@ -13,6 +13,9 @@ memory), so a rebuilt instance mid-branch behaves identically to the original.
 - ``ec_conditional_contributor``: the unchanged contributor's action rule,
   gated after a finite warmup by a conservative visible peer-contributor quorum.
   A zero quorum is an exact response-free action control (ADR-0012).
+- ``ec_skeptical_contributor``: the same quorum over an evidential screen on
+  corroboration, contradiction and rival support. It responds to evidence
+  structure, never to truth or utility (ADR-0013).
 
 All choices iterate sorted ids, so behaviour is deterministic.
 """
@@ -224,6 +227,108 @@ class ECConditionalContributorPolicy:
         return self._contributor.propose(observation, rng)
 
 
+class ECSkepticalContributorPolicy:
+    """Contribution quorum over an observable evidence screen, version 1.
+
+    A proposition passes only if my inspected fresh items in its slot supply
+    min_sources distinct supporting source labels and neither contradict it
+    nor support a rival. See ADR-0013 for what this cannot distinguish: chiefly
+    unanimous false evidence, and which side of a contradiction is true.
+    """
+
+    def __init__(self, min_sources: int | str = 2,
+                 peer_threshold: Fraction | str | int = "1/2",
+                 warmup_rounds: int | str = 3, share_evidence: bool | str = True) -> None:
+        parsed = coerce_policy_params("ec_skeptical_contributor", {
+            "min_sources": min_sources, "peer_threshold": peer_threshold,
+            "warmup_rounds": warmup_rounds, "share_evidence": share_evidence,
+        })
+        self.min_sources = cast(int, parsed["min_sources"])
+        self.peer_threshold = cast(Fraction, parsed["peer_threshold"])
+        self.warmup_rounds = cast(int, parsed["warmup_rounds"])
+        self.share_evidence = cast(bool, parsed["share_evidence"])
+        self.policy_id = (
+            f"ec_skeptical_contributor[min_sources={self.min_sources},"
+            f"peer_threshold={self.peer_threshold},warmup={self.warmup_rounds},"
+            f"share={self.share_evidence}]@1"
+        )
+
+    def passes_screen(self, observation: dict[str, Any], slot: str, proposition: str) -> bool:
+        sources: set[str] = set()
+        for item in _inspected(observation):
+            facts = item["facts"]
+            if facts["slot_id"] != slot or facts["freshness"] != "fresh":
+                continue
+            same_proposition = facts["proposition_id"] == proposition
+            supports = facts["stance"] == "supports"
+            if same_proposition and supports:
+                sources.add(facts["source_id"])
+            elif same_proposition or supports:
+                return False  # contradicts this proposition, or supports a rival
+        return len(sources) >= self.min_sources
+
+    def propose(self, observation: dict[str, Any], rng: Any) -> ActionProposal:
+        del rng
+        if observation["round"] >= self.warmup_rounds:
+            required = self.peer_threshold * (observation["n_agents"] - 1)
+            if visible_peer_contributor_count(observation) < required:
+                return ActionProposal(
+                    action=WithholdAction(),
+                    justification="visible peer contribution history is below my quorum",
+                )
+        if observation["my_budgets"]["inspect"] > 0:
+            pending = _uninspected_ids(observation)
+            if pending:
+                return ActionProposal(action=InspectEvidenceAction(evidence_id=pending[0]),
+                                      justification="inspecting unread evidence")
+        fresh = sorted((e for e in _inspected(observation) if e["facts"]["freshness"] == "fresh"),
+                       key=lambda x: x["evidence_id"])
+        if self.share_evidence and observation["evidence_topology"] == "private":
+            for e in fresh:
+                if not e["public"]:
+                    return ActionProposal(
+                        action=ShareEvidenceAction(evidence_id=e["evidence_id"]),
+                        justification="sharing fresh evidence of either stance")
+        return self._act_on_claims(observation, fresh)
+
+    def _act_on_claims(self, observation: dict[str, Any],
+                       fresh: list[dict[str, Any]]) -> ActionProposal:
+        def cited(stance: str, slot: str, proposition: str) -> tuple[str, ...]:
+            return tuple(e["evidence_id"] for e in fresh if e["facts"]["stance"] == stance
+                         and e["facts"]["slot_id"] == slot
+                         and e["facts"]["proposition_id"] == proposition)
+
+        for c in observation["claims"]:
+            if c["proposed_by_me"] or c["challenged_by_me"]:
+                continue
+            against = cited("contradicts", c["slot_id"], c["proposition_id"])
+            if against:
+                return ActionProposal(
+                    action=ChallengeClaimAction(claim_id=c["claim_id"], evidence_ids=against),
+                    justification="my fresh evidence contradicts this claim")
+        my_slots = _slots_with_my_claim(observation)
+        already = _claimed_propositions(observation)
+        for e in fresh:
+            slot = e["facts"]["slot_id"]
+            prop = e["facts"]["proposition_id"]
+            if (e["facts"]["stance"] != "supports" or slot in my_slots
+                    or (slot, prop) in already or not self.passes_screen(observation, slot, prop)):
+                continue
+            return ActionProposal(
+                action=ProposeClaimAction(slot_id=slot, proposition_id=prop,
+                                          evidence_ids=cited("supports", slot, prop)),
+                justification="proposing a claim that passes my evidence screen")
+        if observation["my_budgets"]["verify"] > 0:
+            for c in observation["claims"]:
+                if (not c["proposed_by_me"] and not c["verified_by_me"]
+                        and self.passes_screen(observation, c["slot_id"], c["proposition_id"])
+                        and set(c["evidence_ids"]) & set(
+                            cited("supports", c["slot_id"], c["proposition_id"]))):
+                    return ActionProposal(action=VerifyClaimAction(claim_id=c["claim_id"]),
+                                          justification="verifying a claim that passes my screen")
+        return ActionProposal(action=WithholdAction(), justification="nothing passes my screen")
+
+
 def build_ec_policy(name: str, params: dict[str, Any]) -> Any:
     if name == "ec_contributor":
         share = params.get("share_evidence", True)
@@ -237,6 +342,14 @@ def build_ec_policy(name: str, params: dict[str, Any]) -> Any:
     if name == "ec_conditional_contributor":
         parsed = coerce_policy_params(name, params)
         return ECConditionalContributorPolicy(
+            peer_threshold=cast(Fraction, parsed.get("peer_threshold", Fraction(1, 2))),
+            warmup_rounds=cast(int, parsed.get("warmup_rounds", 3)),
+            share_evidence=cast(bool, parsed.get("share_evidence", True)),
+        )
+    if name == "ec_skeptical_contributor":
+        parsed = coerce_policy_params(name, params)
+        return ECSkepticalContributorPolicy(
+            min_sources=cast(int, parsed.get("min_sources", 2)),
             peer_threshold=cast(Fraction, parsed.get("peer_threshold", Fraction(1, 2))),
             warmup_rounds=cast(int, parsed.get("warmup_rounds", 3)),
             share_evidence=cast(bool, parsed.get("share_evidence", True)),
