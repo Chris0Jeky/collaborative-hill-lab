@@ -93,6 +93,73 @@ Literal `api_key`, arbitrary authorization headers and nested `sampling` paramet
 are rejected. The declared environment-variable name can remain in the scenario;
 the resolved value is excluded from manifests and transcripts.
 
+## Planning and request budgets
+
+Both are offline-first and opt-in; neither selects a model or approves a paid run.
+No default limit exists: leaving the flags out means *unlimited* (the behaviour
+above), not a safe budget. Design record: ADR-0015.
+
+```sh
+chl study plan path/to/your/study [--condition ID] [--replicates N] \
+    [--max-episode-request-attempts N] [--max-run-request-attempts N]
+```
+
+`plan` reads only the study files (no policy built, no credential variable read,
+no request) and prints JSON maxima. For each LLM agent per episode it separates
+`max_logical_completions` (rounds x (1 + `max_retries`)),
+`max_action_repair_completions`, `max_rate_limit_retry_attempts` (HTTP 429) and
+`max_http_request_attempts` (logical completions x (1 + `rate_limit_retries`)).
+It repeats these per condition and for the whole selection, and says whether the
+worst case exceeds each limit you passed. `requested_output_token_ceiling` is
+attempts times the requested completion cap: a request, not a measurement; input
+tokens and prices are not estimated. These are maxima for episodes that run to
+completion, not predictions.
+
+```sh
+chl run path/to/your/study --allow-provider-requests \
+    --max-episode-request-attempts 20 --max-run-request-attempts 200 --deadline-seconds 1800
+```
+
+(The numbers are placeholders, not recommendations.) The unit is the **HTTP
+request attempt**, charged when admitted and before it is sent, so timeouts,
+transport errors, 429s and responses without usage all count; repairs and 429
+retries draw on the same counters. Scopes:
+
+| Scope | Counts | Resets |
+|---|---|---|
+| episode | attempts of one episode (all its agents) | at each new episode only |
+| run | attempts of this whole `chl run` invocation | never |
+| continuation | `branch_run(..., request_budget=b)` marks the fork | never; reuse `b` for one cumulative limit |
+
+A retry, repair or continuation never resets a counter. In Python, build
+`RequestBudget(max_episode_attempts=, max_run_attempts=, deadline_seconds=,
+cancelled=)`, pass it to `run_study(request_budget=...)` or
+`branch_run(request_budget=...)` (a network override must be built with the same
+object: `build_openai_compatible_policy(..., budget=b)`). It applies only to the
+network transport; the fake provider sends nothing.
+
+**Deadline and cancellation are between-request checks, not an in-flight bound.**
+`deadline_seconds` runs on a monotonic clock from the budget's construction and is
+checked before each admission and before a 429 delay that would pass it. A request
+admitted just before the deadline may still run for `timeout_seconds` or longer
+(DNS and a stalled server are not covered), and its response is kept and measured.
+`timeout_seconds` remains a socket I/O timeout. A truly cancellable in-flight
+bound is not implemented.
+
+An exhausted budget follows the existing failure path (no silent abstain): the
+run is sealed `RunFailed` with `policy error for <agent>: ProviderError: provider
+request budget exhausted: <code>`, and replay reproduces it offline. Stable codes:
+`request_attempt_limit_episode`, `request_attempt_limit_run`, `deadline_exceeded`,
+`cancelled`. After a run-level stop each later network episode is still sealed
+`RunFailed` with zero requests; scripted episodes run normally. The manifest gains
+`request_budget` (null when no budget was configured; omitted from a continuation manifest without one): `limits`, `scope`,
+`admitted_before`, `admitted`, `stop_reason` and
+`deadline_check="between_requests_monotonic"`. `admitted` is a count of attempts,
+not tokens or money; token/cost totals stay null when unmeasured. The budget is
+operational: it enters no scenario, mechanism or study hash, no PolicySpec and no
+ledger event, so unbudgeted scenarios and completing budgeted runs are
+byte-identical. Counters are per process; concurrent invocations do not share one.
+
 ## Supported parameters
 
 | Parameter | Contract |

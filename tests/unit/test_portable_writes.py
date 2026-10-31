@@ -9,15 +9,18 @@ REPO = Path(__file__).resolve().parents[2]
 def _text_writes_without_newline(path: Path) -> list[int]:
     found = []
     for node in ast.walk(ast.parse(path.read_bytes())):
-        if not isinstance(node, ast.Call) or not isinstance(node.func, ast.Attribute):
+        if not isinstance(node, ast.Call):
             continue
-        if any(keyword.arg == "newline" for keyword in node.keywords):
+        name = (node.func.attr if isinstance(node.func, ast.Attribute)
+                else getattr(node.func, "id", ""))
+        keywords = {keyword.arg: keyword.value for keyword in node.keywords}
+        if "newline" in keywords:
             continue
-        modes = [arg.value for arg in node.args if isinstance(arg, ast.Constant)]
-        mode = modes[0] if modes else "r"
-        writes_mode = isinstance(mode, str) and "b" not in mode and set(mode) & set("wax")
-        if node.func.attr == "write_text" or (node.func.attr in ("open", "fdopen")
-                                              and writes_mode):
+        values = [*node.args, keywords.get("mode")]
+        modes = [value.value for value in values if isinstance(value, ast.Constant)]
+        writes_mode = any(isinstance(mode, str) and "b" not in mode and set(mode) & set("wax")
+                          for mode in modes)
+        if name == "write_text" or (name in ("open", "fdopen") and writes_mode):
             found.append(node.lineno)
     return found
 

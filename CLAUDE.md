@@ -35,6 +35,9 @@ the standalone checks validate their own additional experiment inputs.
 Use `.venv/bin/python` on POSIX or `.venv/Scripts/python.exe` on Windows for the
 Python commands below.
 
+Start with `make quick` (diff-selected checks) and `make lab` (film strips of real runs in
+the terminal and `artifacts/lab/console.html`); the table below is the manual equivalent.
+
 | Changed area | Narrow check |
 |---|---|
 | Package or tests | `make check` (ruff, strict typing, unit/property); `make test` for the full suite |
