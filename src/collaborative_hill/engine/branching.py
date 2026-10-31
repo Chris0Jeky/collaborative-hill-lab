@@ -59,6 +59,20 @@ def _continuation_provenance(parent_dir: Path) -> dict[str, Any]:
             **environment_provenance(), "started_at": utc_now_iso()}
 
 
+def _begin_budgeted_continuation(policies: dict[str, Any], budget: Any) -> None:
+    """Require one shared budget object, then mark the fork without resetting it."""
+    from collaborative_hill.agents.llm import LLMPolicy
+
+    if budget is None:
+        return
+    for policy in policies.values():
+        if (isinstance(policy, LLMPolicy) and hasattr(policy.provider, "budget")
+                and policy.provider.budget is not budget):
+            raise ValueError("a network-backed policy must share the continuation's "
+                             "request_budget object")
+    budget.begin("continuation")
+
+
 def branch_run(
     *,
     parent_dir: Path,
@@ -67,6 +81,7 @@ def branch_run(
     child_run_id: str,
     policy_overrides: dict[str, Any],
     allow_provider_requests: bool = False,
+    request_budget: Any = None,
 ) -> tuple[RunResult, BranchManifest]:
     """Fork the run in ``parent_dir`` at checkpoint ``fork_seq``.
 
@@ -74,6 +89,11 @@ def branch_run(
     .propose). Agents not overridden keep their original scripted policies,
     rebuilt from the resolved scenario. An inherited non-original policy must
     be supplied explicitly; opaque policy IDs are not executable configurations.
+
+    ``request_budget`` (a ``RequestBudget``, operational and unhashed) is NOT reset
+    by the fork: its counters continue, so pass the object already used for the
+    parent to keep one cumulative limit, or a fresh one for an independent limit.
+    A network-backed override must have been constructed with that same object.
     """
     parent_dir = Path(parent_dir)
     child_dir = Path(child_dir)
@@ -103,8 +123,9 @@ def branch_run(
     )
 
     mechanism = resolved.build_mechanism()
-    policies = build_policies(resolved, allow_provider_requests=allow_provider_requests,
-                               overrides=policy_overrides)
+    policies = build_policies(
+        resolved, allow_provider_requests=allow_provider_requests, overrides=policy_overrides,
+        **({"budget": request_budget} if request_budget is not None else {}))
     original_ids = effective_policy_ids(parent_dir, parent_events, manifest)
     for agent, policy in policies.items():
         if agent not in policy_overrides and policy.policy_id != original_ids[agent]:
@@ -115,6 +136,7 @@ def branch_run(
             raise ValueError(f"override for unknown agent {agent}")
         policies[agent] = policy
         changed[agent] = policy.policy_id
+    _begin_budgeted_continuation(policies, request_budget)
 
     usage_offsets = {a: p.call_count for a, p in policies.items() if isinstance(p, LLMPolicy)}
     transcript_offsets = {a: len(p.transcript) for a, p in policies.items()
@@ -161,9 +183,10 @@ def branch_run(
         (child_dir / "scenario.resolved.json").write_text(
             resolved.model_dump_json(indent=2), encoding="utf-8", newline="\n"
         )
-        child_manifest = dict(manifest)
+        # The parent's request_budget record does not describe the child.
+        child_manifest = {k: v for k, v in manifest.items() if k != "request_budget"}
         child_manifest.update({
-            **llm_manifest_fields(policies, since=usage_offsets),
+            **llm_manifest_fields(policies, since=usage_offsets, budget=request_budget),
             **provenance,
             "run_id": child_run_id,
             "ended_at": utc_now_iso(),

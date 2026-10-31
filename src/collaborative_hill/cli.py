@@ -4,6 +4,7 @@
     chl study validate <study-dir>
     chl study audit-seeds <study-dir> [--replicate N] [--round N]
     chl study freeze <study-dir>          (explicit human step)
+    chl study plan <study-dir> [--condition ID] [--replicates N]   (offline request maxima)
     chl run <study-dir> [--artifacts DIR] [--condition ID] [--replicates N]
     chl replay <run-dir>
     chl branch <run-dir> --at-event N --override agent=policy[:param=value...] --out DIR
@@ -76,6 +77,27 @@ def study_audit_seeds(
     typer.echo(json.dumps(audit, indent=2, sort_keys=True))
 
 
+@study_app.command("plan")
+def study_plan(
+    study_dir: Path,
+    condition: str | None = typer.Option(None, "--condition"),
+    replicates: int | None = typer.Option(None, "--replicates"),
+    max_episode_request_attempts: int | None = typer.Option(None, min=0),
+    max_run_request_attempts: int | None = typer.Option(None, min=0),
+) -> None:
+    """Print worst-case request counts as JSON. Offline: no credentials, no requests."""
+    from collaborative_hill.experiments.request_plan import plan_study
+
+    try:
+        plan = plan_study(study_dir, only_condition=condition, replicates_override=replicates,
+                          max_episode_attempts=max_episode_request_attempts,
+                          max_run_attempts=max_run_request_attempts)
+    except (ValueError, OSError) as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(code=2) from exc
+    typer.echo(json.dumps(plan, indent=2, sort_keys=True))
+
+
 @study_app.command("freeze")
 def study_freeze(study_dir: Path,
                  yes: bool = typer.Option(False, "--yes",
@@ -102,14 +124,27 @@ def run(
     replicates: int | None = typer.Option(None, "--replicates"),
     allow_provider_requests: bool = typer.Option(
         False, "--allow-provider-requests", help="Explicitly enable configured model requests"),
+    max_episode_request_attempts: int | None = typer.Option(
+        None, min=0, help="Admit at most N HTTP attempts per episode (default: no limit)"),
+    max_run_request_attempts: int | None = typer.Option(
+        None, min=0, help="Admit at most N HTTP attempts in this whole invocation"),
+    deadline_seconds: int | None = typer.Option(
+        None, min=0, help="Stop admitting requests after N seconds; checked between requests"),
 ) -> None:
     """Run a study's conditions x replicates."""
+    from collaborative_hill.agents.llm import RequestBudget
     from collaborative_hill.experiments.study import run_study
 
+    budget = None
+    if (max_episode_request_attempts, max_run_request_attempts, deadline_seconds) != (None,) * 3:
+        budget = RequestBudget(max_episode_attempts=max_episode_request_attempts,
+                               max_run_attempts=max_run_request_attempts,
+                               deadline_seconds=deadline_seconds)
     try:
         results = run_study(study_dir, artifacts, only_condition=condition,
                             replicates_override=replicates,
-                            allow_provider_requests=allow_provider_requests)
+                            allow_provider_requests=allow_provider_requests,
+                            request_budget=budget)
     except (ValueError, FileExistsError) as exc:
         typer.echo(f"error: {exc}", err=True)
         raise typer.Exit(code=2) from exc
