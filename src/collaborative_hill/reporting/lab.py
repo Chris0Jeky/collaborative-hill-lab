@@ -13,8 +13,8 @@ from pathlib import Path
 from typing import Any
 
 from collaborative_hill.engine.events import ChainError, Event, EventType
-from collaborative_hill.engine.replay import replay_run
-from collaborative_hill.reporting.report import _load_sealed_run
+from collaborative_hill.engine.replay import load_run, replay_run
+from collaborative_hill.engine.validation import effective_policy_ids
 
 EC_GLYPHS = {
     "inspect_evidence": "i", "share_evidence": "s", "propose_claim": "p",
@@ -78,8 +78,6 @@ def _mark_rejections(strips: dict[str, str], events: list[Event]) -> dict[str, s
 def _trace(events: list[Event], manifest: dict[str, Any],
            replay: bool | None) -> dict[str, Any]:
     started = events[0].payload
-    if manifest["policies"] != started["policies"]:
-        raise ChainError("manifest policies do not match the sealed RunStarted event")
     agents = list(started["agents"])
     transitions = [event.payload for event in events
                    if event.event_type == EventType.WORLD_TRANSITIONED]
@@ -89,7 +87,7 @@ def _trace(events: list[Event], manifest: dict[str, Any],
     terminal = events[-1]
     condition = manifest["condition_id"]
     if manifest.get("parent_run"):  # Branches share their parent's prefix: never pool them.
-        condition = f"{condition} (branch of {manifest['parent_run']})"
+        condition = f"{condition} (branch {manifest['run_id']} of {manifest['parent_run']})"
     trace: dict[str, Any] = {
         "run_id": manifest["run_id"], "condition_id": condition,
         "study_id": manifest["study_id"], "replicate": manifest["replicate"],
@@ -97,6 +95,8 @@ def _trace(events: list[Event], manifest: dict[str, Any],
         "policies": {agent: manifest["policies"][agent] for agent in agents},
         "events": len(events), "final_event_hash": terminal.event_hash,
         "parent_run": manifest.get("parent_run"), "fork_seq": manifest.get("fork_seq"),
+        "fork_round": (events[manifest["fork_seq"] + 1].logical_time
+                       if manifest.get("parent_run") else None),
         "replay_identical": replay,
     }
     if mechanism != "evidence_commons":
@@ -123,7 +123,10 @@ def run_trace(run_dir: Path, *, verify_replay: bool = False) -> dict[str, Any]:
     """Verified film strip of one run; a broken ledger yields ``{"broken": reason}``."""
     run_dir = Path(run_dir)
     try:
-        events, manifest = _load_sealed_run(run_dir)
+        events, _, manifest = load_run(run_dir)
+        # Old branch manifests retain root labels. Resolve the local, validated
+        # branch partition without rewriting provenance or reading parent paths.
+        manifest = {**manifest, "policies": effective_policy_ids(run_dir, events, manifest)}
         replay = replay_run(run_dir).chains_match if verify_replay else None
         return _trace(events, manifest, replay)
     except (ChainError, ValueError, KeyError, OSError) as exc:
@@ -192,6 +195,9 @@ def render_text(traces: list[dict[str, Any]]) -> str:
                 lines.append(f"  BROKEN {trace['run_id']}: {trace['broken']}")
         sample = next((trace for trace in rows if "broken" not in trace), None)
         if sample is not None:
+            if sample.get("parent_run"):
+                lines.append(f"  continuation policies from round {sample['fork_round']}"
+                             " (zero-based); earlier actions are inherited")
             for agent, strip in sample["strips"].items():
                 policy = _short_policy(sample["policies"][agent])
                 lines.append(f"  {agent:>4} {policy:<22} {strip}")
@@ -265,7 +271,11 @@ def _strip_html(trace: dict[str, Any]) -> str:
         cells.append(f'<span class="who" title="{policy}">{escape(agent)} '
                      f'{escape(_short_policy(trace["policies"][agent]))}</span>')
         cells += [f'<b class="{_glyph_class(glyph)}">{escape(glyph)}</b>' for glyph in strip]
-    return (f'<div class="mono dim">{escape(trace["run_id"])} · {trace["events"]} events · '
+    boundary = (f'<div class="dim">Continuation policies from round {trace["fork_round"]}'
+                ' (zero-based); earlier actions are inherited.</div>'
+                if trace.get("parent_run") else "")
+    return (f'{boundary}<div class="mono dim">{escape(trace["run_id"])} · '
+            f'{trace["events"]} events · '
             f'{trace["final_event_hash"][:12]}</div>'
             f'<div class="strip" style="--n:{rounds}">{"".join(cells)}</div>')
 
