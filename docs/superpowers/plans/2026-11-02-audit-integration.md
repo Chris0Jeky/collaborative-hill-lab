@@ -43,11 +43,11 @@
 - Audit RNG key is `(generator_version, contract_version, audit_id, slot_id, proposition_id, purpose)` with purpose `availability` or `verdict`. It excludes config hashes, publication round, schedule position, run ID and policy roots.
 - `prepare_round(state, rng_for_key)` returns new state and domain event dictionaries. Only released findings persist. `observe` supplies a cloned v1 audit envelope and `observation_schema_version=3`.
 
-- [ ] Commit ADR-0018 separately before implementation.
-- [ ] Write and observe failing tests for exact generation thresholds, strict schemas, staged publication, projection equivalence and compiler routing/hash isolation.
-- [ ] Implement package schemas/generator and opt-in mechanism; leave the original standalone contract and base EC engine unchanged.
-- [ ] Verify complete due-prefix coverage, idempotence, no future findings, event/report equality, direct-constructor validation and observation nonmutation.
-- [ ] Run focused tests, Ruff and strict mypy; record commands and commit implementation.
+- [x] Commit ADR-0018 separately before implementation.
+- [x] Write and observe failing tests for exact generation thresholds, strict schemas, staged publication, projection equivalence and compiler routing/hash isolation.
+- [x] Implement package schemas/generator and opt-in mechanism; leave the original standalone contract and base EC engine unchanged.
+- [x] Verify complete due-prefix coverage, idempotence, no future findings, event/report equality, direct-constructor validation and observation nonmutation.
+- [x] Run focused tests, Ruff and strict mypy; record commands and commit implementation.
 
 ## Task 2: kernel lifecycle and artifact integrity
 
@@ -62,13 +62,13 @@
 - Add `EventType.AUDIT_PUBLISHED = "AuditPublished"`; legacy mechanisms receive no new events or changed payloads.
 - Keep `_RoundBoundary` delegation effective via `getattr`/typed cast, preserving replay's existing lifecycle.
 
-- [ ] Capture pre-change legacy scenario dumps/hashes and representative chain commitments from authoritative base `e1f8f119b2709f4370303786c2796383eb6b8fa9`.
-- [ ] Write and observe failing lifecycle tests before implementing the optional hook.
-- [ ] Implement opening dispatch and domain event support without changing existing policy/resolution RNG paths.
-- [ ] Verify actual audit runs, simultaneous publication, final-round timing, policy failure after publication, fixed-action C3 and truth isolation.
-- [ ] Verify forks before/at/after publication, inherited finding persistence, nested replay without parent paths/checkpoints and byte-identical branch prefixes.
-- [ ] Reject audited manifest institution settings that disagree with the canonical resolved scenario; retain documented legacy omission behavior.
-- [ ] Run targeted kernel/seed/replay/branch tests and the full suite; commit changes and integrate the model lane.
+- [x] Capture pre-change legacy scenario dumps/hashes and representative chain commitments from authoritative base `e1f8f119b2709f4370303786c2796383eb6b8fa9`.
+- [x] Write and observe failing lifecycle tests before implementing the optional hook.
+- [x] Implement opening dispatch and domain event support without changing existing policy/resolution RNG paths.
+- [x] Verify actual audit runs, simultaneous publication, final-round timing, policy failure after publication, fixed-action C3 and truth isolation.
+- [x] Verify forks before/at/after publication, inherited finding persistence, nested replay without parent paths/checkpoints and byte-identical branch prefixes.
+- [x] Reject audited manifest institution settings that disagree with the canonical resolved scenario; retain documented legacy omission behavior.
+- [x] Run targeted kernel/seed/replay/branch tests and the full suite; commit changes and integrate the model lane.
 
 ## Task 3: observation-driven negative-veto policy
 
@@ -82,11 +82,11 @@
 - Delegate selection to unchanged `ECSkepticalContributorPolicy.propose`; veto only a selected proposal/verification whose `(slot, proposition)` has a published negative finding.
 - Positive, unavailable, pending and absent audits preserve baseline choice. Do not rerank claims, mutate the supplied observation, synthesize evidence, challenge from audit alone or retract previous acceptance.
 
-- [ ] Commit the experiment DESIGN separately and send it for publication before any audit-enabled episode.
-- [ ] Write and observe failing factory/behavior tests against the old registry.
-- [ ] Implement the separate policy and additive registration; validate public contract version and reject malformed/future public findings.
-- [ ] Check parameter boundaries, exact baseline action/proposal identity for controls, false negatives, target/slot isolation and rebuilding policy instances from the same observation.
-- [ ] Run focused tests and relevant legacy policy tests; commit separately from experiment source/results.
+- [x] Commit the experiment DESIGN separately and send it for publication before any audit-enabled episode.
+- [x] Write and observe failing factory/behavior tests against the old registry.
+- [x] Implement the separate policy and additive registration; validate public contract version and reject malformed/future public findings.
+- [x] Check parameter boundaries, exact baseline action/proposal identity for controls, false negatives, target/slot isolation and rebuilding policy instances from the same observation.
+- [x] Run focused tests and relevant legacy policy tests; commit separately from experiment source/results.
 
 ## Task 4: predeclared audit-feedback experiment
 
@@ -94,20 +94,20 @@
 
 **Files:** `experiments/audit-feedback/DESIGN.md`, executable source, readouts, source provenance and publication mapping; focused tests. Root adds Make/CI gates after reproduction is implemented.
 
-- [ ] Declare the complete finite grid, literal action/outcome predictions, timing and missingness laws, negative/zero cases, fixed-action controls and exact expectation equations before execution.
-- [ ] Independently review the declared design; resolve ambiguity before committing source.
-- [ ] Implement all conditional trajectories and exact probability mixtures with separate accuracy/coverage/quality/effort/utility reporting. Preserve undefined selective accuracy rather than substituting zero.
-- [ ] Commit source, publish through GitHub, and verify local/published tree equality before original execution.
-- [ ] Run to a fresh artifact root; retain all prediction outcomes and original sealed runs. Rebuild the readout only from those artifacts.
-- [ ] Independently check exact expectations, controls, provenance, every replay and byte-identical reproduction.
-- [ ] Add a dedicated Make/CI check and archive original evidence with verified checksums.
+- [x] Declare the complete finite grid, literal action/outcome predictions, timing and missingness laws, negative/zero cases, fixed-action controls and exact expectation equations before execution.
+- [x] Independently review the declared design; resolve ambiguity before committing source.
+- [x] Implement all conditional trajectories and exact probability mixtures with separate accuracy/coverage/quality/effort/utility reporting. Preserve undefined selective accuracy rather than substituting zero.
+- [x] Commit source, publish through GitHub, and verify local/published tree equality before original execution.
+- [x] Run to a fresh artifact root; retain all prediction outcomes and original sealed runs. Rebuild the readout only from those artifacts.
+- [x] Independently check exact expectations, controls, provenance, every replay and byte-identical reproduction.
+- [x] Add a dedicated Make/CI check and archive original evidence with verified checksums.
 
 ## Task 5: review, integration and handoff
 
 **Owner:** root with independent reviewer.
 
-- [ ] Review all implementation diffs and scientific claims; add failing reproducers and fix material findings.
-- [ ] Run the complete package, acceptance, study and historical experiment gates plus the new experiment gate.
+- [x] Review all implementation diffs and scientific claims; add failing reproducers and fix material findings.
+- [x] Run the complete package, acceptance, study and historical experiment gates plus the new experiment gate.
 - [ ] Publish draft PRs using connected GitHub tools, reconcile current main, inspect exact-head Ubuntu/Windows CI logs and resolve review comments.
 - [ ] Merge safe PRs with expected-head leases; compare each merge tree with the tested tree.
 - [ ] Update README/HANDOFF/NEXT/PLAN/guides, append BUILD_LOG, update issue #103 and PR records with measured results and remaining scope.
@@ -119,3 +119,10 @@
 - Builder review: no architectural blockers; the five review-focus items above are mandatory test cases.
 - Policy choice: negative veto preserves the existing inspection/share/challenge priorities and makes false-negative and late-signal effects explicit. A positive-only gate is a different policy and is outside this first experiment.
 - Observation isolation applies under fixed accepted actions. Adaptive feedback can legitimately change later ordinary observations through changed actions; tests distinguish those effects.
+
+- Design publication: local `e93e8b3` and public `a11a11f` share tree `e87a3a7`; this preceded audit-enabled episodes. Complete reviewed source local `ab9e3ec` and public `6727532` share tree `d4494ee`; this preceded the original batch.
+- Runtime verification: 2,026 tests passed before the final experiment-source integration; 111 focused final experiment/runtime checks passed. The complete final suite then passed 2,063 tests. All 69 legacy scenario identities and three original ledger byte hashes remain unchanged.
+- Review corrections: twelve manifest-institution regressions first failed and then passed; strict binding rejects omission, injection, altered settings and Boolean round aliases. Experiment review also corrected unconditional success prose, ambiguous source-cleanliness flags and unbound branch intervention labels, with failing-first regressions and independent re-review.
+- Original execution: 76 scientific runs (52 behavioral, 24 fixed-action), four separate branches, P1–P8 all held, 60 C3 comparisons, 42 truth controls and 720 exact expectation rows. Independent read-only audit replayed 80 chains, checked 621 checkpoints and all 65 source digests, and reproduced both readouts byte for byte without changing any of the 947 original files.
+- Original evidence archive: `collaborative-hill-audit-feedback-original-evidence-2026-11-02.zip`, SHA-256 `338f6a15611f4ae8d4db69140d44c857686ab633cda55489b346fab03ff36fe1`; contains original evidence plus inventory and audit metadata, separately from verification reruns.
+- The complete local gate passed, including all historical/new experiment reproductions. Remaining gate at this record: final publication and hosted Ubuntu/Windows logs, safe merge and final-main verification. Issue #108 tracks a separate explicitly versioned LLM prompt adapter; its implementation does not rewrite this experiment or its original claims.

@@ -2,9 +2,12 @@
 
 The scope contract for what the platform's outputs do and do not license. Each study
 states its own claim boundary; a confirmatory preregistration must restate it. This
-document is the standing cross-study boundary, updated 2026-10-29. It reflects legacy
-N-IPD, the separately versioned local graph world, **Evidence Commons v0**, its
-observation-responsive policy baseline, and optional provider transport. All current
+document is the standing cross-study boundary, updated 2026-11-02. It reflects legacy
+N-IPD, the separately versioned local graph world, the Evidence Commons task,
+opt-in EC v3 audit observations, scripted responsive policies and optional provider transport.
+The audit implementation and original experiment are complete in
+[PR #107](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/107), which is not
+merged at this checkpoint; its final hosted checks remain separate from local evidence. All current
 measured scientific results use scripted agents and synthetic inputs; transport tests use
 mocked responses. No live provider pilot is claimed.
 
@@ -71,6 +74,24 @@ mocked responses. No live provider pilot is claimed.
    Those exact finite controls establish no universal topology benefit or independent
    replication from symmetry-equivalent seats.
 
+8. **A bounded response to an explicit synthetic audit channel.** The
+   [audit-feedback design](../../experiments/audit-feedback/DESIGN.md) fixes N=3,
+   one slot, eight rounds, aggregate accountability, a shared ledger and three
+   perfectly correlated source reports with distinct labels. Its
+   [original readout](../../experiments/audit-feedback/RESULTS.md) retains 52 behavioral
+   episodes and 24 fixed-action controls; all P1–P8 hold. The 60 same-action
+   comparisons include forced acceptance of false claims after negative reports,
+   testing that audit publication alone does not change the task rules. The 42
+   truth controls distinguish prepublication equality, direct audit differences
+   under fixed actions and later history changes caused by a policy response.
+   The 720 exact mixture rows are reweightings of conditional endpoint responses,
+   not extra episodes, observed accuracy estimates or independent samples.
+   The [original-artifact audit](../../experiments/audit-feedback/ORIGINAL_AUDIT.json)
+   verifies all 76 scientific chains and four separate branch fixtures, 621
+   checkpoints, 65 source digests and byte-identical recollection. These checks
+   establish consistency with the declared finite design, not the empirical
+   validity of its audit accuracy, independence, availability or cost assumptions.
+
 ---
 
 ## 2. What the platform CANNOT claim
@@ -98,7 +119,7 @@ mocked responses. No live provider pilot is claimed.
 
 ---
 
-## 3. Current known limitations (v0, honest enumeration)
+## 3. Current known limitations
 
 1. **Verification is engine-adjudicated provenance-checking — agents cannot lie in
    verification.** `_adjudicate_verification` is deterministic typed code: a verification is
@@ -107,23 +128,29 @@ mocked responses. No live provider pilot is claimed.
    So an agent cannot submit a dishonest verification — **deception in verification is not
    modelled in v0** and is explicit future work. What v0 *does* capture is
    provenance-vs-truth divergence: well-cited misinformation passes verification (provenance
-   holds) yet scores as incorrect (truth fails).
+   holds) yet scores as incorrect (truth fails). The opt-in audit channel adds a
+   separate public signal; it does not let agents report verification outcomes.
 
 2. **Acceptance is a mechanical net-support rule.** A claim is accepted iff
    `net_support = supported_verifications − valid_challenges ≥ 1`, highest wins, ties to
    earliest (`final_briefing`). There is no deliberation, negotiation, or judgement in
    acceptance. `ApproveClaimAction` exists in the action union but is **not legal in v0** (a
-   documented v1 extension point).
+   documented v1 extension point). Audited EC v3 inherits this acceptance rule;
+   a negative report does not automatically retract support or reject a claim.
 
 3. **Scripted personas are not learned strategies.** The scripted policies
    (`ec_contributor`, `ec_freerider`, `ec_verifier`, `ec_misinformer`,
-   `ec_conditional_contributor`, and the global/local N-IPD families) are hand-specified
+   `ec_conditional_contributor`, `ec_skeptical_contributor`, the separately versioned
+   component ablation and audit-veto policies, and the global/local N-IPD families) are hand-specified
    observation-driven rules without learned parameters or hidden policy state. The legacy
    contributor/freerider pair ignores attribution and monetary weights. The conditional
    contributor can change behavior when identities make more distinct contributors visible,
    but does not respond to utility coefficients, truth or evidence quality. Its cumulative
    signal counts proposals and verification attempts, not current willingness or accuracy.
-   These controls are not claimed to be optimal, representative or performance bounds.
+   The audit wrapper responds only to a matching public negative finding; it does
+   not infer reliability, invert an inaccurate audit, rerank candidates or use
+   audits as citations. These controls are not claimed to be optimal,
+   representative or performance bounds.
 
 4. **Small N and declared composition.** Current Evidence Commons fixtures use N=3;
    the N-IPD studies cover N=3 and N=5 complete graphs, and the graph controls use N=5
@@ -154,14 +181,18 @@ mocked responses. No live provider pilot is claimed.
    and (future) scrambled-incentive controls mitigate this, but for LLM agents recall-vs-
    reasoning is an unresolved confound. Scripted baselines are immune (no cognition).
 
-9. **No sanctions, reputation, commitments or approval institutions inside episodes.** `InstitutionConfig`
-   implements exactly two axes (accountability × evidence_topology). Sanctions, reputation
-   scores, commitments, and approval gates are documented extension points, deliberately
-   unimplemented. Claims about those mechanisms are out of
-   scope until they exist with their own ADRs.
+9. **No sanctions, reputation, commitments or approval institutions inside episodes.**
+   Legacy `InstitutionConfig` retains its two axes (accountability × evidence_topology).
+   The required-audit subtype in [ADR-0018](../adr/0018-opt-in-evidence-commons-audits.md)
+   adds an informational channel. Neither implements sanctions, reputation scores,
+   commitments or approval gates. Claims about those mechanisms remain out of
+   scope until they have explicit rules and their own ADRs.
 
-10. **Two-axis institution space.** The intervention space is the implemented 2×2. Richer
-    institutional designs are future work; current claims are confined to these four cells.
+10. **Bounded institutional designs.** Study 001 covers its original 2×2, while the
+    audit-feedback experiment holds aggregate accountability and shared-ledger
+    topology fixed. It does not estimate audit interactions with attribution,
+    private evidence, larger populations, channel costs or sanctions. Those
+    comparisons require separately declared designs.
 
 11. **Synthetic evidence only.** The evidence corpus is a finite, environment-authored set of
     typed items (`EvidenceSpec`); adversarial content is an inert data fixture. No real
@@ -210,6 +241,37 @@ mocked responses. No live provider pilot is claimed.
     Cross-policy comparisons can also change observation and action rules. Global
     cooperator count is insufficient for general sparse-graph pTFT dynamics, so the Study
     002 complete-population Markov benchmark is not a sparse-network oracle.
+
+17. **Audit accuracy and availability are synthetic assumptions.** Runtime correctness
+    uses an exact rational Bernoulli law conditional on availability, with independent
+    per-target streams and errors independent of source errors. A perfect setting is
+    a trusted-oracle assumption, not calibrated verification. The experiment executes
+    deterministic endpoint configurations and retains them in each manifest; its
+    intermediate probability rows are explicitly labelled exact mixtures. Probability
+    settings affect this policy through the released verdict, while the opaque contract
+    hash is ignored. Endpoint runs alone do not validate a nondegenerate sampler;
+    separate finite-bucket and seed-isolation tests cover that engineering contract.
+
+    Selective accuracy, coverage, signed quality, effort and utility are distinct.
+    With source error `1/10`, audit accuracy `3/4`, no unavailable reports and round-3
+    publication, selective accuracy rises from `9/10` to `27/28`, while acceptance
+    falls from `1` to `7/10` and signed quality falls from `48/5` to `39/5`. The early
+    quality contrast is `12(1-u)(a+e-1)` under the declared law, with a zero contrast
+    at accuracy `9/10` in this example. A round-5 negative report can save redundant
+    verification effort without improving truth; round 6 is a task null. Undefined
+    selective accuracy at zero acceptance and conditional audit accuracy at complete
+    unavailability remain null. No audit price, endogenous target selection, learned
+    response or optimized policy is estimated. These limits accompany the exact
+    [readout](../../experiments/audit-feedback/RESULTS.md).
+
+18. **The current LLM EC prompt does not expose audits.** The engine's public observation
+    includes the versioned audit envelope, but the existing LLM renderer omits it.
+    Current audit-response evidence therefore concerns the scripted veto wrapper.
+    [Issue #108](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/108) has an
+    approved design and separate implementation in progress for an explicit audit-aware
+    renderer that preserves legacy prompt hashes. Offline rendering tests can establish
+    which information reaches a model; they cannot establish a beneficial LLM response.
+    A measured effect needs its own declared experiment and live-run decisions.
 
 ---
 

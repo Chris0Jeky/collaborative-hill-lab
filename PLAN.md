@@ -5,6 +5,12 @@ criteria; [HANDOFF.md](HANDOFF.md) records evidence and remaining decisions.
 Checked engineering follow-ups are implemented, reviewed and locally verified.
 Core PRs #99–#102 are merged after exact-head Ubuntu/Windows checks; the seed
 follow-up's public check and merge record is [PR #105](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/105).
+Audit integration and its original experiment are implemented and independently
+audited in [PR #107](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/107),
+which is not merged at this checkpoint. The integrated local 2,063-test suite and
+complete verification/reproduction gate passed; final hosted CI and merge are
+pending. Versioned audit-aware LLM prompts ([#108](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/108))
+have an approved design and a separate implementation in progress.
 
 ## M0 — Offline foundation
 
@@ -23,7 +29,7 @@ follow-up's public check and merge record is [PR #105](https://github.com/Chris0
 - [x] Input/path safety and shared built-in policy parameter validation
 - [x] Shared recorded-seed validation, actual-artifact/CLI regressions and valid legacy/paired compatibility (#104)
 - [x] Persistent exact-commit CI, full regression suite and A–K acceptance checks
-- [x] Architecture records 0001–0017, research documentation and current handoff
+- [x] Architecture records 0001–0018, research documentation and current handoff
 
 ## M1 — First live pilot
 
@@ -55,7 +61,9 @@ follow-up's public check and merge record is [PR #105](https://github.com/Chris0
 - [x] Exact labeled-state sparse-graph pTFT benchmark (#85)
 - [x] Independent four-component EC ablation: 192 behavioral episodes and 96 controls (#95)
 - [x] Exact declared noisy-corpus model and versioned audit observation contract (#96)
-- [ ] Audit-enabled engine integration through the six ADR-0017 gates (#103)
+- [x] Audit-enabled engine integration through the six ADR-0017 gates, specified by ADR-0018 (#103)
+- [x] Separately declared audit-feedback experiment: 52 behavioral episodes, 24 controls, all P1–P8 and independent original-artifact audit (PR #107)
+- [ ] Versioned audit-aware LLM prompts with unchanged legacy hashes; design approved and implementation in progress (#108)
 - [ ] Deception-capable verification, with unchanged v0 controls
 - [ ] Reputation/sanction institutions with responsive policies and integrity checks
 - [ ] Concordia cognition adapter behind the observation firewall

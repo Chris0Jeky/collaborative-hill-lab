@@ -11,7 +11,7 @@ endif
 CHL := "$(PY)" -m collaborative_hill.cli
 STUDY002_ARTIFACTS ?= artifacts/study-002
 
-.PHONY: doctor setup quick lab mutants check check-atlas check-study002 check-responsive check-quality-safeguards check-graph check-sparse-ptft check-noisy-corpus check-ec-rule-ablation test validate acceptance study-000 study-001-smoke study-002-plan study-002 replay-smoke report clean-generated
+.PHONY: doctor setup quick lab mutants check check-atlas check-study002 check-responsive check-quality-safeguards check-graph check-sparse-ptft check-noisy-corpus check-ec-rule-ablation check-audit-feedback test validate acceptance study-000 study-001-smoke study-002-plan study-002 replay-smoke report clean-generated
 
 doctor:
 	$(CHL) doctor
@@ -81,6 +81,11 @@ check-ec-rule-ablation:
 	"$(PY)" -m ruff check experiments/ec-rule-ablation
 	"$(PY)" -m mypy --strict --follow-imports=silent experiments/ec-rule-ablation/*.py
 	"$(PY)" experiments/ec-rule-ablation/ec_rule_ablation.py --check
+
+check-audit-feedback:
+	"$(PY)" -m ruff check experiments/audit-feedback
+	"$(PY)" -m mypy --strict --follow-imports=silent experiments/audit-feedback/*.py
+	"$(PY)" experiments/audit-feedback/audit_feedback.py --check
 
 test:
 	"$(PY)" -m pytest tests/ -q

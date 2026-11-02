@@ -5,25 +5,31 @@ model, budget and confirmatory-study decisions remain open. The unchanged
 [human-owned decisions](HANDOFF.md#human-owned-decisions--unchanged) are the home
 for those choices.
 
-## Next feature: integrate the explicitly versioned audit channel
+## Next feature: versioned audit-aware LLM prompts
 
-[Issue #103](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/103) carries
-the six remaining [ADR-0017](docs/adr/0017-noisy-corpus-and-audit-contract.md) gates:
+[Issue #108](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/108) has an
+approved design and a separate implementation in progress. The current LLM EC
+renderer enumerates ordinary fields and omits the new audit envelope. The
+completed audit-feedback result therefore measures the scripted veto policy.
 
-1. Opt-in scenario/institution configuration, candidate/horizon validation,
-   version routing and hash binding that preserve existing v2 scenarios.
-2. Exact declared audit-error and unavailability generation with isolated seed
-   paths and a stated dependence model.
-3. Publication timing, public events, all-agent projection, checkpoint, replay
-   and branch support without leaking hidden fields.
-4. A separately versioned observation-driven audit policy.
-5. Integrated C3, timing-isolation, malformed-input, leak, seed, replay, branch
-   and legacy-hash regression tests.
-6. A separately committed design before any audit-enabled experiment.
+The follow-up must expose the validated, already-public envelope through an
+explicitly versioned renderer while preserving legacy prompt bytes and template
+hashes. Its offline checks must cover an absent channel, no published findings,
+positive/negative/unavailable reports, malformed envelopes, and the absence of
+hidden truth or future findings. Missing reports cannot establish future selection.
+Correct rendering establishes what a model would receive; it does not establish
+how a live model responds or whether audits improve its outcomes. Any measured
+LLM effect still needs a separately declared experiment and the human decisions
+listed below.
 
-The existing schema validates declared accuracy and supplied findings; it does
-not establish either's accuracy. A perfect audit remains a synthetic trusted-oracle
-assumption. Keep that distinction explicit in any later engine or experiment.
+Issue [#103](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/103)'s six
+ADR-0017 gates are implemented under
+[ADR-0018](docs/adr/0018-opt-in-evidence-commons-audits.md). Its original experiment
+and independent artifact audit are complete in
+[PR #107](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/107), which is
+not merged at this checkpoint. The integrated local 2,063-test suite and complete
+verification/reproduction gate passed; final hosted checks and merge are pending.
+Use the PR for the authoritative final-head/check/merge record.
 
 ## Completed foundations
 
@@ -77,8 +83,9 @@ Implementation, review and verification evidence is recorded in [HANDOFF.md](HAN
   The 64 behavioral worlds and 64 accounting controls satisfy P1–P8 under the
   declared exact model. With independent errors, accuracy among accepted claims
   can rise while coverage and signed quality fall; fully correlated errors give
-  a null rule contrast with distinct labels. The versioned audit projection
-  contract is implemented separately. It does not enable an audit engine.
+  a null rule contrast with distinct labels. The historical standalone audit
+  projection contract remains unchanged; engine integration is the separate
+  #103 follow-up below.
 - **Provider-budget follow-ups (#92 / [PR #101](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/101)).**
   Budgeted continuations reject omitted or mismatched budget objects before output or
   requests, retain cumulative accounting, and expose stable stop reasons in
@@ -97,12 +104,24 @@ Implementation, review and verification evidence is recorded in [HANDOFF.md](HAN
   The local 1,762-test suite, 303 targeted cases and relevant reproduction gates
   passed; the PR and [CI 41387542882](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/41387542882)
   retain the authoritative hosted check and merge record.
+- **Opt-in audits and the declared feedback experiment (#103 / [PR #107](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/107)).**
+  EC v3, exact isolated audit generation, publication-before-observation,
+  checkpoint/replay/branch support and a versioned negative-veto policy are
+  implemented. The original 52 behavioral episodes and 24 fixed-action controls
+  satisfy P1–P8, with 60 C3 comparisons, 42 truth controls and 720 exact mixture
+  rows. Independent audit replayed all 76 originals and four separate branch
+  fixtures, verified 621 checkpoints and 65 source digests, and preserved every
+  original byte. The [readout](experiments/audit-feedback/RESULTS.md) separates
+  selective accuracy, coverage and signed quality; the assumed audit law is not
+  a measured accuracy claim. The [original-evidence record](experiments/audit-feedback/ORIGINAL_EVIDENCE.md)
+  preserves the pre-execution source mapping and 947-file original inventory.
 
-The complete combined local gate passed before the seed follow-up; the new
-`check-noisy-corpus` and `check-ec-rule-ablation` targets remain in the full gate
-and automatic quick-check selection. Preserve the original clean source mappings
-and verified 416-run evidence archive. Verification reruns do not replace original
-evidence or add samples.
+The earlier combined local gate and 416-run noisy-corpus/ablation archive remain
+historical evidence. The current audit integration also passed the complete local
+gate, including all 76 audit runs, four branch fixtures and 720 exact rows in
+`check-audit-feedback`. Final hosted checks and merge remain separate obligations.
+Preserve both original archives and their actual clean source records.
+Verification reruns do not replace evidence or add samples.
 
 ## Path to a live Study 001 result
 

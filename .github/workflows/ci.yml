@@ -90,6 +90,9 @@ jobs:
       - name: Verify skeptical EC component ablations and controls
         run: make check-ec-rule-ablation
 
+      - name: Verify opt-in audit feedback and exact expectation controls
+        run: make check-audit-feedback
+
       - name: Verify the tested commit and clean workspace
         run: |
           test "$(git rev-parse HEAD)" = "$CHL_EXPECTED_SHA"
