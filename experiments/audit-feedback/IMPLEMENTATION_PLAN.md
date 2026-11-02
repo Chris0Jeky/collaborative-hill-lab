@@ -78,10 +78,10 @@ Consumes: the reviewed v3 engine/compiler/kernel integration, registered policy,
 shared models and independent oracle. Produces a fresh 76-run tree, 60 C3 bindings,
 publication/leak/replay checks, original provenance and exact JSON/Markdown readouts.
 
-- [ ] Integrate root's reviewed kernel/compiler commits without editing its lane.
-- [ ] Add failing tests for fresh-output/clean-source guards, cell completeness,
+- [x] Integrate root's reviewed kernel/compiler commits without editing its lane.
+- [x] Add failing tests for fresh-output/clean-source guards, cell completeness,
   report timing, prediction retention and invalid/corrupt evidence rejection.
-- [ ] Implement endpoint execution through the real generator; never inject findings
+- [x] Implement endpoint execution through the real generator; never inject findings
   or choose seeds by outcomes. Use 52 behavioral and 24 literal schedule runs.
 - [ ] Check complete task/publication invariants and replay every run; implement
   `--check` as temporary regeneration plus byte-identical readout comparison.

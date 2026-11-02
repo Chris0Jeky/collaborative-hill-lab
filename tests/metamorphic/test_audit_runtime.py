@@ -158,12 +158,28 @@ def test_target_draws_survive_unrelated_schedule_and_policy_changes(tmp_path, va
         assert original_manifest["policies"] != changed_manifest["policies"]
 
 
+def test_final_round_finding_is_observed_before_the_terminal_seal(tmp_path):
+    run, result = run_fixture(tmp_path, schedule=(("s1", "p1a", 5),))
+    assert result.status == "completed" and result.rounds_played == 6
+    events, _, _ = load_run(run)
+    publication, = [e for e in events if e.event_type == EventType.AUDIT_PUBLISHED]
+    assert publication.logical_time == 5
+    for event in events:
+        if event.event_type == EventType.OBSERVATION_ISSUED:
+            observed = event.payload["observation"]["audit"]["reports"]
+            assert observed == ([publication.payload["report"]] if event.logical_time == 5 else [])
+            if observed:
+                assert publication.seq < event.seq
+    assert events[-1].logical_time == 6 and events[-1].event_type == EventType.RUN_COMPLETED
+    assert replay_run(run).chains_match
+
+
 def test_branches_before_after_and_nested_replay_without_ancestors(tmp_path, valid_runs):
     parent = copied_run(tmp_path, valid_runs)
     parent_events, _, _ = load_run(parent)
     parent_bytes = (parent / "events.jsonl").read_bytes().splitlines(keepends=True)
     branches = []
-    for name, rnd in (("before", 2), ("after", 4)):
+    for name, rnd in (("before", 2), ("at-publication", 3), ("after", 4)):
         child = tmp_path / name
         seq = fork_at(parent, rnd)
         result, _ = branch_run(parent_dir=parent, fork_seq=seq, child_dir=child,
@@ -182,8 +198,8 @@ def test_branches_before_after_and_nested_replay_without_ancestors(tmp_path, val
     assert result.status == "completed"
     assert reports(load_run(nested)[0]) == reports(parent_events)
     shutil.rmtree(parent)
-    assert replay_run(before).chains_match
-    assert replay_run(branches[1]).chains_match
+    for child in branches:
+        assert replay_run(child).chains_match
     shutil.rmtree(before)
     shutil.rmtree(nested / "checkpoints")
     original = all_bytes(nested)
