@@ -9,6 +9,7 @@ from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 from urllib.parse import urlsplit
 
+from collaborative_hill.agents.llm.prompt_adapters import validate_prompt_renderer
 from collaborative_hill.engine.hashing import frac_str
 
 if TYPE_CHECKING:
@@ -20,6 +21,7 @@ _SAMPLING_KEYS = {"max_completion_tokens", "max_tokens", "temperature", "top_p",
 _CONFIG_KEYS = {"endpoint", "model_id", "api_key_env", "timeout_seconds",
                 "rate_limit_retries", "retry_delay_seconds", "max_retries",
                 "allow_insecure_localhost"}
+_POLICY_KEYS = {"prompt_renderer"}
 
 
 def _integer(value: Any, name: str, minimum: int, maximum: int | None = None) -> int:
@@ -114,8 +116,11 @@ class OpenAICompatibleConfig:
 
 def validate_provider_params(params: Mapping[str, Any]) -> OpenAICompatibleConfig:
     """Validate flat PolicySpec parameters without reading credentials or networking."""
-    if not isinstance(params, Mapping) or set(params) - (_SAMPLING_KEYS | _CONFIG_KEYS):
+    if not isinstance(params, Mapping) or set(params) - (
+        _SAMPLING_KEYS | _CONFIG_KEYS | _POLICY_KEYS
+    ):
         raise ValueError("unsupported provider parameter; credentials must use api_key_env")
+    validate_prompt_renderer(params.get("prompt_renderer", "legacy@1"))
     if "endpoint" not in params or "model_id" not in params:
         raise ValueError("provider endpoint and model_id must be explicitly configured")
     return OpenAICompatibleConfig(
@@ -135,9 +140,11 @@ def build_openai_compatible_policy(agent_id: str, skin: "NarrativeSkin",
     from collaborative_hill.agents.llm.policy import LLMPolicy
 
     config = validate_provider_params(params)
+    renderer = validate_prompt_renderer(params.get("prompt_renderer", "legacy@1"))
     api_key = os.environ.get(config.api_key_env) if config.api_key_env is not None else None
     if config.api_key_env is not None and not api_key:
         raise ValueError("provider credential environment variable is unavailable")
     provider = OpenAICompatibleProvider(config, api_key=api_key, budget=budget)
     return LLMPolicy(agent_id, provider, skin,
-                     max_retries=config.max_retries, sampling=dict(config.sampling))
+                     max_retries=config.max_retries, sampling=dict(config.sampling),
+                     prompt_renderer=renderer)

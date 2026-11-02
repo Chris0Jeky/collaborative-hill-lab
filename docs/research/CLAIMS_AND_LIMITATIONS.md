@@ -5,11 +5,13 @@ states its own claim boundary; a confirmatory preregistration must restate it. T
 document is the standing cross-study boundary, updated 2026-11-02. It reflects legacy
 N-IPD, the separately versioned local graph world, the Evidence Commons task,
 opt-in EC v3 audit observations, scripted responsive policies and optional provider transport.
-The audit implementation and original experiment are complete in
-[PR #107](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/107), which is not
-merged at this checkpoint; its final hosted checks remain separate from local evidence. All current
-measured scientific results use scripted agents and synthetic inputs; transport tests use
-mocked responses. No live provider pilot is claimed.
+The audit implementation and original experiment are merged in
+[PR #107](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/107) after complete
+Ubuntu/Windows verification. The explicit audit-aware prompt adapter is separately
+implemented and reviewed in [PR #109](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/109),
+which records its final checks and merge. All current measured scientific results
+use scripted agents and synthetic inputs; prompt and transport tests use fake
+providers or intercepted responses. No live provider pilot is claimed.
 
 ---
 
@@ -264,14 +266,18 @@ mocked responses. No live provider pilot is claimed.
     response or optimized policy is estimated. These limits accompany the exact
     [readout](../../experiments/audit-feedback/RESULTS.md).
 
-18. **The current LLM EC prompt does not expose audits.** The engine's public observation
-    includes the versioned audit envelope, but the existing LLM renderer omits it.
-    Current audit-response evidence therefore concerns the scripted veto wrapper.
-    [Issue #108](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/108) has an
-    approved design and separate implementation in progress for an explicit audit-aware
-    renderer that preserves legacy prompt hashes. Offline rendering tests can establish
-    which information reaches a model; they cannot establish a beneficial LLM response.
-    A measured effect needs its own declared experiment and live-run decisions.
+18. **Audit-aware prompting is an offline engineering capability.** The separately
+    selected `ec-audit@1` adapter in [ADR-0019](../adr/0019-opt-in-audit-aware-llm-prompts.md)
+    renders the validated public envelope with a fixed policy/template identity.
+    The default legacy renderer retains its original prompt bytes and hashes and
+    still omits audits. Captured fake-provider prompts, intercepted compatible
+    requests, sealed manifests, replay and continuation tests establish the
+    implemented information/provenance path. They do not measure a live model's
+    interpretation, persuasion resistance or beneficial response. Missing findings
+    do not distinguish pending from unselected targets, and the public contract
+    hash supplies no accuracy or authentication guarantee. The original audit-feedback
+    evidence remains a scripted-policy result, with its source and readouts unchanged.
+    A measured LLM effect needs its own declared experiment and live-run decisions.
 
 ---
 

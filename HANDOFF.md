@@ -1,6 +1,70 @@
 # HANDOFF — current checkpoint, 2026-11-02
 
-## Current checkpoint — opt-in audits and the declared feedback experiment
+## Current checkpoint — audit core merged; explicit LLM prompt adapter
+
+The audit runtime and original feedback experiment are merged in
+[PR #107](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/107), closing
+[#103](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/103). Merge
+`3caf6d8fcc58f8627aaec0a8a92ff032fd82f689` has exactly the tested head
+`7ea6f236692f58c0db80889ac5f668139de305d1`'s tree,
+`4ad2a6b737d66ae51c7e484aa947d3a13732a9bb`. Both complete job logs in
+[CI 41454553709](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/41454553709)
+were inspected before merge: Ubuntu **2,063 passed**, Windows **2,062 passed and
+one skipped**, all verification/reproduction steps successful, and the final
+commit/clean-workspace guard passed. The merge's own
+[CI 41456028690](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/41456028690)
+also passed both platforms; both complete logs were inspected with the same test
+counts, research gates and final identity/cleanliness guard.
+
+Issue [#108](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/108) is
+implemented in the separate [PR #109](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/109),
+based on that merged main. It adds the policy-owned
+`prompt_renderer="ec-audit@1"`; the default `legacy@1` retains literal prompt
+bytes, template hashes, policy IDs, metadata, retry behavior and representative
+ledger bytes. [ADR-0019](docs/adr/0019-opt-in-audit-aware-llm-prompts.md) was committed
+before implementation, and the literal v1 fixtures were committed before source
+edits. See [configuration](docs/PROVIDER_USAGE.md#opt-in-audit-aware-evidence-commons-prompts)
+and the [audit usage guide](docs/AUDIT_USAGE.md).
+
+The opt-in adapter has a fixed construction-time template identity and distinct
+`@2` policy ID, preserving the compatible-provider identity suffix. It validates
+EC context and the strict public envelope before a request, renders only released
+allowlisted fields, and rejects nested skin/template drift for fake and compatible
+providers. Absent channels, envelopes with no published reports, unavailable
+reports and reported verdicts are distinct. Missing findings do not distinguish
+pending from unselected;
+the envelope supplies neither accuracy nor a future schedule. JSON escaping is
+scoped to the new section, with no whole-prompt persuasion-resistance claim.
+
+Independent review approved the core and intercepted a compatible-provider HTTP
+request offline to verify template/provider identities, transport separation,
+prompt digest and honest accounting. It found one factory defect: effective
+audit-aware policy overrides bypassed non-EC preflight. The fix was preceded by
+failing fake/compatible regressions and independently re-reviewed. Actual branch
+tests now reject these overrides before creating output; valid scripted/legacy
+replacements still bypass unused original provider settings.
+
+All **108 focused compatibility, adapter, configuration and sealed-workflow
+cases** pass. They include actual released reports, fixed manifests, audit-mode
+format repair and exhaustion, unknown usage, byte-exact continuation prefixes,
+fresh continuation policies and offline replay after moving the parent. An
+independent audit-off EC control produced nine absent-channel prompts with the
+same adapter identity and replayed without provider calls. No review blocker
+remains. The complete integrated local gate on `db6efe0` passed **2,171 tests**
+with no failures or skips, Ruff, strict typing, all four StudySpec validations,
+11 acceptance scenarios and every historical/new research reproduction. The
+subsequent changes correct documentation and record that result; production and
+test bytes are unchanged. PR #109 records final published-head Ubuntu/Windows
+checks and merge; an earlier head's checks do not substitute for that gate.
+
+The original experiment and raw archive below are unchanged. All four shipped
+StudySpecs remain unfrozen, and Study 001 still fails C2 at its placeholder
+weights. Prompt plumbing is an offline engineering capability, with no live-model
+audit-response or benefit result. The next research step is a separately declared
+bounded pilot after the existing human-owned decisions; no model, spend or final
+weights are selected by these changes.
+
+## Prior checkpoint — opt-in audits before hosted verification
 
 Issue [#103](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/103) is
 implemented in [PR #107](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/107).

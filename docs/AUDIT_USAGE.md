@@ -83,10 +83,40 @@ baseline's choice. The policy does not rerank alternatives, invert an inaccurate
 audit, create a citation, retract an existing claim or challenge from an audit
 alone. It validates every present envelope before choosing any action.
 
-Existing scripted policies retain their original behavior. The current LLM
-prompt renderer does not render the audit envelope. This release therefore
-demonstrates audit-responsive behavior through the new scripted policy; it
-does not establish that a model receives or responds to audit reports.
+Existing scripted policies retain their original behavior. The original
+audit-feedback experiment measures the scripted veto policy above.
+
+## Show public findings to an LLM policy
+
+Add `"prompt_renderer": "ec-audit@1"` to an existing `llm_fake` or
+`llm_openai_compatible` policy's flat `params`, retaining its required script or
+provider settings. Direct Python callers select
+`LLMPolicy(..., prompt_renderer="ec-audit@1")`. This selector works only with
+Evidence Commons, including an EC audit-off control. The default `legacy@1`
+continues to omit the audit envelope and preserves its exact prompt/template
+identity. [ADR-0019](adr/0019-opt-in-audit-aware-llm-prompts.md) defines the new
+binding; [provider usage](PROVIDER_USAGE.md#opt-in-audit-aware-evidence-commons-prompts)
+documents configuration and execution boundaries.
+
+The adapter validates the public envelope and current candidate/round context
+before a request, sorts released reports, and includes only their allowlisted
+public fields. An absent channel, an empty published-report list, an explicit
+unavailable report and a positive/negative verdict remain distinct. A candidate
+without a finding may be pending or unselected; the envelope supplies no schedule,
+accuracy or confidence. Reports do not create evidence citations, grant authority
+or force a particular action.
+
+The renderer and template identity are fixed at construction. Nested skin or
+template drift is rejected before fake or compatible-provider calls; construct
+a new policy for a new configuration. The selector is a policy setting, not an
+HTTP or sampling field. Its distinct policy/template identity is retained in
+manifests and actual prompt digests in transcripts. Continuation usage covers
+only the new requests, and replay remains offline.
+
+Validation uses fake providers and intercepted HTTP. It establishes the prompt
+supplied to the provider, with no measured live-model behavior or audit benefit.
+JSON escaping protects the added data section's formatting; it does not establish
+model resistance to instructions in prose or change the legacy prompt body.
 
 ## Publication, branching and replay
 

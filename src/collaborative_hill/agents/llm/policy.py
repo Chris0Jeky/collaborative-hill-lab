@@ -25,12 +25,12 @@ from typing import Any
 from pydantic import ValidationError
 
 from collaborative_hill.agents.llm.accounting import summarize_attempts
+from collaborative_hill.agents.llm.prompt_adapters import PromptRenderer, build_prompt_binding
 from collaborative_hill.agents.llm.providers import (
     CompletionProvider,
     ProviderAttempt,
     ProviderError,
 )
-from collaborative_hill.agents.llm.rendering import prompt_template_hash, render_prompt
 from collaborative_hill.domain.actions import ActionProposal
 from collaborative_hill.engine.hashing import canonical_json, sha256_hex
 from collaborative_hill.experiments.scenario import NarrativeSkin
@@ -38,7 +38,9 @@ from collaborative_hill.experiments.scenario import NarrativeSkin
 
 class LLMPolicy:
     def __init__(self, agent_id: str, provider: CompletionProvider, skin: NarrativeSkin,
-                 max_retries: int | None = None, sampling: dict[str, Any] | None = None) -> None:
+                 max_retries: int | None = None, sampling: dict[str, Any] | None = None,
+                 *, prompt_renderer: PromptRenderer = "legacy@1") -> None:
+        self._prompt_binding = build_prompt_binding(skin, prompt_renderer)
         self.agent_id = agent_id
         self.provider = provider
         self.skin = skin
@@ -56,15 +58,42 @@ class LLMPolicy:
                 raise ValueError("policy sampling must match the configured provider request")
             self.sampling = MappingProxyType(dict(effective_sampling))
             self._provider_metadata["action_retries"] = max_retries
-        self.prompt_template_hash = prompt_template_hash(skin)
-        self.policy_id = (f"llm[{provider.model_id},skin={skin.skin_id},"
-                          f"tpl={self.prompt_template_hash[:12]}]@1")
+        self._prompt_template_hash = self._prompt_binding.template_hash
+        renderer_part = ",renderer=ec-audit@1" if self.prompt_renderer == "ec-audit@1" else ""
+        version = 2 if renderer_part else 1
+        self._policy_id = (f"llm[{provider.model_id},skin={skin.skin_id}{renderer_part},"
+                           f"tpl={self.prompt_template_hash[:12]}]@{version}")
         if self._provider_metadata:
             identity = sha256_hex(canonical_json(self._provider_metadata))[:16]
-            self.policy_id = self.policy_id.replace("]@1", f",provider={identity}]@1")
+            self._policy_id = self.policy_id.replace(
+                f"]@{version}", f",provider={identity}]@{version}")
         # Unhashed audit trail; the study runner writes it to llm_transcript.jsonl.
         self.transcript: list[dict[str, Any]] = []
         self._calls: list[tuple[ProviderAttempt, ...]] = []
+
+    @property
+    def prompt_renderer(self) -> PromptRenderer:
+        return self._prompt_binding.renderer
+
+    @property
+    def prompt_template_hash(self) -> str:
+        return self._prompt_template_hash
+
+    @prompt_template_hash.setter
+    def prompt_template_hash(self, value: str) -> None:
+        if self.prompt_renderer == "ec-audit@1":
+            raise AttributeError("audit prompt identity is read-only")
+        self._prompt_template_hash = value  # Preserve the legacy public mutable API.
+
+    @property
+    def policy_id(self) -> str:
+        return self._policy_id
+
+    @policy_id.setter
+    def policy_id(self, value: str) -> None:
+        if self.prompt_renderer == "ec-audit@1":
+            raise AttributeError("audit prompt identity is read-only")
+        self._policy_id = value
 
     @property
     def call_count(self) -> int:
@@ -92,6 +121,18 @@ class LLMPolicy:
 
     def _check_provider_configuration(self) -> None:
         """Refuse provenance drift before making a real provider request."""
+        if self.prompt_renderer == "ec-audit@1":
+            try:
+                unchanged = (
+                    self.prompt_template_hash == self._prompt_binding.template_hash
+                    and self._prompt_binding.template_hash_for(self.skin) ==
+                    self._prompt_binding.template_hash
+                )
+            except Exception:
+                unchanged = False
+            if not unchanged:
+                raise ProviderError("prompt configuration changed; construct a new policy",
+                                    attempts=())
         if not self._provider_metadata:
             return
         try:
@@ -101,7 +142,7 @@ class LLMPolicy:
                 canonical_json(current) == canonical_json(self._provider_metadata)
                 and canonical_json(dict(self.sampling)) ==
                 canonical_json(self._provider_metadata["sampling"])
-                and prompt_template_hash(self.skin) == self.prompt_template_hash
+                and self._prompt_binding.template_hash_for(self.skin) == self.prompt_template_hash
             )
         except Exception:
             unchanged = False
@@ -112,7 +153,7 @@ class LLMPolicy:
     def propose(self, observation: dict[str, Any], rng: random.Random) -> ActionProposal:
         del rng  # sampling randomness belongs to the provider, not the kernel streams
         self._check_provider_configuration()
-        prompt = render_prompt(observation, self.skin)
+        prompt = self._prompt_binding.render(observation, self.skin)
         attempt_prompt = prompt
         last_error = ""
         for attempt in range(self.max_retries + 1):

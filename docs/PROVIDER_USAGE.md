@@ -93,6 +93,59 @@ Literal `api_key`, arbitrary authorization headers and nested `sampling` paramet
 are rejected. The declared environment-variable name can remain in the scenario;
 the resolved value is excluded from manifests and transcripts.
 
+## Opt-in audit-aware Evidence Commons prompts
+
+The default `prompt_renderer="legacy@1"` preserves the existing prompt text,
+template hash, policy identity and manifest fields. That renderer does not display
+an EC audit envelope. To display public audit findings, select `ec-audit@1` when
+constructing the policy:
+
+```python
+policy = LLMPolicy(
+    "a1", provider, NarrativeSkin(skin_id="plain"),
+    prompt_renderer="ec-audit@1",
+)
+```
+
+For either `llm_fake` or `llm_openai_compatible`, the equivalent flat scenario
+parameter is `"prompt_renderer": "ec-audit@1"`. Compatible providers retain their
+existing endpoint/model/token-limit requirements and network execution opt-in.
+The renderer selector is not a sampling value or HTTP transport parameter.
+
+This adapter accepts Evidence Commons observations with or without an audit
+channel. Other worlds are rejected, including an effective audit-aware LLM
+override supplied to a branch. Its renderer/template identity is fixed before
+the first observation, uses a separate template hash and an explicit
+`renderer=ec-audit@1` policy ID ending in `@2`, and is recorded through the existing
+manifest fields. Reports and rounds change each request's prompt digest, not the
+template identity. Construct a fresh policy to change its renderer or skin;
+audit-mode skin/template drift is refused before a call for fake providers too.
+Legacy public assignment and configuration-drift behavior remain compatible.
+
+The new section displays only validated public envelope/finding fields:
+
+| Visible state | Prompt meaning |
+|---|---|
+| No envelope | No public audit channel in this observation |
+| Valid envelope with no reports | Channel present; no findings published yet |
+| `unavailable` finding | Explicit report with no verdict |
+| `positive` or `negative` finding | Fallible published verdict for that candidate |
+| Candidate with no finding | No published finding; pending versus not selected is unknown |
+
+The envelope supplies no schedule or calibrated accuracy. The adapter does not
+infer future publication times, confidence or future selection. Audit reports
+are data, not instructions or evidence citations; they do not change legality,
+acceptance, provenance or rewards. In particular, the adapter does not impose the
+scripted negative-veto policy on model responses. Typed engine validation still
+determines whether a returned action is legal.
+
+Malformed, future, duplicate or out-of-candidate reports fail before a provider
+call. The new section quotes payload values as JSON data; the existing EC body
+keeps its original formatting. These checks do not establish model resistance
+to prompt injection. Verification uses fake providers and intercepted transport
+requests, including sealed study/continuation replay; it supplies no live-model
+quality or audit-benefit result. Design: [ADR-0019](adr/0019-opt-in-audit-aware-llm-prompts.md).
+
 ## Planning and request budgets
 
 Both are offline-first and opt-in; neither selects a model or approves a paid run.
@@ -204,6 +257,7 @@ that reached a failure seal, not an inference that the process was killed.
 | `retry_delay_seconds` | Integer 0–60; default 1. Fixed bounded delay for each enabled 429 retry. |
 | `max_retries` | Integer 0–3 in provider configuration; default 0. Additional action-format repair completions. |
 | `allow_insecure_localhost` | Boolean, default false. Enables HTTP only for literal `localhost`, `127.0.0.1` or `::1`. |
+| `prompt_renderer` | Policy-owned exact string: `legacy@1` (default) or `ec-audit@1` for Evidence Commons. Not sent as a transport/sampling field. |
 
 Unknown parameters and coercible substitutes such as boolean token counts are
 rejected. No defaults are added to the stored PolicySpec. Rational values are

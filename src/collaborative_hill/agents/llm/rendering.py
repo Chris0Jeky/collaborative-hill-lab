@@ -55,7 +55,13 @@ def prompt_template_hash(skin: NarrativeSkin) -> str:
 
 
 def render_prompt(observation: dict[str, Any], skin: NarrativeSkin) -> str:
-    """Render one agent's observation as the model prompt."""
+    """Original v1 prompt, with its exact default output preserved."""
+    return _render_prompt_with_sections(observation, skin, before_response=())
+
+
+def _render_prompt_with_sections(observation: dict[str, Any], skin: NarrativeSkin,
+                                 *, before_response: tuple[str, ...]) -> str:
+    """Shared body; separately versioned adapters own any added public sections."""
     me = observation["self_id"]
     name = skin.agent_names.get(me, me)
     lines: list[str] = []
@@ -112,6 +118,7 @@ def render_prompt(observation: dict[str, Any], skin: NarrativeSkin) -> str:
             sort_keys=True,
         ))
 
+    lines.extend(before_response)
     lines.append("## Respond with EXACTLY one JSON object, no other text:")
     lines.append(action_schema_for(observation))
     return "\n".join(lines)
