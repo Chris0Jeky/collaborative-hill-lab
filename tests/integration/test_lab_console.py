@@ -218,16 +218,22 @@ def test_console_rejects_a_relabelled_manifest_and_separates_branches(nipd_root,
     assert "broken" in run_trace(run)
 
 
-def test_real_branches_show_continuation_policies_without_pooling(nipd_root, tmp_path):
+@pytest.mark.parametrize("shared_default_id", [False, True])
+def test_real_branches_show_continuation_policies_without_pooling(
+        nipd_root, tmp_path, shared_default_id):
     parent = next(path.parent for path in nipd_root.rglob("events.jsonl")
                   if path.parent.parent.name == "pw-2tft-alld")
     fork = FileCheckpointStore(RunPaths(parent).checkpoints).list_seqs()[0]
+    parent_id = json.loads((parent / "manifest.json").read_text(encoding="utf-8"))["run_id"]
     traces = []
     for name, policy in (("cooperative-child", AllCPolicy("pairwise")),
                          ("defecting-child", AllDPolicy("pairwise"))):
         child = tmp_path / name
+        # The CLI's default ID is identical for every branch at this checkpoint;
+        # output directories and continuation policies can nevertheless differ.
+        child_id = f"{parent_id}-branch{fork}" if shared_default_id else name
         _, branch = branch_run(parent_dir=parent, fork_seq=fork, child_dir=child,
-                               child_run_id=name, policy_overrides={"a1": policy})
+                               child_run_id=child_id, policy_overrides={"a1": policy})
         trace = run_trace(child, verify_replay=True)
         assert "broken" not in trace, trace
         assert trace["policies"]["a1"] == policy.policy_id
@@ -241,6 +247,8 @@ def test_real_branches_show_continuation_policies_without_pooling(nipd_root, tmp
 
     assert len(lab._group(traces)) == 2  # Shared histories are not independent replicates.
     assert all(len(rows) == 1 for _, _, rows in lab._group(traces))
+    assert all(len(rows) == 1 for _, _, rows in lab._group([traces[0], traces[0]]))
+    assert "2/2 sealed" not in render_text(traces)
     assert "continuation" in render_text(traces)
     assert "continuation" in render_html(traces).lower()
 
@@ -280,6 +288,21 @@ def test_malformed_manifest_is_shown_as_broken_without_crashing(nipd_root, tmp_p
     run = tmp_path / "malformed-manifest"
     shutil.copytree(parent, run)
     (run / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8", newline="\n")
+    assert "broken" in run_trace(run)
+    result = CliRunner().invoke(app, ["lab", str(run)])
+    assert result.exit_code == 1, result.output
+    assert "BROKEN" in result.output
+
+
+@pytest.mark.parametrize("seed_root", [None, 0, True])
+def test_malformed_manifest_field_is_shown_as_broken(nipd_root, tmp_path, seed_root):
+    parent = next(nipd_root.rglob("events.jsonl")).parent
+    run = tmp_path / "malformed-field"
+    shutil.copytree(parent, run)
+    path = run / "manifest.json"
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    manifest["seed_root"] = seed_root
+    path.write_text(json.dumps(manifest), encoding="utf-8", newline="\n")
     assert "broken" in run_trace(run)
     result = CliRunner().invoke(app, ["lab", str(run)])
     assert result.exit_code == 1, result.output

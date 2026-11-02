@@ -87,7 +87,8 @@ def _trace(events: list[Event], manifest: dict[str, Any],
     terminal = events[-1]
     condition = manifest["condition_id"]
     if manifest.get("parent_run"):  # Branches share their parent's prefix: never pool them.
-        condition = f"{condition} (branch {manifest['run_id']} of {manifest['parent_run']})"
+        condition = (f"{condition} (branch {manifest['run_id']} of {manifest['parent_run']}; "
+                     f"seal {terminal.event_hash[:12]})")
     trace: dict[str, Any] = {
         "run_id": manifest["run_id"], "condition_id": condition,
         "study_id": manifest["study_id"], "replicate": manifest["replicate"],
@@ -129,7 +130,7 @@ def run_trace(run_dir: Path, *, verify_replay: bool = False) -> dict[str, Any]:
         manifest = {**manifest, "policies": effective_policy_ids(run_dir, events, manifest)}
         replay = replay_run(run_dir).chains_match if verify_replay else None
         return _trace(events, manifest, replay)
-    except (ChainError, ValueError, KeyError, OSError) as exc:
+    except (ChainError, ValueError, KeyError, TypeError, IndexError, OSError) as exc:
         return {"run_id": run_dir.name, "condition_id": run_dir.parent.name,
                 "study_id": run_dir.parent.parent.name,
                 "broken": f"{type(exc).__name__}: {exc}"}
@@ -153,8 +154,16 @@ def _spark(values: list[float]) -> str:
 
 def _group(traces: list[dict[str, Any]]) -> list[tuple[str, str, list[dict[str, Any]]]]:
     key = lambda trace: (trace["study_id"], trace["condition_id"])  # noqa: E731
-    return [(study, condition, list(rows))
-            for (study, condition), rows in groupby(sorted(traces, key=key), key=key)]
+    groups = []
+    for (study, condition), items in groupby(sorted(traces, key=key), key=key):
+        rows = list(items)
+        independent = [row for row in rows if not row.get("parent_run")]
+        if independent:
+            groups.append((study, condition, independent))
+        # Default child IDs can coincide. Even identical seals do not make
+        # shared-history branches independent replicates: summarize each alone.
+        groups.extend((study, condition, [row]) for row in rows if row.get("parent_run"))
+    return groups
 
 
 def _summary(rows: list[dict[str, Any]]) -> str:
