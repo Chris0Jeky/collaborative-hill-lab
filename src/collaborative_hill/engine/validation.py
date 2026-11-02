@@ -47,8 +47,6 @@ def _validate_scenario_bindings(events: list[Event], resolved: ResolvedScenario,
         if field in events[0].payload and events[0].payload[field] != actual:
             raise ChainError(f"RunStarted {field} does not match the resolved scenario")
     validate_recorded_seed_metadata(manifest, events[0].payload)
-    if list(map(str, manifest.get("seed_root", []))) != events[0].payload.get("seed_root"):
-        raise ChainError("manifest seed_root disagrees with RunStarted")
     if manifest.get("invalid_action_policy") != events[0].payload.get("invalid_action_policy"):
         raise ChainError("manifest invalid_action_policy disagrees with RunStarted")
     roster = sorted(a.agent_id for a in resolved.spec.cognition.agents)
