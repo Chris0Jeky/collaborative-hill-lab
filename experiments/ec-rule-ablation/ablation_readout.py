@@ -30,7 +30,7 @@ def cell_id(item: dict[str, str]) -> str:
 
 def expected_outcome(context: str, variant: str) -> tuple[int, int, int, str]:
     """Literal K,E,G,A table from DESIGN.md, never derived from policy execution."""
-    screen, share, challenge, read = variant
+    screen, share, challenge, read = tuple(variant)
     if context == "corroborated-private":
         return 2, 48, 14, "13/14"
     if context == "echo-private":

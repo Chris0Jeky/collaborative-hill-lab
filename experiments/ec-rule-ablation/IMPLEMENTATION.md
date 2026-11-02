@@ -89,3 +89,12 @@ rewriting its local identity. A fresh independent reviewer is checking the
 complete branch; root owns any review fixes, publication, Makefile/CI changes and
 final integrated-head validation. This status update changes no executable
 source, design, prediction, or recorded result.
+
+## Integration typing correction
+
+The new standalone strict-mypy gate identified four typing errors that the
+package-only gate did not cover. Integration removes two obsolete sibling-import
+ignores, makes string unpacking explicit with `tuple`, and asserts the paired
+protocol's non-null policy seed before conversion to a list. The original
+execution source and its provenance remain unchanged; the standalone gate checks
+that the corrected integration source reproduces the same readout.

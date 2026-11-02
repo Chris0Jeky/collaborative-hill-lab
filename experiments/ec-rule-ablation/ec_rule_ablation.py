@@ -15,9 +15,9 @@ REPO = HERE.parents[1]
 sys.path[:0] = [str(REPO / "src"), str(HERE), str(HERE.parent / "quality-safeguards"),
                str(HERE.parent / "responsive-commons")]
 
-import ablation_readout as readout  # type: ignore[import-not-found]  # noqa: E402
+import ablation_readout as readout  # noqa: E402
 import quality_safeguards as qs  # type: ignore[import-not-found]  # noqa: E402
-from ablation_readout import (  # type: ignore[import-not-found]  # noqa: E402
+from ablation_readout import (  # noqa: E402
     CONTEXTS,
     FACTOR_KEYS,
     TRUTHS,
@@ -129,6 +129,7 @@ def behavior_manifest(study: StudySpec, digest: str, item: dict[str, str]) -> di
     cid = cell_id(item)
     seed, policy_seed = study_seed_roots(SEED, cid, 0, protocol=PAIRED_SEED_PROTOCOL,
                                          scenario_block=item["context"])
+    assert policy_seed is not None  # The paired protocol always supplies this root.
     policies = build_policies(compile_scenario(scenario(item), SKIN))
     return {"study_id": study.study_id, "study_hash": digest, "study_frozen": False,
             "condition_id": cid, "run_id": cid + "-r000", "replicate": 0,
