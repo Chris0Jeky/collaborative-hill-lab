@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from collaborative_hill.domain.institutions import AuditInstitutionConfig, InstitutionConfig
 from collaborative_hill.engine.events import ChainError, Event, EventType
 from collaborative_hill.engine.hashing import content_hash
 from collaborative_hill.engine.seeds import validate_recorded_seed_metadata
@@ -46,12 +47,36 @@ def _validate_scenario_bindings(events: list[Event], resolved: ResolvedScenario,
             raise ChainError(f"manifest or resolved scenario {field} mismatch")
         if field in events[0].payload and events[0].payload[field] != actual:
             raise ChainError(f"RunStarted {field} does not match the resolved scenario")
+    _validate_institution_binding(resolved, manifest)
     validate_recorded_seed_metadata(manifest, events[0].payload)
     if manifest.get("invalid_action_policy") != events[0].payload.get("invalid_action_policy"):
         raise ChainError("manifest invalid_action_policy disagrees with RunStarted")
     roster = sorted(a.agent_id for a in resolved.spec.cognition.agents)
     if roster != events[0].payload.get("agents"):
         raise ChainError("RunStarted agent roster does not match the resolved scenario")
+
+
+def _validate_institution_binding(resolved: ResolvedScenario, manifest: dict[str, Any]) -> None:
+    """Bind displayed institutional claims to the already hash-checked scenario.
+
+    Historical manifests may omit the legacy institution. An audited scenario
+    must retain its explicit settings; a legacy scenario cannot claim an audit.
+    Validate JSON before equality so aliases such as False == 0 cannot conceal
+    a malformed schedule, while legitimate JSON schedule arrays remain valid.
+    """
+    audited = isinstance(resolved.spec.institution, AuditInstitutionConfig)
+    if "institution" not in manifest:
+        if audited:
+            raise ChainError("manifest institution is required for an audited scenario")
+        return
+    model = AuditInstitutionConfig if audited else InstitutionConfig
+    try:
+        model.model_validate_json(json.dumps(manifest["institution"], allow_nan=False))
+    except (TypeError, ValueError) as exc:
+        raise ChainError("manifest institution is invalid for the resolved scenario") from exc
+    expected = resolved.spec.institution.model_dump(mode="json")
+    if content_hash(manifest["institution"]) != content_hash(expected):
+        raise ChainError("manifest institution does not match the resolved scenario")
 
 
 def _validate_ancestry(events: list[Event], manifest: dict[str, Any]) -> None:

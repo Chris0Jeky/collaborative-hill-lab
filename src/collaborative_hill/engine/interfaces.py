@@ -1,4 +1,4 @@
-"""Structural interfaces for the kernel's two seams. Protocols, not inheritance.
+"""Structural interfaces for the kernel's lifecycle seams. Protocols, not inheritance.
 
 An LLM is never authoritative for anything defined here: payoffs, world truth,
 evidence validity, permissions, and metrics are all computed by deterministic
@@ -8,9 +8,11 @@ protocol — they are versioned pure functions over sealed events
 """
 
 import random
+from collections.abc import Callable
 from typing import Any, Protocol, runtime_checkable
 
 from collaborative_hill.domain.actions import Action, ActionProposal
+from collaborative_hill.engine.seeds import SeedPath
 
 
 @runtime_checkable
@@ -49,6 +51,22 @@ class MechanismEngine(Protocol):
         wraps them into hash-chained envelopes.
         """
         ...
+
+
+class RoundOpeningMechanism(Protocol):
+    """Optional mechanism seam for public information due before observations.
+
+    The runner supplies independently keyed streams under its mechanism root.
+    The key must identify the draw itself; the runner adds no implicit round.
+    Return a detached state and domain events using the same envelope contract
+    as ``resolve``. Existing mechanisms need not implement this seam.
+    """
+
+    def prepare_round(
+        self,
+        state: dict[str, Any],
+        rng_for_key: Callable[[SeedPath], random.Random],
+    ) -> tuple[dict[str, Any], list[dict[str, Any]]]: ...
 
 
 @runtime_checkable

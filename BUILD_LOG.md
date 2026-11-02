@@ -1108,3 +1108,116 @@ against integration base `6d2b969` confirmed that the historical HANDOFF evidenc
 is unchanged and BUILD_LOG is append-only. The complete human-owned decision
 section and closing paragraphs remain byte-identical, SHA-256
 `bb98e30eb28e12a2d7c3323043244007a5d9b3f584da290fc6a5d9a48e64bafe`.
+
+## 2026-11-02 — opt-in audit engine and original feedback experiment (#103 / PR #107)
+
+Implemented the six ADR-0017 gates under
+[ADR-0018](docs/adr/0018-opt-in-evidence-commons-audits.md): strict required audit
+configuration, isolated exact generation, EC v3/observation v3 routing,
+publication before observations, published-only checkpoint state, replay and
+branch support, a separately versioned observation-driven policy, and a declared
+experiment. Existing EC v2 behavior, historical source/readout files and the four
+unfrozen StudySpecs remain unchanged. The audit channel changes information,
+without an audit effort charge, new action, acceptance gate or reward change.
+
+The new `ec_audit_veto_contributor@1` validates every present envelope and wraps
+the unchanged skeptical selection. Only a selected proposal/verification with a
+matching public negative finding becomes Withhold. There is no reranking,
+calibration, citation creation or automatic retraction. Strict manifest institution
+validation binds displayed settings to the resolved scenario. Runtime tests cover
+first/final-round publication, exact publication-boundary forks, nested branches,
+provider failure at publication and replay without provider calls or ancestor files.
+
+### Pre-execution publication and source identity
+
+The reviewed design was published as
+`a11a11feb8fd27dc619e237e60549de14c935f28`, matching local
+`e93e8b324ae6a946adf10cc127756b6b57e4cd43` at tree
+`e87a3a7caec0596cc5707e50f209f0ed3cf4039f`, before audit-enabled episodes.
+Complete tested source was published as
+`67275327133d00e161c38d2b56d1b21472927bcb`, matching actual local execution source
+`ab9e3ec842c24ad12bc6b60b30a11843353df965` at tree
+`d4494ee3557deb7ef6a4d736336070aae4c73373`, before the original scientific batch.
+The source record retains that actual local identity, clean flag, dependency lock
+and 65 source digests. Public mappings do not relabel original provenance.
+
+The policy slice is `a98be04`, the independent arithmetic oracle `bc906ec`, and
+the corrected experiment/collector source `eec165a`. The policy's 82 pure fixtures
+first failed against the absent factory and then passed. The arithmetic tests use
+literal A/B/C/D traces, hand-calculated checkpoints and separate finite enumeration
+of all 720 law rows. They obtain no expected answer by executing the policy or engine.
+
+Independent source review found and reproduced three collector/reporting defects:
+unconditional success prose when predictions failed; weak dirty/source-shape
+validation; and branch labels that were not bound to the declared intervention.
+The first two yielded 12 expected failing cases before correction; a forged
+old-policy branch label separately yielded the expected failure. The corrected
+renderer separates measured and expected traces, original provenance requires an
+exactly false `worktree_dirty` flag and valid schema, and every branch binds exact active IDs
+and changed/unchanged partitions. All 36 artifact tests passed in independent
+re-review. Failure records retain all declared cells and leave incomplete
+predictions null instead of inventing results.
+
+### Original result and independent artifact audit
+
+The original batch retained **76 scientific runs: 52 behavioral and 24 fixed-action
+controls**, plus **four separate branch-integrity fixtures**. All P1–P8 held, with
+60 C3 comparisons, 42 truth controls and 720 exact mixture rows. The fixed-action
+negative-audit controls still accepted wrong claims under the unchanged task rules.
+
+At source error `1/10`, audit accuracy `3/4`, zero unavailability and round-3
+publication, the exact mixture raises selective accuracy from `9/10` to `27/28`,
+reduces acceptance from `1` to `7/10`, and reduces signed quality from `48/5` to
+`39/5`. The early quality contrast is `12(1-u)(a+e-1)`; accuracy `9/10` gives a
+zero contrast in this example. Round-5 negative findings save redundant effort
+without changing the accepted claim; round 6 is a task null. These are synthetic
+conditional-response mixtures with assumed accuracy, independence and free audit
+cost. They are not extra samples or evidence of deployed audit performance.
+
+Independent recollection used the exact 65 original source-file bytes and checked
+each digest against `git show ab9e3ec:<path>`. All **80 chains replayed**, **621
+checkpoints** passed validation, every source/clean/lock/scenario/seal binding
+passed, and recollected JSON/Markdown matched the original readouts byte for byte.
+The complete before/after inventory was identical: **947 files / 10,283,384 bytes**.
+There are 8,048 scientific events and 409 branch-ledger records including copied
+prefixes, or 8,457 stored event records. The four branches are software fixtures,
+not additions to the scientific sample.
+
+The [original-evidence record](experiments/audit-feedback/ORIGINAL_EVIDENCE.md)
+and [independent audit](experiments/audit-feedback/ORIGINAL_AUDIT.json) retain the
+bindings and exact readout hashes. Saved archive
+`collaborative-hill-audit-feedback-original-evidence-2026-11-02.zip` is **1,515,408
+bytes**, with **952 members**: 947 original files plus five metadata/checksum
+entries. SHA-256:
+
+```text
+338f6a15611f4ae8d4db69140d44c857686ab633cda55489b346fab03ff36fe1
+```
+
+### Verification and next work
+
+Runtime integration passed 2,026 full-suite tests and 111 final focused cases.
+The corrected `eec165a` source passed 2,062 tests in 215.28 seconds, Ruff across
+source/tests/experiment, strict package mypy in 57 files and standalone mypy in
+three experiment modules. The final combined integration passed **2,063 tests**
+with no failures or skips, all four StudySpec validations, acceptance, atlas,
+Study 002, responsive EC, quality safeguards, graph, sparse pTFT, noisy corpus,
+EC ablation and the new audit-feedback gate. That gate regenerated and replayed
+all 76 scientific runs plus four separate branch fixtures and reproduced all
+720 exact rows and both readouts byte for byte. This regeneration is distinct
+from the read-only audit of the original artifacts above.
+
+[PR #107](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/107) is not
+merged at this checkpoint; the final published-head hosted checks and merge
+remain pending. The PR is their authoritative record. The current LLM EC prompt
+renderer omits the audit envelope, so no LLM audit-response result is claimed.
+[Issue #108](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/108) has
+an approved design and separate implementation in progress for a versioned
+audit-aware renderer with unchanged legacy hashes. It does not select a model,
+authorize spend, freeze a study or choose final weights.
+
+Documentation verification resolved all 49 relative links against this slice and
+the integrated evidence files. The historical handoff body is unchanged apart
+from its two checkpoint headings, and BUILD_LOG is append-only. The human-owned
+decisions and closing paragraphs remain byte-identical, SHA-256
+`bb98e30eb28e12a2d7c3323043244007a5d9b3f584da290fc6a5d9a48e64bafe`.

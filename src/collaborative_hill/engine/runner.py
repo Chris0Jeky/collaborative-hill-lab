@@ -2,6 +2,8 @@
 
 Per round (all deterministic given policies' recorded outputs; ADR-0001):
 
+  0. open round   - optional mechanism hook publishes due public information
+                    before any observation, using separately keyed streams.
   1. observe      - one ObservationIssued per agent (sorted order); the FULL
                     observation is in the payload, so hidden-truth leak tests
                     can scan sealed ledgers directly.
@@ -24,7 +26,7 @@ Wall-clock time and other environment facts go only into unhashed event meta.
 """
 
 from copy import deepcopy
-from typing import Any, Literal, Self
+from typing import Any, Literal, Self, cast
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -36,7 +38,7 @@ from collaborative_hill.engine.events import (
     make_event,
 )
 from collaborative_hill.engine.hashing import GENESIS_HASH, content_hash
-from collaborative_hill.engine.interfaces import MechanismEngine
+from collaborative_hill.engine.interfaces import MechanismEngine, RoundOpeningMechanism
 from collaborative_hill.engine.seeds import (
     LEGACY_SEED_PROTOCOL,
     PAIRED_SEED_PROTOCOL,
@@ -188,6 +190,22 @@ def run_episode(
     failure: str | None = None
     while not mechanism.is_terminal(state):
         t = int(state["round"])
+
+        # getattr preserves adapter forwarding (notably replay's _RoundBoundary).
+        # Runtime protocol checks use getattr_static on Python 3.12 and would
+        # silently miss a hook exposed through an adapter's __getattr__.
+        if getattr(mechanism, "prepare_round", None) is not None:
+            state, opening_events = cast(RoundOpeningMechanism, mechanism).prepare_round(
+                state,
+                lambda key: rng_for(*config.seed_root, "mechanism", "round-opening", *key),
+            )
+            for de in opening_events:
+                emitter.emit(
+                    logical_time=t,
+                    actor=str(de.get("actor", ENGINE_ACTOR)),
+                    event_type=EventType(de["event_type"]),
+                    payload=de["payload"],
+                )
 
         observations: dict[str, dict[str, Any]] = {}
         for agent in sorted(agent_ids):

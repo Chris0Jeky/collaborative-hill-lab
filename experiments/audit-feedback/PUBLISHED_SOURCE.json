@@ -1,0 +1,20 @@
+{
+  "checked_source_file_count": 65,
+  "design_tree": "e87a3a7caec0596cc5707e50f209f0ed3cf4039f",
+  "execution_tree": "d4494ee3557deb7ef6a4d736336070aae4c73373",
+  "experiment": "audit-feedback",
+  "local_design_commit": "e93e8b324ae6a946adf10cc127756b6b57e4cd43",
+  "local_execution_commit": "ab9e3ec842c24ad12bc6b60b30a11843353df965",
+  "original_artifact_archive": "collaborative-hill-audit-feedback-original-evidence-2026-11-02.zip",
+  "original_readout_sha256": {
+    "RESULTS.json": "c4778511d38677da89bdd02362ff4ac704aa771b5d93d06e65222b5f03f43006",
+    "RESULTS.md": "1d090750979daeaea1bc3230a900b6919b273b12a82cf02625cf2cb5df917974",
+    "SOURCE_PROVENANCE.json": "5c82167410fd6e6a3f52f2a5a3a59d635197738054b699424fd5c17ef9cabd7f"
+  },
+  "publication_order": "Design and identical full source tree were published before the original --out execution.",
+  "published_design_commit": "a11a11feb8fd27dc619e237e60549de14c935f28",
+  "published_execution_commit": "67275327133d00e161c38d2b56d1b21472927bcb",
+  "schema": "chl.published-experiment-source.v1",
+  "scope": "Source correspondence and original readout commitments. Later integration/check executions are reproductions and do not replace the original execution provenance.",
+  "source_file_check": "Every SHA-256 in SOURCE_PROVENANCE.json matched its blob in the local execution commit; the published source has the identical full Git tree."
+}

@@ -1,6 +1,122 @@
 # HANDOFF — current checkpoint, 2026-11-02
 
-## Current integration: merged core work and recorded-seed follow-up
+## Current checkpoint — opt-in audits and the declared feedback experiment
+
+Issue [#103](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/103) is
+implemented in [PR #107](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/107).
+The original audit-feedback experiment has executed and passed an independent
+read-only artifact audit. **PR #107 is not merged at this checkpoint.** Its PR
+record is authoritative for the final published head, hosted checks and merge.
+The integrated local suite passed **2,063 tests**, with no failures or skips,
+and the complete local verification/reproduction gate passed. Final hosted CI
+and merge remain pending.
+
+The next feature is [#108](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/108),
+a separately versioned audit-aware LLM prompt renderer. Its design is approved
+and implementation is in progress. The current LLM EC renderer omits the audit
+envelope, so the results below concern the registered scripted policy. This
+follow-up preserves legacy prompt bytes and hashes; it does not authorize a live
+provider run or establish an LLM response to audits.
+
+### Implemented runtime and policy contract
+
+The implementation specified by [ADR-0018](docs/adr/0018-opt-in-evidence-commons-audits.md)
+covers all six [ADR-0017](docs/adr/0017-noisy-corpus-and-audit-contract.md) gates. An explicit
+required audit institution selects EC engine and observation schema version 3.
+Legacy institutions retain their serialized shape and EC v2 routing. The exact
+synthetic generator uses separate per-target availability and correctness streams;
+reports publish once before the scheduled round's observations. Checkpoints
+retain only published findings. Replay, nested branches and a failure at a
+publication boundary are covered without provider requests or future verdicts.
+
+`ec_audit_veto_contributor@1` validates every present envelope, then obtains the
+unchanged skeptic's choice. A matching published negative report vetoes only a
+selected proposal or verification. Positive, unavailable, absent and pending
+reports preserve the baseline choice. The wrapper does not rerank candidates,
+create evidence, retract support or change the task's acceptance/reward rules.
+Manifest institution claims are strictly validated and bound to the resolved
+scenario; malformed metadata is rejected without repairing the source artifact.
+
+### Original experiment and its limits
+
+The [pre-execution design](experiments/audit-feedback/DESIGN.md) fixes N=3, one
+slot, eight rounds, aggregate accountability, a shared ledger and three perfectly
+correlated reports with distinct source labels. The
+[readout](experiments/audit-feedback/RESULTS.md) retains **52 behavioral episodes
+and 24 fixed-action controls**, plus **four separate branch-integrity fixtures**.
+All **P1–P8 hold**: 60 same-action C3 comparisons, 42 truth controls and 720 exact
+mixture rows. The forced-action controls still accept a false claim after a
+negative audit, confirming that publication itself does not change task rules.
+
+The intermediate probability rows reweight executed endpoint responses under
+explicit synthetic laws. They are not additional episodes or measured audit
+accuracy. At source error `1/10`, audit accuracy `3/4`, no unavailability and
+round-3 publication, selective accuracy rises from `9/10` to `27/28`, acceptance
+falls from `1` to `7/10`, and signed quality falls from `48/5` to `39/5`. The early
+quality contrast is `12(1-u)(a+e-1)`; at accuracy `9/10` that contrast is zero.
+Round-5 negative reports save effort after the winning claim already has enough
+support, while round 6 is a task null. Complete unavailability preserves baseline
+behavior. Undefined selective or conditional-audit accuracy remains JSON null.
+
+These conclusions use a free audit channel, assumed accuracy and independence,
+and the declared placeholder action costs. They establish no general audit
+benefit, deployed verification accuracy, optimized policy, LLM result or human
+inference. All four shipped StudySpecs retain their bytes and remain unfrozen;
+Study 001 still fails C2 at its placeholder weights.
+
+### Source publication, verification and preserved originals
+
+Both design and complete source were published before original execution:
+
+| Stage | Local commit | Public commit | Identical tree |
+|---|---|---|---|
+| Reviewed design | `e93e8b3` | [a11a11fe](https://github.com/Chris0Jeky/collaborative-hill-lab/commit/a11a11feb8fd27dc619e237e60549de14c935f28) | `e87a3a7caec0596cc5707e50f209f0ed3cf4039f` |
+| Original execution source | `ab9e3ec` | [67275327](https://github.com/Chris0Jeky/collaborative-hill-lab/commit/67275327133d00e161c38d2b56d1b21472927bcb) | `d4494ee3557deb7ef6a4d736336070aae4c73373` |
+
+The original source record retains actual local commit
+`ab9e3ec842c24ad12bc6b60b30a11843353df965`, its exact clean flag, dependency lock
+and 65 source-file digests. The public mapping does not rewrite that identity.
+
+| Completed verification | Evidence |
+|---|---|
+| Runtime integration | 2,026 full-suite tests and 111 final focused tests passed |
+| Corrected experiment source `eec165a` | 2,062 full-suite tests; Ruff; strict mypy over 57 package and 3 experiment files passed |
+| Independent corrected-source review | 36 artifact tests passed, including failed-readout prose, strict source flags and branch-policy identity regressions |
+| Final integrated local gate | 2,063 tests, four StudySpec validations, acceptance and every standalone research gate passed; hosted CI and merge remain pending |
+| Independent original-evidence audit | All 80 chains replayed; 621 checkpoints and 65 source digests verified; recollected JSON/Markdown byte-identical |
+
+The [original-evidence record](experiments/audit-feedback/ORIGINAL_EVIDENCE.md)
+and [independent audit](experiments/audit-feedback/ORIGINAL_AUDIT.json) bind **947
+original files / 10,283,384 bytes**. Their before/after inventory is identical.
+The 76 scientific ledgers contain 8,048 events; the four branch ledgers contain
+409 records including copied prefixes. Branches are software checks, not extra
+scientific samples. Every manifest's source, clean flag, lock, scenario and seal
+binding passed. The new archive
+`collaborative-hill-audit-feedback-original-evidence-2026-11-02.zip` contains the
+947 original files and five metadata/checksum entries: **952 members**, **1,515,408
+bytes**, SHA-256:
+
+```text
+338f6a15611f4ae8d4db69140d44c857686ab633cda55489b346fab03ff36fe1
+```
+
+The original-artifact audit is distinct from
+`python experiments/audit-feedback/audit_feedback.py --check`, which regenerates
+sealed runs and branch fixtures in a temporary directory, replays them and
+compares the retained readouts. The new `make check-audit-feedback` gate passed:
+all 76 runs, four branch fixtures and 720 exact rows reproduced byte for byte.
+The complete local gate also passed `check`, `test`, `validate`, `acceptance`,
+atlas, Study 002, responsive EC, quality safeguards, graph, sparse pTFT, noisy
+corpus and EC ablation. Reproductions do not replace the originals or add
+samples. All 61 preexisting experiment files and the four shipped StudySpecs are
+byte-identical to `e1f8f119`; all 11 preexisting EC policy functions/classes are
+unchanged, with additive factory dispatch only.
+
+The following sections preserve prior checkpoint findings and verification.
+Their earlier next-work and publication statements describe those checkpoints;
+use the current section above and [NEXT.md](NEXT.md) for active work.
+
+## Prior checkpoint — merged core work and recorded-seed follow-up
 
 The provider-budget follow-ups, separate EC component ablation, declared noisy
 corpora/audit contract, and lab branch-integrity fixes are implemented. Independent
@@ -421,7 +537,7 @@ validation from outside the checkout. The original shared environment and run
 records were not rewritten. This follow-up changes the build dependency pin and
 the maintenance record, not simulator behavior or any scientific input/result.
 
-## Remaining directions and limits
+## Prior checkpoint — remaining directions and limits
 
 Issues #76–#78 and #84–#86 are complete. The #92, #95 and #96 follow-ups are
 merged, and the lab branch-integrity fixes are merged. Issue #103 is the next

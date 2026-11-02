@@ -19,9 +19,12 @@ The intervention changes WHO IS SEEN and WHO IS CREDITED, never the task,
 payoff totals for identical behaviour, or legal actions — the mechanism
 certificate (studies/001) checks this by enumeration.
 
+AuditInstitutionConfig separately opts into the scheduled public audit channel
+(ADR-0018). The legacy base model below retains its exact two-field shape.
+
 Extension points deliberately NOT implemented (design-first, per the
 second-occurrence rule; add when a study needs them, with an ADR):
-reputation scores, commitments, sanctions (see SanctSim lineage), audits,
+reputation scores, commitments, sanctions (see SanctSim lineage),
 human approval gates, alternative credit-assignment schemes. Each would be a
 new field on InstitutionConfig plus rules in the mechanism's observe/credit
 paths; keep them out of world-truth resolution.
@@ -30,6 +33,8 @@ paths; keep them out of world-truth resolution.
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict
+
+from collaborative_hill.domain.audit import AuditMechanismConfig
 
 Accountability = Literal["aggregate", "attributable"]
 EvidenceTopology = Literal["private", "shared_ledger"]
@@ -40,3 +45,9 @@ class InstitutionConfig(BaseModel):
 
     accountability: Accountability = "aggregate"
     evidence_topology: EvidenceTopology = "private"
+
+
+class AuditInstitutionConfig(InstitutionConfig):
+    """Explicit required audit; never add a null/default field to legacy dumps."""
+
+    audit: AuditMechanismConfig

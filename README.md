@@ -38,9 +38,11 @@ different accountability and information rules.
   switches screening, contradiction sharing, challenges and citation reading. A
   separate exact noisy-corpus model tests declared independent and correlated
   source errors. Both retain their pre-execution predictions and complete outcomes.
-- **Audit contract foundation.** `ec-audit-observation@1` validates a declared
-  synthetic audit and projects public reports at fixed times. It is a standalone
-  contract; audit-enabled engine execution remains a separate integration task.
+- **Opt-in public audits.** A separate EC v3 mechanism publishes the versioned
+  `ec-audit-observation@1` envelope before observations, with exact declared error
+  and unavailability laws and isolated target streams. A new scripted negative-veto
+  policy responds to findings. Existing EC v2 inputs, policies and replay hashes
+  remain unchanged. See [audit configuration and limits](docs/AUDIT_USAGE.md).
 - **Configurable provider transport.** An optional OpenAI-compatible Chat
   Completions adapter records requested/reported models and measured request
   usage. Explicit execution opt-in, bounded retries, redacted errors and
@@ -79,6 +81,7 @@ execution boundary and [current priorities](NEXT.md) for the remaining work.
 | Quality safeguards | Across 220 accurate/misleading pairs the skeptical rule acts identically with opposite quality, so it cannot separate truth from unanimous false support. On conflicted evidence it trades: it gains where structure tracks truth and loses where structure inverts it. For its two designated strategies and placeholder settings, C1 and C2 hold together in 0 of 48 groups. | [Results](experiments/quality-safeguards/RESULTS.md) |
 | EC component ablation | 192 behavioral episodes and 96 fixed-action controls isolate four independently switched components. All P1–P6 predictions hold and 288 ledger replays match. Sharing, challenges and screening interact; the citation-read gate acts in the limited-inspection probe. All 96 truth pairs retain identical actions and observations. | [Ablation readout](experiments/ec-rule-ablation/RESULTS.md) |
 | Declared noisy corpora | 64 behavioral episodes and 64 accounting controls satisfy P1–P8. With independent errors, skepticism can improve accuracy among accepted claims while reducing coverage and signed quality. Fully correlated errors give a null rule contrast with distinct labels. These are synthetic assumptions, not estimated source reliability. | [Exact expectations](experiments/noisy-corpus/RESULTS.md) |
+| Audit feedback | All P1–P8 hold across 76 sealed runs, 60 fixed-action comparisons and 720 exact expectation rows. Early negative findings can improve selective accuracy while lowering coverage and signed quality. Their exact quality contrast is `12(1-u)(a+e-1)` under the declared correlated-source model; late findings have separate effort and null controls. | [Audit readout](experiments/audit-feedback/RESULTS.md) |
 | Sparse exact pTFT | Sixteen exact cells on small graphs match an independent history oracle, and the Study 002 benchmark on complete graphs. Total cooperator count is not a sufficient state on the four-cycle. No topology ranking follows. | [Readout](experiments/sparse-ptft/EXACT.md) |
 | Graph topology controls | All 18 eight-round cooperation curves match their pre-execution predictions, and all sealed runs replay. The N=5 design fixes one AllD and mean edge payoff while separating complete/ring/star topology, defector placement and reciprocity rule. | [Exact readout](experiments/graph-topology/RESULTS.md) |
 
@@ -89,7 +92,7 @@ From a checkout, using Python 3.12 or later:
 ```bash
 make setup
 make doctor
-make check test validate acceptance check-atlas check-study002 check-responsive check-quality-safeguards check-graph check-sparse-ptft check-noisy-corpus check-ec-rule-ablation
+make check test validate acceptance check-atlas check-study002 check-responsive check-quality-safeguards check-graph check-sparse-ptft check-noisy-corpus check-ec-rule-ablation check-audit-feedback
 ```
 
 `make setup` installs the committed `requirements-lock.txt`, builds the editable
@@ -163,8 +166,25 @@ raw-run archive receives a separate integrity audit. Published source mappings
 preserve the actual original clean execution commits and their equal public source trees.
 
 The [audit contract](docs/adr/0017-noisy-corpus-and-audit-contract.md) is separate
-from these executed experiments. [Issue #103](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/103)
-tracks the six integration gates required before audit-enabled episodes.
+from these historical experiments. Its opt-in engine integration is described
+in [ADR-0018](docs/adr/0018-opt-in-evidence-commons-audits.md) and the
+[audit usage guide](docs/AUDIT_USAGE.md); it does not alter those original runs.
+
+### Audit feedback: timing, accuracy and unavailable reports
+
+```bash
+python experiments/audit-feedback/audit_feedback.py --out artifacts/audit-feedback-new
+make check-audit-feedback
+```
+
+The first command requires clean committed source and a fresh destination. It
+retains 52 behavioral runs, 24 fixed-action controls, four separate branch
+fixtures and complete prediction checks. The gate regenerates those cases,
+replays every ledger and byte-compares the readout. Its 720 expectation rows
+reweight conditional trajectories under explicit laws; they are not additional
+samples. The [design](experiments/audit-feedback/DESIGN.md) and complete source
+were published before the original execution. See the
+[methods and provenance](experiments/audit-feedback/README.md).
 
 ### Local graph N-IPD
 
@@ -243,7 +263,7 @@ flowchart TD
 
 The mechanism controls world truth, legality and payoffs. Policies see only allowed
 observations; scorers do not influence live execution. Decisions and rationale are
-in [ADRs 0001–0017](docs/adr/) and the [foundation review](docs/FOUNDATION_REVIEW.md).
+in [ADRs 0001–0018](docs/adr/) and the [foundation review](docs/FOUNDATION_REVIEW.md).
 
 ## Scientific limits
 
@@ -261,8 +281,10 @@ label is not evidence of independence, and a contradiction does not establish
 which claim is false. The noisy-corpus results add an explicit synthetic relation
 between source reports and truth; they do not calibrate real sources. Accuracy
 conditional on acceptance, coverage, signed quality, effort and utility remain
-separate outcomes. The audit prototype supplies no deployed accuracy estimate,
-live truth feedback or audit-responsive behavior.
+separate outcomes. The opt-in audit channel supplies synthetic truth-correlated
+reports under a declared law; it supplies no deployed accuracy estimate. Its
+responsive policy is scripted. The current LLM prompt renderer omits the audit
+envelope, so these results do not establish model access or response to audits.
 
 Graph comparisons must hold policy, defector placement and payoff aggregation
 explicit. Pairwise cooperation counts directed edge votes; neighbourhood
@@ -295,9 +317,11 @@ and current [handoff](HANDOFF.md) retain the remaining qualifications.
 | `experiments/quality-safeguards/` | Skeptical rule design, truth negative control and full finite readout |
 | `experiments/ec-rule-ablation/` | Four-component factorial, literal predictions, exact interactions and 288 sealed-run checks |
 | `experiments/noisy-corpus/` | Exact source-error model, 128 sealed-run checks and standalone versioned audit contract |
+| `experiments/audit-feedback/` | 76 original audit-feedback runs, 720 exact expectation rows, controls, readout and source commitments |
 | `experiments/sparse-ptft/` | Exact labeled-state pTFT on small graphs and its history oracle |
 | `experiments/graph-topology/` | Canonical local-graph controls, analytical predictions, measured readout and source commitments |
 | `docs/PROVIDER_USAGE.md` | Optional provider configuration, execution boundary and request accounting |
+| `docs/AUDIT_USAGE.md` | Opt-in audit configuration, scripted response, seed/replay semantics and scientific limits |
 | `docs/adr/`, `docs/research/` | Architecture decisions, methods, research context and analysis contract |
 | `tests/`, `.github/workflows/ci.yml` | Unit, property, metamorphic and integration checks; persistent CI |
 | `artifacts/` | Generated sealed runs and reports, ignored by Git |

@@ -1,0 +1,42 @@
+{
+  "audit_runtime_matches_original65SourceFiles": true,
+  "auditor_worktree_commit": "eec165a102c8759ab0723c580b21ca5185e8def0",
+  "before_after_inventory_identical": true,
+  "behavioral_runs": 52,
+  "branch_ledger_events_including_copied_prefixes": 409,
+  "c3_comparisons": 60,
+  "checkpoints_verified": 621,
+  "exact_mixture_rows": 720,
+  "fixed_action_runs": 24,
+  "inventory_sha256": "4b7f21318c9e37789c4788ac534e588395d79efda41c0f019b9f51e73f795425",
+  "json_recollection_byte_identical": true,
+  "markdown_recollection_byte_identical": true,
+  "original_bytes": 10283384,
+  "original_files": 947,
+  "original_source_commit": "ab9e3ec842c24ad12bc6b60b30a11843353df965",
+  "original_source_tree": "d4494ee3557deb7ef6a4d736336070aae4c73373",
+  "predictions": {
+    "P1": true,
+    "P2": true,
+    "P3": true,
+    "P4": true,
+    "P5": true,
+    "P6": true,
+    "P7": true,
+    "P8": true
+  },
+  "readout_sha256": {
+    "RESULTS.json": "c4778511d38677da89bdd02362ff4ac704aa771b5d93d06e65222b5f03f43006",
+    "RESULTS.md": "1d090750979daeaea1bc3230a900b6919b273b12a82cf02625cf2cb5df917974",
+    "SOURCE_PROVENANCE.json": "5c82167410fd6e6a3f52f2a5a3a59d635197738054b699424fd5c17ef9cabd7f"
+  },
+  "schema": "independent-audit-feedback-original-audit-v1",
+  "scientific_events": 8048,
+  "scientific_runs": 76,
+  "sealed_chains_replayed": 80,
+  "separate_branch_fixtures": 4,
+  "source_digests_matched": 65,
+  "stored_ledger_records": 8457,
+  "terminal_hash_inventory_sha256": "c81f363472fa631642868820a566c4f13c51d7049fb6b581c7ce2f853543b8a5",
+  "truth_controls": 42
+}
