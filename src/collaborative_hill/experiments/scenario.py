@@ -109,6 +109,12 @@ class PolicySpec(BaseModel):
         # Validate without normalizing stored strings or inserting defaults:
         # the original exact representation participates in scenario hashes.
         coerce_policy_params(self.name, self.params)
+        if self.name in ("llm_fake", "llm_openai_compatible"):
+            # Lazy: importing the LLM package before NarrativeSkin is defined
+            # would close the policy -> scenario import cycle.
+            from collaborative_hill.agents.llm.prompt_adapters import validate_prompt_renderer
+
+            validate_prompt_renderer(self.params.get("prompt_renderer", "legacy@1"))
         if self.name == "llm_openai_compatible":
             # Lazy import avoids the LLMPolicy -> NarrativeSkin import cycle.
             from collaborative_hill.agents.llm.configuration import validate_provider_params
@@ -167,6 +173,12 @@ class ScenarioSpec(BaseModel):
 
     @model_validator(mode="after")
     def _check_combination(self) -> "ScenarioSpec":
+        if not isinstance(self.world, ECWorld) and any(
+            agent.policy.name in ("llm_fake", "llm_openai_compatible")
+            and agent.policy.params.get("prompt_renderer", "legacy@1") == "ec-audit@1"
+            for agent in self.cognition.agents
+        ):
+            raise ValueError("audit-aware LLM prompts require an Evidence Commons world")
         if (isinstance(self.institution, AuditInstitutionConfig)
                 and not isinstance(self.world, ECWorld)):
             raise ValueError("audit institutions require an Evidence Commons world")

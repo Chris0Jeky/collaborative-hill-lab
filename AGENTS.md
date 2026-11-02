@@ -33,11 +33,14 @@ evidence and institutions. First environment: **Evidence Commons**. Full charter
 ## 3. Architecture map
 
 Scenario (5 planes) → compiler (content hashes; mechanism ≠ narrative) → deterministic
-MechanismEngine → runner (observe → propose typed action → validate → resolve → checkpoint
-→ seal) → hash-linked `events.jsonl` → replay/branch → metrics → reports. LLMs act only
+MechanismEngine → runner (optional round preparation → observe → propose typed action →
+validate → resolve → checkpoint → seal) → hash-linked `events.jsonl` → replay/branch →
+metrics → reports. LLMs act only
 through the typed-action gate; they never resolve or score world state. Decisions:
-`docs/adr/0001…0017`; synthesis: `docs/FOUNDATION_REVIEW.md`. Legacy `nipd` keeps
+`docs/adr/0001…0018`; synthesis: `docs/FOUNDATION_REVIEW.md`. Legacy `nipd` keeps
 its complete-population contract; `nipd_graph` explicitly selects local graph rules.
+An explicit required audit institution selects the separate EC v3 mechanism and
+observation schema; legacy EC v2 serialization, hashes and behavior remain unchanged.
 
 ## 4. Repository map
 
@@ -45,7 +48,9 @@ its complete-population contract; `nipd_graph` explicitly selects local graph ru
 |---|---|
 | `src/collaborative_hill/engine/` | hashing, seeds, events, store, runner, replay, branching, interfaces |
 | `src/collaborative_hill/domain/` | actions (typed union), evidence, claims, institutions, `world/` mechanisms (nipd, graph_nipd, evidence_commons) |
-| `src/collaborative_hill/agents/` | `scripted/` (global/local TFT, EC personas, quorum, skeptical rule and component ablation), `replay.py`, `llm/` (policy, transport, accounting, rendering) |
+| `src/collaborative_hill/domain/audit.py` | strict public audit schemas, opt-in mechanism configuration, exact synthetic generator and released-findings projection |
+| `src/collaborative_hill/domain/world/audited_evidence_commons.py` | EC v3 scheduled publication, published-only state and audit observations; inherited task rules |
+| `src/collaborative_hill/agents/` | `scripted/` (global/local TFT, EC personas, quorum, skeptical rule, component ablation and `ec_audit.py` negative-veto policy), `replay.py`, `llm/` (policy, transport, accounting, rendering) |
 | `src/collaborative_hill/experiments/` | scenario (5 planes + skins + compiler), study lifecycle, manifests |
 | `src/collaborative_hill/metrics/` | cooperation, epistemics, distribution, operations (versioned) |
 | `src/collaborative_hill/reporting/` | run/study reports, counterfactual comparison, sealed factorial analysis |
@@ -55,9 +60,11 @@ its complete-population contract; `nipd_graph` explicitly selects local graph ru
 | `experiments/quality-safeguards/` | skeptical EC rule, truth negative control, finite incentives and fixed-action controls |
 | `experiments/ec-rule-ablation/` | separately versioned four-component factorial, hand-derived predictions, interactions and fixed-action controls |
 | `experiments/noisy-corpus/` | exact declared source noise/dependence, label controls and standalone audit observation contract |
+| `experiments/audit-feedback/` | pre-execution design, literal oracle, 52 behavioral episodes and 24 fixed-action controls, exact mixtures, branch fixtures and original-evidence audit |
 | `experiments/sparse-ptft/` | exact labeled-state pTFT on small connected graphs with an independent history oracle |
 | `experiments/graph-topology/` | explicit graph/placement/policy controls and original-artifact readout tooling |
 | `docs/PROVIDER_USAGE.md` | optional network transport, explicit opt-in, redaction and measured usage contract |
+| `docs/AUDIT_USAGE.md` | opt-in audit settings, versioned scripted policy, publication/seed/branch boundaries and synthetic-model limits |
 | `tests/{unit,property,metamorphic,integration}` | the science-guarding suites |
 | `.github/workflows/ci.yml` | exact-commit offline verification on PRs and main, Ubuntu and Windows |
 | `docs/adr/`, `docs/research/` | decisions; research documents |
@@ -87,7 +94,7 @@ its complete-population contract; `nipd_graph` explicitly selects local graph ru
 
 `make doctor | setup | quick | lab | mutants | check | test | validate | acceptance | check-atlas |
 check-study002 | check-responsive | check-quality-safeguards | check-graph | check-sparse-ptft |
-check-noisy-corpus | check-ec-rule-ablation | study-000 | study-001-smoke | study-002-plan | study-002 |
+check-noisy-corpus | check-ec-rule-ablation | check-audit-feedback | study-000 | study-001-smoke | study-002-plan | study-002 |
 replay-smoke | report | clean-generated`; CLI: `chl scenario validate`, `chl study
 validate|audit-seeds|freeze`, `chl run`, `chl replay`, `chl branch`, `chl compare`,
 `chl analyze`, `chl report`, `chl lab`, `chl doctor`.
@@ -96,8 +103,8 @@ Quote all paths (spaces).
 
 Feedback loop: `make quick` runs ruff, mypy, tests and gates selected from the diff
 against `origin/main` by import graph and path mentions (`scripts/quick.py --plan`
-shows the selection; unclassified files select everything). The new noisy-corpus
-and ablation gates participate in that selection automatically. `make lab` regenerates a
+shows the selection; unclassified files select everything). The noisy-corpus,
+ablation and audit-feedback gates participate in that selection automatically. `make lab` regenerates a
 small sealed sample and renders per-agent film strips to the terminal and
 `artifacts/lab/console.html`; `chl lab <dir>` does the same for any run or artifacts
 root and exits 1 on a broken ledger. Neither replaces the complete CI gate.
@@ -105,7 +112,7 @@ root and exits 1 on a broken ledger. Neither replaces the complete CI gate.
 `make validate` checks all four shipped StudySpecs (Study 002 has two components).
 `make study-002` needs a fresh output root; choose another with
 `STUDY002_ARTIFACTS=artifacts/study-002-repeat`. Persistent CI runs
-`make check test validate acceptance check-atlas check-study002 check-responsive check-quality-safeguards check-graph check-sparse-ptft check-noisy-corpus check-ec-rule-ablation` on the exact
+`make check test validate acceptance check-atlas check-study002 check-responsive check-quality-safeguards check-graph check-sparse-ptft check-noisy-corpus check-ec-rule-ablation check-audit-feedback` on the exact
 published commit and checks that verification leaves the checkout clean.
 Setup downloads pinned dependencies; the science checks call no model provider.
 `chl run` and `chl branch` require `--allow-provider-requests` for effective network
@@ -113,10 +120,24 @@ policies. Validation and recorded-action replay remain offline. A scripted overr
 can replace a provider policy without resolving its credentials. This engineering
 boundary does not select a live model, authorize spend or freeze a study.
 
-The audit projector in `experiments/noisy-corpus/` is not an engine integration.
-ADR-0017 and issue #103 require opt-in version/hash routing, exact audit generation,
-publication/replay/branch support, a versioned policy, integrated integrity tests
-and a separately committed experimental design before audit-enabled episodes.
+The original audit projector in `experiments/noisy-corpus/` remains unchanged.
+ADR-0018 implements issue #103's six ADR-0017 gates: opt-in version/hash routing,
+exact isolated generation, publication before observations, replay/branch support,
+the versioned `ec_audit_veto_contributor@1` policy, integrity tests and a design
+published before audit-enabled episodes. The original audit-feedback experiment
+and independent artifact audit are complete; [PR #107](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/107)
+is the authoritative record for the final published head, hosted checks and merge.
+The complete local gate passed.
+
+`make check-audit-feedback` checks lint/types, regenerates sealed runs and branch
+fixtures in a temporary directory, replays them and compares retained readouts.
+It does not replace or rewrite the original evidence. Current audit-response
+results use a scripted policy and synthetic accuracy/availability assumptions.
+The legacy LLM renderer omits the audit envelope; the planned ADR-0019 follow-up
+([#108](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/108)) defines an
+explicit audit-aware renderer while preserving legacy prompt bytes and hashes.
+Its design is approved and implementation is in progress; no live-model audit
+result is claimed.
 
 ## 7. How to add things
 
@@ -143,7 +164,8 @@ and a separately committed experimental design before audit-enabled episodes.
 2. `make validate` passes for all shipped StudySpecs; changed standalone research
    code also passes `make check-atlas`, `make check-study002`, `make check-responsive`,
    `make check-quality-safeguards`, `make check-graph`, `make check-sparse-ptft`,
-   `make check-noisy-corpus` or `make check-ec-rule-ablation` as applicable.
+   `make check-noisy-corpus`, `make check-ec-rule-ablation` or
+   `make check-audit-feedback` as applicable.
 3. After any review fix, rerun the relevant gates on the new exact HEAD.
 4. HANDOFF.md updated: state, failures, open questions, next tasks, verify commands.
 5. BUILD_LOG.md appended with decisions + commands actually run.

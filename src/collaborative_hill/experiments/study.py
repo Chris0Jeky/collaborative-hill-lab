@@ -36,6 +36,7 @@ from collaborative_hill.agents.llm import (
     build_openai_compatible_policy,
     llm_manifest_fields,
 )
+from collaborative_hill.agents.llm.prompt_adapters import validate_prompt_renderer
 from collaborative_hill.agents.scripted.ec_policies import build_ec_policy
 from collaborative_hill.agents.scripted.graph_nipd_policies import build_graph_nipd_policy
 from collaborative_hill.agents.scripted.nipd_policies import build_nipd_policy
@@ -59,6 +60,7 @@ from collaborative_hill.experiments.manifests import (
     write_manifest,
 )
 from collaborative_hill.experiments.scenario import (
+    ECWorld,
     GraphNIPDWorld,
     NarrativeSkin,
     NIPDWorld,
@@ -262,13 +264,16 @@ def build_policies(resolved: ResolvedScenario, *, allow_provider_requests: bool 
     for agent in spec.cognition.agents:
         if agent.agent_id in replacements:
             replacement = replacements[agent.agent_id]
-            if (not allow_provider_requests and isinstance(replacement, LLMPolicy)
-                    and isinstance(replacement.provider, OpenAICompatibleProvider)):
-                raise ValueError("network-backed overrides require allow_provider_requests=True")
+            _validate_policy_override(replacement, spec.world,
+                                      allow_provider_requests=allow_provider_requests)
             policies[agent.agent_id] = replacement
             continue
         name = agent.policy.name
         params = dict(agent.policy.params)
+        if (name in ("llm_fake", "llm_openai_compatible")
+                and validate_prompt_renderer(params.get("prompt_renderer", "legacy@1"))
+                == "ec-audit@1" and not isinstance(spec.world, ECWorld)):
+            raise ValueError("audit-aware LLM prompts require an Evidence Commons world")
         if name in SCRIPTED_NIPD:
             if mode is None:
                 raise ValueError(f"{name} is an NIPD policy but world is not NIPD")
@@ -289,6 +294,7 @@ def build_policies(resolved: ResolvedScenario, *, allow_provider_requests: bool 
                 ),
                 skin=resolved.skin,
                 max_retries=_require_non_negative_retries(params),
+                prompt_renderer=validate_prompt_renderer(params.get("prompt_renderer", "legacy@1")),
             )
         elif name == "llm_openai_compatible":
             if not allow_provider_requests:
@@ -301,6 +307,16 @@ def build_policies(resolved: ResolvedScenario, *, allow_provider_requests: bool 
         else:
             raise ValueError(f"unknown policy {name} for agent {agent.agent_id}")
     return policies
+
+
+def _validate_policy_override(replacement: Any, world: Any, *,
+                               allow_provider_requests: bool) -> None:
+    if not isinstance(replacement, LLMPolicy):
+        return
+    if not allow_provider_requests and isinstance(replacement.provider, OpenAICompatibleProvider):
+        raise ValueError("network-backed overrides require allow_provider_requests=True")
+    if replacement.prompt_renderer == "ec-audit@1" and not isinstance(world, ECWorld):
+        raise ValueError("audit-aware LLM prompts require an Evidence Commons world")
 
 
 def _require_non_negative_retries(params: dict[str, Any]) -> int:

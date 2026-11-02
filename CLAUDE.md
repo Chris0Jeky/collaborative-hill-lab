@@ -16,16 +16,34 @@ structure-only effect. The longer-term target is LLM agents reasoning over evide
 First environment **Evidence Commons**. The lab includes observation-responsive EC
 scripts, explicitly versioned local graph N-IPD and a configurable provider transport.
 Separate EC component ablations and declared noisy-corpus models retain exact
-predictions and controls. The versioned audit projector is a contract foundation;
-engine integration remains issue #103 under ADR-0017.
+predictions and controls. The standalone audit contract remains unchanged;
+ADR-0018 implements issue #103's six ADR-0017 gates through opt-in EC v3,
+scheduled public findings, replay/branch support and a separate scripted veto policy.
+The declared audit-feedback experiment and independent original-artifact audit are
+complete in [PR #107](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/107);
+the complete local gate passed. Use that PR for final hosted checks and merge status.
+The legacy LLM renderer omits audit findings. The planned ADR-0019 follow-up
+([#108](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/108)) has an
+approved design and separate implementation in progress for an explicit audit-aware
+renderer that preserves legacy prompt bytes and hashes.
 Current measured findings use synthetic scripted populations. No live provider pilot,
 paid run or human-subject experiment supports them; see `docs/PROVIDER_USAGE.md`.
+
+Audit modules: `domain/audit.py` defines strict schemas, opt-in settings, exact
+synthetic generation and public projection;
+`domain/world/audited_evidence_commons.py` publishes complete due batches before
+observations through the optional runner `prepare_round` seam. State contains only
+released findings, and task legality, acceptance and reward rules are inherited.
+`agents/scripted/ec_audit.py` supplies `ec_audit_veto_contributor@1`;
+`experiments/audit-feedback/` retains the design, literal oracle, original results,
+source mapping and artifact audit. Paths above are under `src/collaborative_hill/`
+except the experiment directory. Usage and scientific limits: `docs/AUDIT_USAGE.md`.
 
 ## Proving checks (run from the repo root; Windows `make` needs Git Bash)
 
 Persistent GitHub Actions runs `make check test validate acceptance check-atlas
 check-study002 check-responsive check-quality-safeguards check-graph check-sparse-ptft
-check-noisy-corpus check-ec-rule-ablation` on the exact PR head or main commit with the committed dependency
+check-noisy-corpus check-ec-rule-ablation check-audit-feedback` on the exact PR head or main commit with the committed dependency
 lock. Read its job steps and logs for the current commit; green results on an older
 head are not evidence for a new one. Setup downloads dependencies, while the
 science gates make no model-provider calls. CI covers Ubuntu and Windows on Python 3.12; every text write fixes its newline because evidence commits to bytes.
@@ -35,6 +53,9 @@ integrity passes. The responsive EC experiment is a separate unfrozen design wit
 its own finite-strategy diagnostics. Verification evidence and exact counts belong
 in `HANDOFF.md` and `BUILD_LOG.md`. `make validate` covers the four shipped StudySpecs;
 the standalone checks validate their own additional experiment inputs.
+The audit-feedback gate checks lint/types, regenerates sealed episodes and branch
+fixtures, replays them and compares retained readouts. It uses temporary outputs;
+the original evidence is retained separately and is not replaced by verification.
 
 Use `.venv/bin/python` on POSIX or `.venv/Scripts/python.exe` on Windows for the
 Python commands below.
@@ -54,6 +75,8 @@ an equivalent change, so triage it. Whole-episode invariants are fuzzed in
 | Skeptical EC rule | `python -m pytest tests/unit/test_ec_skeptical_contributor.py`; `make check-quality-safeguards` |
 | EC component ablation | `python -m pytest tests/unit/test_ec_ablation_contributor.py tests/unit/test_ec_rule_ablation.py`; `make check-ec-rule-ablation` |
 | Noisy corpus / audit contract | `make check-noisy-corpus` |
+| Audit runtime / scenario | `python -m pytest tests/unit/test_audit_models.py tests/unit/test_audit_scenario.py tests/unit/test_audited_ec.py tests/metamorphic/test_audit_runtime.py tests/metamorphic/test_audit_legacy_compatibility.py` |
+| Audit policy / feedback experiment | `python -m pytest tests/unit/test_ec_audit_contributor.py tests/unit/test_audit_feedback.py tests/unit/test_audit_feedback_execution.py`; `make check-audit-feedback` |
 | Sparse exact pTFT | `make check-sparse-ptft` |
 | Provider transport/workflow | `python -m pytest tests/unit/test_openai_compatible_provider.py tests/unit/test_provider_accounting.py tests/integration/test_provider_workflow.py tests/metamorphic/test_replay_provider_failure.py` (mocked transport only) |
 | Provider budgets / failure analysis | `python -m pytest tests/integration/test_provider_budget.py` (mocked requests only) |
