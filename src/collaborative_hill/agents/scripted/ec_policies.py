@@ -354,4 +354,10 @@ def build_ec_policy(name: str, params: dict[str, Any]) -> Any:
             warmup_rounds=cast(int, parsed.get("warmup_rounds", 3)),
             share_evidence=cast(bool, parsed.get("share_evidence", True)),
         )
+    if name == "ec_ablation_contributor":
+        # Additive experimental policy; legacy rule implementations stay unchanged.
+        from collaborative_hill.agents.scripted.ec_ablation import ECAblationContributorPolicy
+
+        coerce_policy_params(name, params)
+        return ECAblationContributorPolicy(**params)
     raise ValueError(f"unknown scripted EC policy: {name}")
