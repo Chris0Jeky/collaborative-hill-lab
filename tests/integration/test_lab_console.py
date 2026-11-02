@@ -10,8 +10,11 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
+from collaborative_hill.agents.scripted.nipd_policies import AllCPolicy, AllDPolicy
 from collaborative_hill.cli import app
+from collaborative_hill.engine.branching import branch_run
 from collaborative_hill.engine.events import Event, EventType
+from collaborative_hill.engine.store import FileCheckpointStore, RunPaths
 from collaborative_hill.experiments.study import run_study
 from collaborative_hill.reporting import lab
 from collaborative_hill.reporting.lab import (
@@ -212,7 +215,135 @@ def test_console_rejects_a_relabelled_manifest_and_separates_branches(nipd_root,
     manifest["replicate"] = 0
     manifest["parent_run"] = "parent-r000"
     (run / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8", newline="\n")
-    assert run_trace(run)["condition_id"].endswith("(branch of parent-r000)")
+    assert "broken" in run_trace(run)
+
+
+@pytest.mark.parametrize("shared_default_id", [False, True])
+def test_real_branches_show_continuation_policies_without_pooling(
+        nipd_root, tmp_path, shared_default_id):
+    parent = next(path.parent for path in nipd_root.rglob("events.jsonl")
+                  if path.parent.parent.name == "pw-2tft-alld")
+    fork = FileCheckpointStore(RunPaths(parent).checkpoints).list_seqs()[0]
+    parent_id = json.loads((parent / "manifest.json").read_text(encoding="utf-8"))["run_id"]
+    traces = []
+    for name, policy in (("cooperative-child", AllCPolicy("pairwise")),
+                         ("defecting-child", AllDPolicy("pairwise"))):
+        child = tmp_path / name
+        # The CLI's default ID is identical for every branch at this checkpoint;
+        # output directories and continuation policies can nevertheless differ.
+        child_id = f"{parent_id}-branch{fork}" if shared_default_id else name
+        _, branch = branch_run(parent_dir=parent, fork_seq=fork, child_dir=child,
+                               child_run_id=child_id, policy_overrides={"a1": policy})
+        trace = run_trace(child, verify_replay=True)
+        assert "broken" not in trace, trace
+        assert trace["policies"]["a1"] == policy.policy_id
+        assert trace["fork_round"] == branch.fork_round
+        assert trace["replay_identical"] is True
+        if name == "cooperative-child":
+            assert trace["strips"]["a1"][branch.fork_round:] == "C" * (50 - branch.fork_round)
+        else:
+            assert trace["strips"]["a1"][branch.fork_round:] == "D" * (50 - branch.fork_round)
+        traces.append(trace)
+
+    assert len(lab._group(traces)) == 2  # Shared histories are not independent replicates.
+    assert all(len(rows) == 1 for _, _, rows in lab._group(traces))
+    assert all(len(rows) == 1 for _, _, rows in lab._group([traces[0], traces[0]]))
+    assert "2/2 sealed" not in render_text(traces)
+    assert "continuation" in render_text(traces)
+    assert "continuation" in render_html(traces).lower()
+
+
+def test_branch_display_uses_local_provenance_and_rejects_forged_fork(nipd_root, tmp_path):
+    parent = next(path.parent for path in nipd_root.rglob("events.jsonl")
+                  if path.parent.parent.name == "pw-2tft-alld")
+    fork = FileCheckpointStore(RunPaths(parent).checkpoints).list_seqs()[0]
+    child = tmp_path / "child"
+    branch_run(parent_dir=parent, fork_seq=fork, child_dir=child,
+               child_run_id="child", policy_overrides={"a1": AllCPolicy("pairwise")})
+    record_path = child / "branch.json"
+    record = json.loads(record_path.read_text(encoding="utf-8"))
+    record["parent_run_dir"] = str(tmp_path / "unavailable-parent")
+    record_path.write_text(json.dumps(record), encoding="utf-8", newline="\n")
+    assert "broken" not in run_trace(child)
+
+    record["parent_event_hash_at_fork"] = "0" * 64
+    record_path.write_text(json.dumps(record), encoding="utf-8", newline="\n")
+    assert "broken" in run_trace(child)
+
+
+def test_console_rejects_changed_resolved_scenario(nipd_root, tmp_path):
+    parent = next(nipd_root.rglob("events.jsonl")).parent
+    run = tmp_path / "altered-scenario"
+    shutil.copytree(parent, run)
+    path = run / "scenario.resolved.json"
+    scenario = json.loads(path.read_text(encoding="utf-8"))
+    scenario["scenario_hash"] = "0" * 64
+    path.write_text(json.dumps(scenario), encoding="utf-8", newline="\n")
+    assert "broken" in run_trace(run)
+
+
+@pytest.mark.parametrize("manifest", [None, [], "not an object", True])
+def test_malformed_manifest_is_shown_as_broken_without_crashing(nipd_root, tmp_path, manifest):
+    parent = next(nipd_root.rglob("events.jsonl")).parent
+    run = tmp_path / "malformed-manifest"
+    shutil.copytree(parent, run)
+    (run / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8", newline="\n")
+    assert "broken" in run_trace(run)
+    result = CliRunner().invoke(app, ["lab", str(run)])
+    assert result.exit_code == 1, result.output
+    assert "BROKEN" in result.output
+
+
+@pytest.mark.parametrize("seed_root", [None, 0, True])
+def test_malformed_manifest_field_is_shown_as_broken(nipd_root, tmp_path, seed_root):
+    parent = next(nipd_root.rglob("events.jsonl")).parent
+    run = tmp_path / "malformed-field"
+    shutil.copytree(parent, run)
+    path = run / "manifest.json"
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    manifest["seed_root"] = seed_root
+    path.write_text(json.dumps(manifest), encoding="utf-8", newline="\n")
+    assert "broken" in run_trace(run)
+    result = CliRunner().invoke(app, ["lab", str(run)])
+    assert result.exit_code == 1, result.output
+    assert "BROKEN" in result.output
+
+
+def test_nested_and_legacy_branches_display_effective_policy_labels(nipd_root, tmp_path):
+    parent = next(path.parent for path in nipd_root.rglob("events.jsonl")
+                  if path.parent.parent.name == "pw-2tft-alld")
+    fork = FileCheckpointStore(RunPaths(parent).checkpoints).list_seqs()[0]
+    child = tmp_path / "first-child"
+    branch_run(parent_dir=parent, fork_seq=fork, child_dir=child,
+               child_run_id="first-child", policy_overrides={"a1": AllCPolicy("pairwise")})
+    child_fork = FileCheckpointStore(RunPaths(child).checkpoints).list_seqs()[1]
+    nested = tmp_path / "nested-child"
+    _, branch = branch_run(parent_dir=child, fork_seq=child_fork, child_dir=nested,
+                           child_run_id="nested-child", policy_overrides={
+                               "a1": AllCPolicy("pairwise"), "a2": AllDPolicy("pairwise")})
+    trace = run_trace(nested, verify_replay=True)
+    assert "broken" not in trace, trace
+    assert trace["policies"] == {"a1": "allc[pairwise]@1", "a2": "alld[pairwise]@1",
+                                 "a3": "alld[pairwise]@1"}
+    assert trace["fork_round"] == branch.fork_round
+    assert trace["replay_identical"] is True
+
+    # Legacy v1 branches stored root labels in manifest.json; branch.json carries
+    # the effective labels. Compatibility must be read-only.
+    manifest_path = nested / "manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["policies"] = json.loads((parent / "manifest.json").read_text())["policies"]
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8", newline="\n")
+    branch_path = nested / "branch.json"
+    record = json.loads(branch_path.read_text(encoding="utf-8"))
+    record["schema_version"] = 1
+    branch_path.write_text(json.dumps(record), encoding="utf-8", newline="\n")
+    before = {path.name: path.read_bytes() for path in (manifest_path, branch_path)}
+    legacy = run_trace(nested, verify_replay=True)
+    assert "broken" not in legacy, legacy
+    assert legacy["policies"] == trace["policies"]
+    assert legacy["replay_identical"] is True
+    assert {path.name: path.read_bytes() for path in (manifest_path, branch_path)} == before
 
 
 def test_empty_root_writes_no_page(tmp_path):
