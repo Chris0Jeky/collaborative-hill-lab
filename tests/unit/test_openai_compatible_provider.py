@@ -7,6 +7,7 @@ import urllib.error
 import urllib.request
 import urllib.response
 from email.message import Message
+from types import SimpleNamespace
 
 import pytest
 
@@ -56,7 +57,9 @@ def wire(monkeypatch):
     monkeypatch.setattr(socket, "create_connection", no_network)
     monkeypatch.setattr(urllib.request.HTTPSHandler, "https_open", open_request)
     monkeypatch.setattr(urllib.request.HTTPHandler, "http_open", open_request)
-    monkeypatch.setattr("time.sleep", sleeps.append)
+    # Rebind only the transport; other libraries share the standard-library module.
+    monkeypatch.setattr("collaborative_hill.agents.llm.openai_compatible.time",
+                        SimpleNamespace(sleep=sleeps.append))
     return replies, requests, sleeps
 
 

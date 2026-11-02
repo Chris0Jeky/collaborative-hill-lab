@@ -12,7 +12,8 @@ from fractions import Fraction
 from pathlib import Path
 from typing import Any
 
-from collaborative_hill.engine.events import EventType
+from collaborative_hill.agents.replay import provider_errors_from_events
+from collaborative_hill.engine.events import Event, EventType
 from collaborative_hill.engine.hashing import frac_str
 from collaborative_hill.engine.replay import load_run
 from collaborative_hill.engine.seeds import (
@@ -83,6 +84,20 @@ def _reported_models(manifest: dict[str, Any]) -> dict[str, list[str]]:
     return known
 
 
+def _budget_stop_reason(events: list[Event], manifest: dict[str, Any]) -> str | None:
+    """Expose stable sealed codes, never arbitrary provider failure text."""
+    messages = {message for by_round in provider_errors_from_events(events).values()
+                for message in by_round.values()}
+    codes = ("request_attempt_limit_episode", "request_attempt_limit_run",
+             "deadline_exceeded", "cancelled")
+    reason = next((code for code in codes
+                   if f"provider request budget exhausted: {code}" in messages), None)
+    budget = manifest.get("request_budget")
+    if budget is not None and (not isinstance(budget, dict) or budget.get("stop_reason") != reason):
+        raise ValueError("request budget stop reason disagrees with the terminal seal")
+    return reason
+
+
 def _episode(directory: Path) -> _Episode:
     events, resolved, manifest = load_run(directory)
     if manifest.get("parent_run"):
@@ -121,6 +136,7 @@ def _episode(directory: Path) -> _Episode:
         row["reported_models"] = reported_models
     episode = _Episode(directory, row, _comparison_configuration(resolved, manifest))
     if manifest["status"] != "completed":
+        row["stop_reason"] = _budget_stop_reason(events, manifest)
         return episode
     metrics = compute_all_metrics(events, manifest)
     epi, operations = metrics["epistemics"], metrics["operations"]
@@ -242,7 +258,8 @@ def _collect(root: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any]], st
         identities[key] = row
         if row["run_status"] == "failed":
             exclusions.append({**identity, "reason": "run_failed", "detail": "RunFailed",
-                               "study_hash": row["study_hash"], "replicate": row["replicate"]})
+                               "study_hash": row["study_hash"], "replicate": row["replicate"],
+                               "stop_reason": row["stop_reason"]})
         else:
             rows.append(row)
     protocol = episodes[0].row["seed_protocol"] if episodes else None

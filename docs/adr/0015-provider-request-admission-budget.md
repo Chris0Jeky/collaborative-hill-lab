@@ -73,3 +73,11 @@ pilot remain owner decisions. The counters live in one process; two concurrent
 and the CLI builds the budget first, so offline preparation counts against it. Only the network
 transport consumes the budget: the fake provider sends nothing, so budgets do not
 apply to it. See [provider usage](../PROVIDER_USAGE.md).
+
+The admission counters are in memory. Ordinary episode manifests snapshot them
+at the start and after the runner returns; continuation manifests are written
+only after it returns. A hard kill can therefore leave a `running` manifest with
+starting counts, or no child manifest, and no final stop reason. There is no
+per-request durable accounting or cross-process recovery. Unsealed artifacts do
+not establish final usage; the precise interruption limits are documented in
+[provider usage](../PROVIDER_USAGE.md#planning-and-request-budgets).

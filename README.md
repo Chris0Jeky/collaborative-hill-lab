@@ -43,6 +43,8 @@ different accountability and information rules.
 - **Fast, visible feedback.** `make quick` selects checks from the diff, `chl lab` shows
   per-agent film strips from verified ledgers, `make mutants` samples test gaps, and a
   Hypothesis fuzzer checks whole-episode invariants on random small scenarios.
+  The console validates scenario and branch provenance, labels continuation policies
+  and inherited actions, and keeps sibling branches in separate summaries.
 - **Persistent verification.** GitHub Actions tests each exact PR head and `main`
   commit on Ubuntu and Windows, including the complete suite, all shipped study definitions, acceptance
   scenarios and reproducible standalone research outputs. Inputs reject unsafe
