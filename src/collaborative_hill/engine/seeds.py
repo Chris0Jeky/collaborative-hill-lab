@@ -57,10 +57,26 @@ def rng_for(*path: str | int) -> random.Random:
     return random.Random(derive_seed(*path))
 
 
+def _validate_seed_root(root: object, field: str) -> None:
+    """Validate a root before iterating or stringifying untrusted recorded values."""
+    if not isinstance(root, Sequence) or isinstance(root, str | bytes | bytearray):
+        raise ValueError(f"{field} must be a sequence of str or int components")
+    for component in root:
+        if not isinstance(component, str | int) or isinstance(component, bool):
+            raise ValueError(f"{field} components must be str or int, not bool or other types")
+    # A mechanism root may be empty: the runner appends its scope/round suffix.
+    # Paired policy roots retain their separate non-empty requirement below.
+    if root:
+        try:
+            derive_seed(*root)
+        except ValueError as exc:
+            raise ValueError(f"{field}: {exc}") from exc
+
+
 def validate_scenario_block(block: str | None) -> None:
     """Blocks are explicit seed-path components, never silently normalised."""
     if block is not None:
-        if not block.strip():
+        if not isinstance(block, str) or not block.strip():
             raise ValueError("scenario_block must be a non-empty identifier")
         derive_seed("block", block)  # also rejects the reserved separator
 
@@ -71,7 +87,9 @@ def validate_seed_metadata(
     scenario_block: str | None,
 ) -> None:
     """Reject ambiguous run metadata instead of guessing whether a run is paired."""
-    if protocol not in (LEGACY_SEED_PROTOCOL, PAIRED_SEED_PROTOCOL):
+    if not isinstance(protocol, str) or protocol not in (
+        LEGACY_SEED_PROTOCOL, PAIRED_SEED_PROTOCOL,
+    ):
         raise ValueError(f"unknown seed_protocol: {protocol!r}")
     validate_scenario_block(scenario_block)
     if protocol == LEGACY_SEED_PROTOCOL:
@@ -79,10 +97,12 @@ def validate_seed_metadata(
             raise ValueError(
                 "legacy-independent-v1 cannot declare policy_seed_root or scenario_block"
             )
-    elif policy_seed_root is None or not policy_seed_root or scenario_block is None:
+    elif policy_seed_root is None or scenario_block is None:
         raise ValueError("paired-policy-v2 requires policy_seed_root and scenario_block")
     else:
-        derive_seed(*policy_seed_root)
+        _validate_seed_root(policy_seed_root, "policy_seed_root")
+        if not policy_seed_root:
+            raise ValueError("paired-policy-v2 requires policy_seed_root and scenario_block")
 
 
 def study_seed_roots(
@@ -116,17 +136,24 @@ def study_seed_roots(
 def validate_recorded_seed_metadata(
     manifest: Mapping[str, Any], start_payload: Mapping[str, Any],
 ) -> None:
-    """Do not silently downgrade or change a v2 run's sealed seed allocation."""
+    """Validate both recorded shapes, then bind the manifest to the sealed roots."""
+    for record in (manifest, start_payload):
+        validate_seed_metadata(
+            record.get("seed_protocol", LEGACY_SEED_PROTOCOL),
+            record.get("policy_seed_root"), record.get("scenario_block"),
+        )
+        _validate_seed_root(record.get("seed_root"), "seed_root")
     protocol = manifest.get("seed_protocol", LEGACY_SEED_PROTOCOL)
     if protocol != start_payload.get("seed_protocol", LEGACY_SEED_PROTOCOL):
         raise ValueError("seed_protocol disagrees with the sealed RunStarted payload")
-    validate_seed_metadata(
-        protocol, manifest.get("policy_seed_root"), manifest.get("scenario_block"),
-    )
+    fields = ["seed_root"]
     if protocol == PAIRED_SEED_PROTOCOL:
-        for field in ("seed_root", "policy_seed_root", "scenario_block"):
-            value = manifest.get(field)
-            if field.endswith("_root"):
-                value = list(map(str, value or []))
-            if value != start_payload.get(field):
-                raise ValueError(f"{field} disagrees with the sealed RunStarted payload")
+        fields.extend(("policy_seed_root", "scenario_block"))
+    for field in fields:
+        value = manifest[field]
+        if field.endswith("_root"):
+            # Only validated str/int components take part in the documented
+            # integer/string aliasing; RunStarted stores canonical strings.
+            value = list(map(str, value))
+        if value != start_payload.get(field):
+            raise ValueError(f"{field} disagrees with the sealed RunStarted payload")

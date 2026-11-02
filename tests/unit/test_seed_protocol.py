@@ -1,11 +1,13 @@
 """Protocol/block identity is explicit, validated, and frozen into the study hash."""
 
+from copy import deepcopy
 from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
 
 from collaborative_hill.engine.runner import RunConfig
+from collaborative_hill.engine.seeds import validate_recorded_seed_metadata
 from collaborative_hill.experiments.manifests import RunManifest
 from collaborative_hill.experiments.study import StudySpec, load_study, study_hash
 
@@ -74,3 +76,34 @@ def test_run_config_and_manifest_reject_ambiguous_seed_metadata(metadata):
             "scenario_hash": "s", "mechanism_hash": "m", "narrative_hash": "n",
             "evidence_corpus_hash": "e",
         })
+
+
+def _paired_metadata():
+    manifest = {
+        "seed_protocol": PAIRED, "seed_root": [7, "c", 0],
+        "policy_seed_root": [7, "block"], "scenario_block": "block",
+    }
+    start = {**manifest, "seed_root": ["7", "c", "0"], "policy_seed_root": ["7", "block"]}
+    return manifest, start
+
+
+@pytest.mark.parametrize("field", ["seed_root", "policy_seed_root"])
+@pytest.mark.parametrize(("value", "stringified"), [
+    ("ab", ["a", "b"]), ({"a": 1}, ["a"]), (b"ab", ["97", "98"]),
+    ([None], ["None"]), ([True], ["True"]), ([1.5], ["1.5"]),
+    ([[]], ["[]"]), ([{}], ["{}"]),
+])
+def test_recorded_root_is_not_validated_by_accidental_stringification(field, value, stringified):
+    manifest, start = _paired_metadata()
+    manifest[field], start[field] = value, stringified
+    with pytest.raises(ValueError, match=field):
+        validate_recorded_seed_metadata(manifest, start)
+
+
+@pytest.mark.parametrize("root", [[], (), [-7, "", "  ", 10**30], (-7, "", "  ", 10**30)])
+def test_valid_recorded_root_components_are_not_normalized(root):
+    manifest, start = _paired_metadata()
+    manifest["seed_root"], start["seed_root"] = root, [str(c) for c in root]
+    before = deepcopy((manifest, start))
+    validate_recorded_seed_metadata(manifest, start)
+    assert (manifest, start) == before
