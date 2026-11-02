@@ -25,7 +25,7 @@ from collaborative_hill.agents.replay import (
     proposals_from_events,
     provider_errors_from_events,
 )
-from collaborative_hill.engine.events import Event, EventType
+from collaborative_hill.engine.events import ChainError, Event, EventType
 from collaborative_hill.engine.runner import RunConfig, run_episode
 from collaborative_hill.engine.seeds import LEGACY_SEED_PROTOCOL, validate_recorded_seed_metadata
 from collaborative_hill.engine.store import FileCheckpointStore, FileEventStore, RunPaths
@@ -54,6 +54,8 @@ def load_run(run_dir: Path) -> tuple[list[Event], ResolvedScenario, dict[str, An
         (run_dir / "scenario.resolved.json").read_text(encoding="utf-8")
     )
     manifest = json.loads(paths.manifest.read_text(encoding="utf-8"))
+    if not isinstance(manifest, dict):
+        raise ChainError("run manifest must be a JSON object")
     # Label old manifests in memory; never rewrite sealed provenance on disk.
     manifest.setdefault("seed_protocol", LEGACY_SEED_PROTOCOL)
     if events:

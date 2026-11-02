@@ -11,7 +11,7 @@ endif
 CHL := "$(PY)" -m collaborative_hill.cli
 STUDY002_ARTIFACTS ?= artifacts/study-002
 
-.PHONY: doctor setup quick lab mutants check check-atlas check-study002 check-responsive check-quality-safeguards check-graph check-sparse-ptft test validate acceptance study-000 study-001-smoke study-002-plan study-002 replay-smoke report clean-generated
+.PHONY: doctor setup quick lab mutants check check-atlas check-study002 check-responsive check-quality-safeguards check-graph check-sparse-ptft check-noisy-corpus check-ec-rule-ablation test validate acceptance study-000 study-001-smoke study-002-plan study-002 replay-smoke report clean-generated
 
 doctor:
 	$(CHL) doctor
@@ -71,6 +71,16 @@ check-sparse-ptft:
 	"$(PY)" -m mypy --strict --follow-imports=silent experiments/sparse-ptft/*.py
 	"$(PY)" -m pytest tests/unit/test_sparse_ptft.py -q
 	"$(PY)" experiments/sparse-ptft/generate.py --check
+
+check-noisy-corpus:
+	"$(PY)" -m ruff check experiments/noisy-corpus
+	"$(PY)" -m mypy --strict --follow-imports=silent experiments/noisy-corpus/*.py
+	"$(PY)" experiments/noisy-corpus/noisy_corpus.py --check
+
+check-ec-rule-ablation:
+	"$(PY)" -m ruff check experiments/ec-rule-ablation
+	"$(PY)" -m mypy --strict --follow-imports=silent experiments/ec-rule-ablation/*.py
+	"$(PY)" experiments/ec-rule-ablation/ec_rule_ablation.py --check
 
 test:
 	"$(PY)" -m pytest tests/ -q
