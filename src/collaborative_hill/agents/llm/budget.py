@@ -6,6 +6,12 @@ before it is sent, so a timeout, transport error or response without usage can
 never be undercounted. This is neither a token nor a currency budget, and no
 default limit exists: an unset limit means "unlimited", not "safe".
 
+These counters are in memory, not a durable admission log. Episode manifests
+snapshot them at start and after the runner returns; continuation manifests are
+written only after the runner returns. Abrupt process termination can leave
+starting counts or no manifest, so unsealed artifacts cannot establish final
+request usage or a stop reason. There is no cross-process budget recovery.
+
 Scopes (all counters live on one shared object; nothing resets on a retry):
   episode       attempts since ``begin("episode")``; resets only at a new episode
   run           attempts for the object's whole life (one ``chl run`` invocation)

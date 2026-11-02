@@ -135,8 +135,11 @@ A retry, repair or continuation never resets a counter. In Python, build
 `RequestBudget(max_episode_attempts=, max_run_attempts=, deadline_seconds=,
 cancelled=)`, pass it to `run_study(request_budget=...)` or
 `branch_run(request_budget=...)` (a network override must be built with the same
-object: `build_openai_compatible_policy(..., budget=b)`). It applies only to the
-network transport; the fake provider sends nothing.
+object: `build_openai_compatible_policy(..., budget=b)`). If an override already
+has a budget, `branch_run` requires that object explicitly as `request_budget`;
+an omitted or different object is rejected before any child output or request.
+Unbudgeted network policies still allow an omitted `request_budget`. The budget
+applies only to the network transport; the fake provider sends nothing.
 
 **Deadline and cancellation are between-request checks, not an in-flight bound.**
 `deadline_seconds` runs on a monotonic clock from the budget's construction and is
@@ -159,6 +162,31 @@ not tokens or money; token/cost totals stay null when unmeasured. The budget is
 operational: it enters no scenario, mechanism or study hash, no PolicySpec and no
 ledger event, so unbudgeted scenarios and completing budgeted runs are
 byte-identical. Counters are per process; concurrent invocations do not share one.
+
+`chl analyze` includes `stop_reason` in each eligible `run_failed` exclusion,
+using the stable code in the verified `RunFailed` seal. It is null when that seal
+records no known budget stop, including an ordinary provider outage. A present
+`request_budget` record must agree with the seal; disagreement is excluded as
+`invalid_or_unsealed_artifact`. Raw provider error text is not copied into the
+analysis. Budget stops remain failed attempted episodes in the attrition counts.
+
+**Abrupt termination does not produce final accounting.** Admissions are charged
+in memory. For an ordinary episode, the manifest is written at the start and
+again after the runner returns, including a normally sealed failure. There is no
+per-request accounting checkpoint. A process killed after admitting requests can
+leave `status="running"` with `admitted` still at its episode-start values (zero
+for the episode, and the prior cumulative value for the run) and
+`stop_reason=null`. A continuation writes its child manifest only after the
+runner returns, so a killed continuation may have no child manifest at all.
+Termination during a file write can also leave an incomplete artifact.
+
+These partial artifacts cannot establish final admitted attempts, token usage,
+billing, or the cause of the stop. They remain unsealed and are excluded from
+analysis. Consult provider-side records for requests that may already have been
+sent; stopping the local process does not guarantee cancellation of remote work.
+A new invocation creates fresh counters: automatic budget recovery across
+processes is not implemented. The `cancelled` code describes a cooperative check
+that reached a failure seal, not an inference that the process was killed.
 
 ## Supported parameters
 

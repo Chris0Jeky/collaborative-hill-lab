@@ -47,6 +47,15 @@ def too_many(code):
     return urllib.error.HTTPError(PARAMS["endpoint"], code, SECRET, {}, io.BytesIO(b""))
 
 
+def write_primary_study(path):
+    """Use a primary factorial cell so real provider failures reach the analyzer."""
+    write_study(path)
+    spec_path = path / "study.json"
+    spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    spec["conditions"][0]["condition_id"] = "agg-priv"
+    spec_path.write_text(json.dumps(spec), encoding="utf-8", newline="\n")
+
+
 def test_exhaustion_before_the_first_request_sends_nothing_and_seals_run_failed(tmp_path, wire):
     results, (manifest,), (run_dir,) = execute(
         tmp_path, wire, RequestBudget(max_episode_attempts=0))
@@ -77,6 +86,31 @@ def test_repair_and_429_retries_all_draw_on_one_episode_budget(tmp_path, wire, m
     assert manifest["request_budget"]["stop_reason"] == EPISODE
     assert manifest["provider_usage"]["a1"]["request_attempts"] == 3
     assert manifest["provider_usage"]["a1"]["completion_calls"] == 3
+
+
+def test_two_provider_agents_share_one_episode_budget(tmp_path, wire):
+    study = tmp_path / "study"
+    write_study(study)
+    scenario_path = study / "scenario.json"
+    scenario = json.loads(scenario_path.read_text(encoding="utf-8"))
+    scenario["cognition"]["agents"][1]["policy"] = {
+        "name": "llm_openai_compatible", "params": PARAMS,
+    }
+    scenario_path.write_text(json.dumps(scenario), encoding="utf-8", newline="\n")
+
+    # Round 0 admits a1 and a2; round 1 admits a1 and refuses a2's fourth attempt.
+    results, (manifest,), (run_dir,) = execute(
+        tmp_path, wire, RequestBudget(max_episode_attempts=3), replies=[response()] * 3)
+    assert results[0].status == "failed"
+    assert results[0].failure_reason == (
+        "policy error for a2: ProviderError: provider request budget exhausted: " + EPISODE
+    )
+    assert manifest["request_budget"]["admitted"] == {"episode": 3, "run": 3}
+    assert manifest["request_budget"]["stop_reason"] == EPISODE
+    assert manifest["provider_usage"]["a1"]["request_attempts"] == 2
+    assert manifest["provider_usage"]["a2"]["request_attempts"] == 1
+    assert len(wire[1]) == 3
+    assert replay_run(run_dir).chains_match
 
 
 def test_429_with_unknown_usage_stops_before_the_retry_and_its_sleep(tmp_path, wire, monkeypatch):
@@ -272,6 +306,28 @@ def test_branch_refuses_a_network_policy_that_does_not_share_the_budget(tmp_path
     assert not (tmp_path / "child").exists()
 
 
+@pytest.mark.parametrize("supply_other_budget", [False, True])
+def test_budgeted_network_override_requires_the_explicit_matching_budget(
+        tmp_path, wire, supply_other_budget):
+    _, _, (parent,) = execute(tmp_path, wire, None, replies=[response()] * 3)
+    fork = FileCheckpointStore(parent / "checkpoints").list_seqs()[0]
+    budget = RequestBudget(max_run_attempts=9)
+    policy = build_openai_compatible_policy("a1", NarrativeSkin(skin_id="plain"), PARAMS,
+                                            budget=budget)
+    before = budget.snapshot()
+    arguments = {"request_budget": RequestBudget(max_run_attempts=9)} if supply_other_budget else {}
+    wire[0].extend([response()] * 2)
+
+    with pytest.raises(ValueError, match="share the continuation's request_budget"):
+        branch_run(parent_dir=parent, fork_seq=fork, child_dir=tmp_path / "child",
+                   child_run_id="child", policy_overrides={"a1": policy},
+                   allow_provider_requests=True, **arguments)
+
+    assert not (tmp_path / "child").exists()
+    assert len(wire[1]) == 3  # Parent requests only; rejection precedes any continuation work.
+    assert budget.snapshot() == before
+
+
 def test_scripted_child_of_a_budgeted_parent_does_not_inherit_its_budget(tmp_path, wire):
     from collaborative_hill.agents.scripted.ec_policies import ECFreeriderPolicy
 
@@ -281,6 +337,68 @@ def test_scripted_child_of_a_budgeted_parent_does_not_inherit_its_budget(tmp_pat
     branch_run(parent_dir=parent, fork_seq=fork, child_dir=tmp_path / "child",
                child_run_id="child", policy_overrides={"a1": ECFreeriderPolicy()})
     assert "request_budget" not in json.loads((tmp_path / "child" / "manifest.json").read_text())
+
+
+@pytest.mark.parametrize(("settings", "stop_reason"), [
+    ({"max_episode_attempts": 0}, EPISODE),
+    ({"max_run_attempts": 0}, RUN),
+    ({"deadline_seconds": 0}, "deadline_exceeded"),
+    ({"cancelled": lambda: True}, "cancelled"),
+    ({"max_run_attempts": 3}, None),
+    (None, None),
+])
+def test_analysis_exclusions_distinguish_budget_stops_from_provider_errors(
+        tmp_path, wire, settings, stop_reason):
+    write_primary_study(tmp_path / "study")
+    budget = RequestBudget(**settings) if settings is not None else None
+    _, _, (run_dir,) = execute(tmp_path, wire, budget, replies=[TimeoutError(SECRET)])
+
+    result = CliRunner().invoke(app, ["analyze", str(run_dir.parent.parent)])
+    assert result.exit_code == 0, result.output
+    analysis = json.loads(result.output)
+    assert analysis["episodes"] == []
+    assert analysis["exclusions"] == [{
+        "run_path": "agg-priv/agg-priv-r000", "condition_id": "agg-priv",
+        "reason": "run_failed", "detail": "RunFailed", "replicate": 0,
+        "study_hash": analysis["study_hash"], "stop_reason": stop_reason,
+    }]
+    assert analysis["attrition"]["per_cell"]["agg-priv"]["failed"] == 1
+    assert SECRET not in result.output
+
+
+@pytest.mark.parametrize(("limit", "recorded_reason"), [
+    (0, RUN), (0, None), (0, SECRET), (1, EPISODE),
+])
+def test_analysis_rejects_budget_stop_metadata_that_disagrees_with_the_seal(
+        tmp_path, wire, limit, recorded_reason):
+    write_primary_study(tmp_path / "study")
+    _, (manifest,), (run_dir,) = execute(
+        tmp_path, wire, RequestBudget(max_episode_attempts=limit), replies=[TimeoutError(SECRET)])
+    manifest["request_budget"]["stop_reason"] = recorded_reason
+    (run_dir / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8", newline="\n")
+
+    result = CliRunner().invoke(app, ["analyze", str(run_dir.parent.parent)])
+    assert result.exit_code == 0, result.output
+    analysis = json.loads(result.output)
+    assert analysis["exclusions"] == [{
+        "run_path": "agg-priv/agg-priv-r000", "condition_id": "agg-priv",
+        "reason": "invalid_or_unsealed_artifact", "detail": "ValueError",
+    }]
+    assert SECRET not in result.output
+
+
+def test_analysis_retains_a_sealed_budget_stop_without_optional_manifest_metadata(tmp_path, wire):
+    write_primary_study(tmp_path / "study")
+    _, (manifest,), (run_dir,) = execute(tmp_path, wire, RequestBudget(max_run_attempts=0))
+    del manifest["request_budget"]
+    del manifest["failure_reason"]
+    (run_dir / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8", newline="\n")
+
+    result = CliRunner().invoke(app, ["analyze", str(run_dir.parent.parent)])
+    assert result.exit_code == 0, result.output
+    exclusion, = json.loads(result.output)["exclusions"]
+    assert exclusion["reason"] == "run_failed"
+    assert exclusion["stop_reason"] == RUN
 
 
 @pytest.mark.parametrize("bad", [-1, True, 1.5, "3"])

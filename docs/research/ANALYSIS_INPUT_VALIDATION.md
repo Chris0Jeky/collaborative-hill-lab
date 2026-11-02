@@ -65,6 +65,16 @@ the validated study's identity or comparison population. Eligible failed
 episodes remain in the failure counts, and a study with no completed episodes
 still reports the seed protocol recorded in its failed runs.
 
+Each eligible `run_failed` exclusion includes `stop_reason`: the stable provider
+budget code from its verified terminal seal, or null when no known budget stop
+is recorded. This distinguishes a request-attempt limit, deadline, or cooperative
+cancellation from an ordinary provider failure without copying raw error text.
+An optional manifest `request_budget` record must agree with the sealed code;
+inconsistent metadata is an `invalid_or_unsealed_artifact`. Missing optional
+budget metadata does not erase a code retained in the seal. These stops still
+count as failed attempted episodes; no outcome is imputed and no new exclusion
+rule is chosen for scientific analysis.
+
 Attrition counts describe discovered artifacts. A completely absent run
 directory cannot be counted from the input alone; the analysis does not infer
 an unrecorded planned sample size or invent missing outcomes.
