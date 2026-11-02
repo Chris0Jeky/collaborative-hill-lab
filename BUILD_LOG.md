@@ -918,3 +918,193 @@ never reached main.
 `make mutants` with seed 20261030 and 6 mutants per file killed 55 of 72 using fast tests
 only. After the metric oracles, a sample of 16 metric mutants killed 15, and the last
 survivor gained its own test. Verification reruns add no scientific samples.
+
+## 2026-11-02 — EC rule ablations, declared noisy corpora and review fixes
+
+Completed the authorized offline follow-ups for #92, #95 and #96 in separate
+checkouts and published reviewable draft PRs. At this checkpoint: noisy-corpus
+PR #99 is at `f501a9a`, ablation PR #100 at `985defa`, provider PR #101 at
+`66f50ce`, and lab PR #102 at `c0e810b`. PR #101 merged as
+`a23a68a5bf8f04cd7bfd0be0293cfd9062ebdbff` after both exact-head jobs passed
+CI 41385412412 and their logs were inspected; merge tree `8600b02` matches its
+tested head. PR #99 passed both jobs in CI 41386097110, with logs inspected, and
+remains a draft. No other merge is claimed here. Local integration includes later
+review/type corrections `4306a2b` and `344b5e2` and has passed the complete local
+gate. PRs #100 and #102 have passed Ubuntu; Windows and final integration remain
+pending. Historical build-log entries and human-owned decisions are retained.
+
+### Research designs, execution and findings
+
+For #95, committed the complete four-component design and literal outcome table
+before implementation. Local design `2ea2d56` maps to public `dde9b1b`; clean
+execution source `160ed5b` maps to public `768c9a7`, with identical tree
+`894ba0718172fba36985dd019e7972b188e8a619`. Both publications preceded original
+`python experiments/ec-rule-ablation/ec_rule_ablation.py --out artifacts/ec-rule-ablation-20261102`.
+
+The separately named ablation policy exposes screening, contradiction sharing,
+challenges and the read-citation requirement without editing either v1 rule.
+All 16 settings in six contexts and two hidden truths were retained: 192 behavioral
+episodes, 96 fixed-action controls and 288 complete replays. All P1–P6 held,
+including every hand-derived outcome. The readout keeps 384 single-component
+contrasts and 396 higher-order contrasts with their conditioning bits and nulls.
+The limited-inspection probe isolates citation reading; enabling it removes one
+accepted slot under either truth and saves two effort units. Sharing, challenge
+priority, finite time and quorum reopening explain nonadditive effects. All
+96 truth pairs retain identical observations/actions, and 24 endpoints match the
+unchanged conditional/skeptical typed actions. No prediction was revised.
+
+For #96, local design `ecbc31c` maps to public `c675c63`; clean execution source
+`f8c466d` maps to public `f04fa8a`, with identical tree
+`606be7f7fb5952b7b701c1fd29505667f0c17954`. Both publications preceded original
+`python experiments/noisy-corpus/noisy_corpus.py --out artifacts/noisy-corpus-original`.
+All 64 behavioral worlds, 64 same-action controls and 128 complete replays were
+retained. P1–P8 held. Six exact source-error rates and independent/fully correlated
+error models reweight those same outcomes; they do not add samples.
+
+At independent error `e=1/10` with distinct labels, skepticism raises selective
+accuracy from `9/10` to `729/730`, lowers acceptance from `1` to `73/100`, and
+lowers signed quality from `48/5` to `1092/125`. Its exact quality contrast is
+`-12 e(1-e)(1-2e)`. Fully correlated distinct labels give identical expected
+outcomes under both rules; collapsed labels make the skeptic abstain even with
+perfect evidence. These findings depend on declared synthetic assumptions and
+retain effort and utility separately.
+
+ADR-0017 also implements the strict standalone `ec-audit-observation@1` contract
+and fixed-time public projection, with exact declared accuracy and explicit
+unavailability. It supplies no audit-enabled engine or demonstrated audit accuracy.
+Issue #103 now carries the six remaining version/hash, generator, engine/event,
+policy, integrated-test and pre-execution-design gates. Original #96's corpus
+model and versioned observation-contract deliverables are complete.
+
+### Provider and lab corrections
+
+The provider slice rejects omitted/mismatched budget objects for budgeted network
+continuations before requests or child output, records cumulative continuation
+admissions, and carries stable budget stop codes into failed-run analysis. Tests
+cover shared-agent episode limits and inconsistent manifest/seal accounting.
+The guide states what abrupt termination cannot establish: counters are in memory,
+there is no per-request checkpoint, and an unsealed artifact cannot supply final
+requests, billing or a stop cause. Unlimited execution remains valid when no
+budget is configured; no default limit or live-run decision was introduced.
+
+The retry fixture failure was traced to globally replacing `time.sleep`, which
+also affected subprocess provenance collection. Five fixture clock bindings now
+patch the provider seam only. The provider branch passed 1,374 full-suite tests
+and 153 independent focused cases; all requests were mocked.
+
+The lab now validates branch ancestry and effective policies from sealed artifacts,
+labels inherited-prefix actions and separates counterfactual summaries. Independent
+review reproduced pooling when branches reused the default run ID and a rendering
+crash for malformed seed fields. Four expected failing regressions preceded
+`4306a2b`; 25 focused lab tests and independent re-review pass. The shared recorded-
+seed validator follow-up is tracked separately as #104 and is still in progress.
+
+### Verification and evidence retention
+
+The ablation slice passed 208 focused tests and its full 1,475-case suite. Its
+original `--check` reproduced JSON/Markdown while replaying all regenerated runs;
+the unchanged quality-safeguards check reproduced the original 440+220 readout.
+The noisy-corpus slice passed 158 focused tests, `make check`, `make validate` and
+its 128-run regeneration gate. Fresh independent science reviews approved both
+experiments and checked the original artifacts, input controls and exact arithmetic.
+
+Added `make check-noisy-corpus` and `make check-ec-rule-ablation` to persistent CI;
+the existing quick selector picks them automatically. The new ablation target's
+strict standalone mypy pass first exposed four errors. Commit `344b5e2` fixes
+tuple unpacking, removes obsolete ignores and asserts the paired root is non-null.
+Ruff, strict mypy over both modules and the complete 288-run replay/readout gate
+then passed. Independent integration review verified all 62 original source
+commitments and the public design/source trees and approved this correction.
+Original source records and readout bytes were not rewritten.
+
+The combined local `make check test validate acceptance check-atlas check-study002
+check-responsive check-quality-safeguards check-graph check-sparse-ptft
+check-noisy-corpus check-ec-rule-ablation` exited successfully. The full suite
+collected 1,658 tests; every listed standalone gate passed and preserved the original
+research readouts. Remaining exact published-head Windows checks and final merges
+are separate obligations. No additional merged status is claimed.
+
+Preserved the two original experiments in
+`collaborative-hill-original-evidence-2026-11-02.zip`: 416 sealed runs, 61,400 events
+(12,296 noisy-corpus and 49,104 ablation), 1,930 original files and 54,450,912
+original bytes. All source-commit, clean-worktree, dependency-lock, seal, scenario
+and manifest bindings pass; all terminal hashes match their retained readouts.
+Original readout/provenance bytes match Git, and original file contents are unchanged.
+The archive has 1,936 entries: the original files plus two public-source mappings,
+a manifest, README, repack script and checksums. Size is 6,130,217 bytes; SHA-256:
+
+```text
+ca58443e691fcd74f7b2311c1aaee825e577f551f7da46f0f1d3e9870504a17a
+```
+
+Each experiment's `PUBLISHED_SOURCE.json` preserves the actual original clean
+local commit and equal public source tree; 62 ablation and 61 noisy-corpus source
+digests were checked. Regeneration gates replay newly regenerated sealed runs and
+compare retained readouts; the raw archive has its separate original-evidence audit.
+No old experimental evidence or any of the four unfrozen StudySpecs changed. No
+real/paid provider, study freeze, final-weight selection or human decision was used.
+
+## 2026-11-02 — core merges and shared recorded-seed validation (#104)
+
+This checkpoint supersedes the earlier same-day draft status. The four core PRs
+merged after both Ubuntu and Windows passed on their exact published heads,
+their job logs were inspected and each merge tree was checked against its tested
+head. Issues #92, #95, #96 and discovered #98 are closed.
+
+| PR | Tested head | Merge | Exact-head CI |
+|---|---|---|---|
+| [#99](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/99) | `f501a9a` | `a166a55` | [41386097110](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/41386097110) |
+| [#100](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/100) | `985defa` | `c5f2fa2` | [41386233859](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/41386233859) |
+| [#101](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/101) | `66f50ce` | `a23a68a` | [41385412412](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/41385412412) |
+| [#102](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/102) | `c0e810b` | `ff3c3e1` | [41386055377](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/41386055377) |
+
+The lab review's shared-validator follow-up #104 is implemented and independently
+reviewed. Local `a7e40e169fc817d93c783df7887a756056cdb10d` and public PR #105 head
+`bdc3de068c07a8e61f8db398e6d68a235cf7cb70` share tree
+`be5962d74c4fb1d515428e88fc69ccb5f0c65a02`. Its
+[PR](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/105) and
+[CI 41387542882](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/41387542882)
+retain the hosted check and merge record; the counts below describe completed
+local verification.
+
+The change validates seed roots, protocol and scenario block in both the manifest
+and hash-valid `RunStarted` payload before string conversion. Malformed recorded
+values raise `ValueError` before replay or branching creates output; the CLI exits
+2 with an error message and no traceback. No source artifacts are repaired or
+rewritten. Mechanism-root binding remains enforced for both protocols. Valid
+integer/string aliases, empty mechanism-root prefixes, absent legacy protocol
+fields, paired streams and replay hashes remain unchanged. Source comparison
+confirmed `derive_seed`, `rng_for` and `study_seed_roots` are exactly unchanged.
+
+The author reproduced 53 failing-before cases. All 119 focused cases and 303
+targeted cases then passed. The full suite passed all 1,762 tests in 209.87 seconds;
+Ruff, strict mypy over 54 package files, all four StudySpecs, 11 acceptance
+scenarios and the quality-safeguards/noisy-corpus/ablation gates also passed.
+Independent read-only review of the exact local head passed these commands with
+the shared interpreter and `PYTHONPATH=src`:
+
+```bash
+python -m pytest -q tests/unit/test_seed_protocol.py tests/integration/test_recorded_seed_validation.py
+python -m pytest -q tests/property/test_seed_properties.py tests/integration/test_seed_protocol.py tests/metamorphic/test_replay_determinism.py tests/metamorphic/test_branch_prefix.py
+```
+
+Those commands passed 119 and 23 tests respectively. Additional actual runs with
+empty mechanism roots passed parent and child replay under both protocols,
+preserved byte-identical branch prefixes and left every parent artifact byte
+unchanged. The review found no correctness or compatibility issue. Test fixtures
+rehash altered sealed starts so malformed-field checks reach the metadata trust
+boundary; CLI regressions also assert no output and no source mutation.
+
+The roadmap marks this engineering implementation complete and leads with audit
+engine integration issue #103, retaining all six ADR-0017 gates. Documentation
+records core merges separately from the seed follow-up's local and hosted evidence.
+Earlier build-log entries and experiment records remain unchanged; all four
+StudySpecs remain unfrozen and byte-identical. No live/paid provider, freeze,
+final-weight selection or human-owned decision was used.
+
+The documentation pass changed only seven authorized Markdown files. `git diff --check`
+passed; 61 relative link targets and heading anchors resolved. Comparison
+against integration base `6d2b969` confirmed that the historical HANDOFF evidence
+is unchanged and BUILD_LOG is append-only. The complete human-owned decision
+section and closing paragraphs remain byte-identical, SHA-256
+`bb98e30eb28e12a2d7c3323043244007a5d9b3f584da290fc6a5d9a48e64bafe`.

@@ -15,13 +15,17 @@ show that both structure and reciprocity policy matter, so the legacy pattern is
 structure-only effect. The longer-term target is LLM agents reasoning over evidence.
 First environment **Evidence Commons**. The lab includes observation-responsive EC
 scripts, explicitly versioned local graph N-IPD and a configurable provider transport.
+Separate EC component ablations and declared noisy-corpus models retain exact
+predictions and controls. The versioned audit projector is a contract foundation;
+engine integration remains issue #103 under ADR-0017.
 Current measured findings use synthetic scripted populations. No live provider pilot,
 paid run or human-subject experiment supports them; see `docs/PROVIDER_USAGE.md`.
 
 ## Proving checks (run from the repo root; Windows `make` needs Git Bash)
 
 Persistent GitHub Actions runs `make check test validate acceptance check-atlas
-check-study002 check-responsive check-quality-safeguards check-graph check-sparse-ptft` on the exact PR head or main commit with the committed dependency
+check-study002 check-responsive check-quality-safeguards check-graph check-sparse-ptft
+check-noisy-corpus check-ec-rule-ablation` on the exact PR head or main commit with the committed dependency
 lock. Read its job steps and logs for the current commit; green results on an older
 head are not evidence for a new one. Setup downloads dependencies, while the
 science gates make no model-provider calls. CI covers Ubuntu and Windows on Python 3.12; every text write fixes its newline because evidence commits to bytes.
@@ -48,8 +52,13 @@ an equivalent change, so triage it. Whole-episode invariants are fuzzed in
 | Graph mechanism | `python -m pytest tests/unit/test_graph_nipd.py tests/unit/test_graph_scenario.py tests/unit/test_graph_policies.py tests/metamorphic/test_graph_invariance.py tests/integration/test_graph_pipeline.py`; `make check-graph` |
 | Responsive EC | `python -m pytest tests/unit/test_ec_conditional_contributor.py tests/metamorphic/test_ec_conditional_invariants.py`; `make check-responsive` |
 | Skeptical EC rule | `python -m pytest tests/unit/test_ec_skeptical_contributor.py`; `make check-quality-safeguards` |
+| EC component ablation | `python -m pytest tests/unit/test_ec_ablation_contributor.py tests/unit/test_ec_rule_ablation.py`; `make check-ec-rule-ablation` |
+| Noisy corpus / audit contract | `make check-noisy-corpus` |
 | Sparse exact pTFT | `make check-sparse-ptft` |
 | Provider transport/workflow | `python -m pytest tests/unit/test_openai_compatible_provider.py tests/unit/test_provider_accounting.py tests/integration/test_provider_workflow.py tests/metamorphic/test_replay_provider_failure.py` (mocked transport only) |
+| Provider budgets / failure analysis | `python -m pytest tests/integration/test_provider_budget.py` (mocked requests only) |
+| Lab branch summaries | `python -m pytest tests/integration/test_lab_console.py` |
+| Recorded seed metadata | `python -m pytest tests/unit/test_seed_protocol.py tests/integration/test_recorded_seed_validation.py tests/integration/test_seed_protocol.py tests/property/test_seed_properties.py` |
 | Scenario, skin or study JSON | `make validate` and the affected standalone experiment check |
 | Sealed artifacts and replay | `make acceptance`; `make replay-smoke` additionally needs a generated run under `artifacts/` |
 | `.agent-harness/tier.json` | NOT covered by `make check` — no repo code reads it (the estate harness and session orientation do), so validate it with the vendored floor loader: `.venv/Scripts/python.exe -c "import os,sys;sys.path.insert(0,os.path.expanduser('~/.claude/hooks'));import dispatch;print(dispatch.load_tier('.'))"` |
@@ -59,6 +68,9 @@ an equivalent change, so triage it. Whole-episode invariants are fuzzed in
 - **Determinism is the product** (spec = the `engine/hashing.py` + `engine/seeds.py` docstrings):
   no floats and no wall-clock in hashed content (exact `Fraction` via `frac_str`); no global RNG —
   every draw from `rng_for(<seed path>)`, and no RNG state is ever persisted.
+- Recorded seed metadata is validated in both the manifest and sealed start before
+  string conversion or replay/branch output. Preserve valid integer/string aliases,
+  empty mechanism-root prefixes and legacy/paired behavior; never repair source artifacts.
 - An LLM is never authoritative for payoffs, world truth, evidence validity, permissions or metrics,
   and its output is never silently repaired — three paths: unparsable/schema-invalid output abstains
   (`invalid_llm_output`) after bounded retries; a provider error seals the run `RunFailed`; and only
@@ -67,5 +79,5 @@ an equivalent change, so triage it. Whole-episode invariants are fuzzed in
   tune results toward the legacy paper, never present a simulation as a prediction about humans.
 - Human-only: freezing a study (`--yes`), any paid LLM run, the `HANDOFF.md` decision list.
 - **Synthetic data only** — real human-subject data needs `sensitive_data: true` in the tier file FIRST.
-- ADR-locked (`docs/adr/0001…0015`; change = new ADR, not a refactor): own kernel + Concordia
+- ADR-locked (`docs/adr/0001…0017`; change = new ADR, not a refactor): own kernel + Concordia
   cognition-only, hash-linked ledger + CoW branches, five planes, mechanism/skin hash separation.

@@ -1,9 +1,29 @@
 # NEXT — research and engineering direction
 
-Current checkpoint: 2026-10-31. Engineering can advance with scripted agents while
+Current checkpoint: 2026-11-02. Engineering can advance with scripted agents while
 model, budget and confirmatory-study decisions remain open. The unchanged
 [human-owned decisions](HANDOFF.md#human-owned-decisions--unchanged) are the home
 for those choices.
+
+## Next feature: integrate the explicitly versioned audit channel
+
+[Issue #103](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/103) carries
+the six remaining [ADR-0017](docs/adr/0017-noisy-corpus-and-audit-contract.md) gates:
+
+1. Opt-in scenario/institution configuration, candidate/horizon validation,
+   version routing and hash binding that preserve existing v2 scenarios.
+2. Exact declared audit-error and unavailability generation with isolated seed
+   paths and a stated dependence model.
+3. Publication timing, public events, all-agent projection, checkpoint, replay
+   and branch support without leaking hidden fields.
+4. A separately versioned observation-driven audit policy.
+5. Integrated C3, timing-isolation, malformed-input, leak, seed, replay, branch
+   and legacy-hash regression tests.
+6. A separately committed design before any audit-enabled experiment.
+
+The existing schema validates declared accuracy and supplied findings; it does
+not establish either's accuracy. A perfect audit remains a synthetic trusted-oracle
+assumption. Keep that distinction explicit in any later engine or experiment.
 
 ## Completed foundations
 
@@ -36,30 +56,53 @@ for those choices.
   adjacency and explicit payoff normalization. All 18 deterministic topology
   controls match their prior predictions and replay successfully
   ([#83](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/83)).
+- **Quality safeguards (#84), sparse exact pTFT (#85), and offline provider
+  planning/budgets (#86)** are complete. The skeptical rule's 440 behavioral and
+  220 fixed-action records remain unchanged; its bundled contrast motivated the
+  separately declared follow-ups below.
 
-## Next useful increments
+## Implemented follow-ups at this checkpoint
 
-Issues #84, #85 and #86 are complete; see [HANDOFF](HANDOFF.md). Their results set
-the next offline work.
+PRs #99, #100, #101 and #102 are merged after reviewed exact-head Ubuntu/Windows
+logs and merge-tree equality checks. Issues #92, #95, #96 and #98 are closed.
+Implementation, review and verification evidence is recorded in [HANDOFF.md](HANDOFF.md).
 
-### 1. Separate the components of the skeptical rule
+- **Component ablation (#95 / [PR #100](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/100)).**
+  All 16 combinations of screen, contradiction sharing, challenges and read-citation
+  requirement are retained in six contexts and both truth worlds: 192 behavioral
+  episodes, 96 fixed-action controls, all P1–P6 and 288 replays passing. Effects
+  interact through timing and quorum; the limited-inspection probe isolates the
+  citation gate. No component distinguishes the matched hidden truths.
+- **Noisy corpora and audit contract (#96 / [PR #99](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/99)).**
+  The 64 behavioral worlds and 64 accounting controls satisfy P1–P8 under the
+  declared exact model. With independent errors, accuracy among accepted claims
+  can rise while coverage and signed quality fall; fully correlated errors give
+  a null rule contrast with distinct labels. The versioned audit projection
+  contract is implemented separately. It does not enable an audit engine.
+- **Provider-budget follow-ups (#92 / [PR #101](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/101)).**
+  Budgeted continuations reject omitted or mismatched budget objects before output or
+  requests, retain cumulative accounting, and expose stable stop reasons in
+  failed-run analysis. Shared-agent limits and interrupted-accounting boundaries
+  have offline regressions. Whether network runs must always declare a budget
+  remains an owner decision.
+- **Lab branch integrity ([PR #102](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/102)).**
+  Effective continuation policies, inherited prefixes and ancestry are validated
+  from sealed artifacts. Review fixes separate branches with matching default run
+  IDs and mark malformed seed fields broken. The 25 focused tests and re-review
+  passed before the exact-head hosted checks and merge.
+- **Shared recorded-seed validation (#104 / [PR #105](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/105)).**
+  Implementation and independent review are complete. Both manifest and sealed
+  start metadata reject malformed roots, protocols and blocks before replay or
+  branch output, preserving valid legacy/paired behavior and original artifacts.
+  The local 1,762-test suite, 303 targeted cases and relevant reproduction gates
+  passed; the PR and [CI 41387542882](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/41387542882)
+  retain the authoritative hosted check and merge record.
 
-[Issue #95](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/95). The quality-safeguards contrast bundles the screen,
-disclosure of contradicting items, challenges and the read-citation requirement.
-A labelled follow-up should vary them independently on the same fixed inputs, with
-hand-derived predictions first.
-
-### 2. Give structure a declared relation to truth
-
-[Issue #96](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/96). Observation-only rules cannot separate corpora that differ
-only in hidden truth. A corpus model with declared source noise rates, or a
-separately versioned audit channel (ADR-0013), would make a quality-sensitive rule
-testable.
-
-### 3. Provider-budget follow-ups
-
-[Issue #92](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/92) holds the remaining non-blocking items. Whether network
-runs must declare a budget is an owner decision.
+The complete combined local gate passed before the seed follow-up; the new
+`check-noisy-corpus` and `check-ec-rule-ablation` targets remain in the full gate
+and automatic quick-check selection. Preserve the original clean source mappings
+and verified 416-run evidence archive. Verification reruns do not replace original
+evidence or add samples.
 
 ## Path to a live Study 001 result
 
