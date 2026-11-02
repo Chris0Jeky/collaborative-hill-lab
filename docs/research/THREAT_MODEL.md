@@ -57,6 +57,12 @@ where the previously proposed guard has not been implemented.
   run remains rule-bound with a valid chain.
   [test_invalid_llm_output.py](../../tests/unit/test_invalid_llm_output.py) covers
   invalid JSON, unsupported action types and the illegal-action fallback paths.
+  The opt-in audit adapter in
+  [prompt_adapters.py](../../src/collaborative_hill/agents/llm/prompt_adapters.py)
+  validates its public envelope before rendering and JSON-escapes identifiers in
+  its added data section; [test_audit_prompt_adapter.py](../../tests/unit/test_audit_prompt_adapter.py)
+  checks malformed contexts and adversarial identifier delimiters. This preserves
+  the existing body format and provides no whole-prompt injection-resistance claim.
 - **Residual/gap.** A model can still be persuaded to choose a harmful **legal**
   action. The fake-provider fixture does not test resistance to persuasion. A
   dedicated clean-versus-injected prompt behavioral study is not established by
@@ -95,18 +101,49 @@ where the previously proposed guard has not been implemented.
   [EvidenceCommonsMechanism.observe](../../src/collaborative_hill/domain/world/evidence_commons.py)
   constructs the per-agent view without `true_propositions` or other agents'
   budgets, effort or credit. Candidate proposition IDs are public; the mapping
-  identifying which candidate is true is hidden. Correctness is used in terminal
-  scoring, after policy decisions, and may appear in the analyst's sealed summary.
+  identifying which candidate is true is excluded from that projection. Legacy
+  EC uses correctness in terminal scoring, after policy decisions, and it may
+  appear in the analyst's sealed summary.
+
+  The explicit opt-in [EC v3 audit mechanism](../../src/collaborative_hill/domain/world/audited_evidence_commons.py)
+  adds the declared synthetic truth-correlated channel in
+  [ADR-0018](../adr/0018-opt-in-evidence-commons-audits.md). Trusted typed code
+  consults truth for targets due now and generates reports under the configured
+  accuracy/availability law before that round's observations and decisions.
+  This intentionally released signal can convey information about truth; it is
+  distinct from an undeclared truth-map or future-verdict leak.
+  The strict [audit projection](../../src/collaborative_hill/domain/audit.py)
+  exposes only contract version, audit ID, contract hash and released findings;
+  each finding contains slot ID, proposition ID, publication round and verdict.
+  It excludes the truth map, future findings, internal draw bits and raw
+  accuracy/generation settings. The full configuration remains an analyst/harness
+  artifact, and the contract hash is intentionally public. Checkpoints retain
+  only findings already published at their boundary.
 - **Existing coverage.**
   [test_hidden_truth_leak.py](../../tests/unit/test_hidden_truth_leak.py) scans a
   full fixture's observations and ledger for the two hidden **field names**, and
   verifies the exact inspected-evidence projection. Acceptance scenario G checks
   the information boundary on its fixture.
+  [test_audit_runtime.py](../../tests/metamorphic/test_audit_runtime.py) checks
+  publication before observations, released-only checkpoint prefixes, exact event
+  payload keys and absence of hidden-truth and raw probability field names in its
+  ledger fixture. [test_audited_ec.py](../../tests/unit/test_audited_ec.py) checks
+  detached public views, rejection of future or partial publication batches,
+  and a fixed-action truth flip with equal observations before release and only
+  the audit field different at release. [test_audit_models.py](../../tests/unit/test_audit_models.py)
+  pins envelope/finding key allowlists, rejects undeclared or coerced settings,
+  and requires exactly the due report prefix. These are finite runtime/schema
+  controls, not a proof about every observation or rendered prompt.
 - **Residual/gap.** These are not tests of secret **values** through every rendered
-  prompt. An end-to-end prompt/observation canary or paired-world noninterference
-  audit remains a gap; it must distinguish the hidden truth assignment from the
-  already-public candidate IDs. Manual projections can regress, and no structural
-  check detects an answer encoded in otherwise permitted skin prose.
+  prompt. A general end-to-end prompt/observation canary or paired-world
+  noninterference audit remains a gap; it must distinguish the hidden truth
+  assignment from the already-public candidate IDs. Manual projections can
+  regress, and no structural check detects an answer encoded in otherwise
+  permitted skin prose.
+  The default legacy LLM renderer omits the audit envelope. The explicit
+  `ec-audit@1` adapter validates and renders its released public fields, with
+  captured-prompt and sealed-workflow coverage cited in T1 and T10. That bounded
+  coverage does not close the general hidden-value/prose canary gap above.
 
 ### T4 — Cross-agent leakage and unintended communication
 
@@ -133,9 +170,11 @@ where the previously proposed guard has not been implemented.
   unsupported-message rejection.
 - **Residual/gap.** There is no dedicated current-round proposal-leak sentinel
   test cited here. Aggregate observations do not provide cryptographic anonymity:
-  actors may be inferred from context. Audit payloads deliberately retain real
-  actor IDs, and the full ledger contains multiple agents' private observations;
-  handing those artifacts to an agent would bypass the intended boundary.
+  actors may be inferred from context. Some ledger event payloads deliberately
+  retain real actor IDs. `AuditPublished` findings have no actor field; their
+  ledger event's actor is `engine`. The full ledger contains multiple agents'
+  private observations; handing those artifacts to an agent would bypass the
+  intended boundary.
 
 ### T5 — Illegal actions and identity spoofing
 
@@ -197,10 +236,14 @@ where the previously proposed guard has not been implemented.
   [replay.py](../../src/collaborative_hill/engine/replay.py)'s `load_run` also checks
   scenario/manifest/terminal bindings through
   [validation.py](../../src/collaborative_hill/engine/validation.py); checkpoint
-  validation binds state hashes to sealed boundary events. Replay re-executes
-  recorded typed actions and compares event hashes. High-level reporting loads
-  verified runs; standalone metric functions require the caller to provide valid
-  events and do not independently authenticate every input.
+  validation binds state hashes to sealed boundary events. Manifest institutions
+  are strictly parsed and bound by canonical hash equality to the resolved
+  scenario's institution. Audited runs require the full audit setting; valid
+  legacy manifests can still omit their institution. Invalid or mismatched
+  claims fail before replay/branch output without rewriting source artifacts.
+  Replay re-executes recorded typed actions and compares event hashes. High-level
+  reporting loads verified runs; standalone metric functions require the caller
+  to provide valid events and do not independently authenticate every input.
 - **Existing coverage.**
   [test_event_chain.py](../../tests/unit/test_event_chain.py),
   [test_checkpoint_tamper.py](../../tests/unit/test_checkpoint_tamper.py),
@@ -210,6 +253,12 @@ where the previously proposed guard has not been implemented.
   cover corruption, mismatched/unsealed reporting and successful/failed replay.
   [test_branch_prefix.py](../../tests/metamorphic/test_branch_prefix.py) checks the
   preserved branch prefix. Acceptance C is the replay check; F is branching.
+  [test_audit_runtime.py](../../tests/metamorphic/test_audit_runtime.py) rejects
+  missing/altered audit settings, Boolean rounds, extra institution fields and
+  audits injected into legacy manifests despite a valid event chain. It asserts
+  rejection before replay/branch output and unchanged input bytes, alongside a
+  valid legacy-omission replay control. This binds displayed settings to retained
+  scenario commitments; it does not authenticate the artifact's author.
 - **Residual/gap.** These artifacts are tamper-evident, not authenticated. A writer
   able to replace the whole record and recompute all commitments can create a
   self-consistent forgery. Event `meta`, manifests and transcripts are not all
@@ -285,6 +334,14 @@ where the previously proposed guard has not been implemented.
   references and scripted chain equality.
   [test_graph_invariance.py](../../tests/metamorphic/test_graph_invariance.py)
   applies the corresponding skin control to both graph action modes.
+  [test_prompt_legacy_compatibility.py](../../tests/unit/test_prompt_legacy_compatibility.py)
+  pins literal pre-adapter v1 prompts, identities and representative ledgers.
+  The opt-in adapter fixes its renderer/template identity before observations and
+  refuses nested skin/template drift before a fake or compatible request.
+  [test_audit_prompt_workflow.py](../../tests/integration/test_audit_prompt_workflow.py)
+  captures actual released findings, prompt digests, sealed identity and fresh
+  continuation usage, with offline replay after the parent moves. These checks
+  establish implementation/provenance, not live-model behavior or interpretation.
 - **Required qualification.** Full event-chain equality in those tests requires
   the **same run configuration, identities and seeds, with no differing
   narrative-bearing `start_meta`**. Standard study execution records narrative

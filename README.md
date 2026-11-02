@@ -43,6 +43,10 @@ different accountability and information rules.
   and unavailability laws and isolated target streams. A new scripted negative-veto
   policy responds to findings. Existing EC v2 inputs, policies and replay hashes
   remain unchanged. See [audit configuration and limits](docs/AUDIT_USAGE.md).
+- **Explicit audit-aware prompts.** `prompt_renderer="ec-audit@1"` exposes validated,
+  released public findings to fake or compatible LLM providers under a distinct
+  template and policy identity. The default `legacy@1` keeps its original prompt
+  bytes and identities. [Configuration and offline scope](docs/PROVIDER_USAGE.md#opt-in-audit-aware-evidence-commons-prompts).
 - **Configurable provider transport.** An optional OpenAI-compatible Chat
   Completions adapter records requested/reported models and measured request
   usage. Explicit execution opt-in, bounded retries, redacted errors and
@@ -263,7 +267,7 @@ flowchart TD
 
 The mechanism controls world truth, legality and payoffs. Policies see only allowed
 observations; scorers do not influence live execution. Decisions and rationale are
-in [ADRs 0001–0018](docs/adr/) and the [foundation review](docs/FOUNDATION_REVIEW.md).
+in [ADRs 0001–0019](docs/adr/) and the [foundation review](docs/FOUNDATION_REVIEW.md).
 
 ## Scientific limits
 
@@ -282,9 +286,12 @@ which claim is false. The noisy-corpus results add an explicit synthetic relatio
 between source reports and truth; they do not calibrate real sources. Accuracy
 conditional on acceptance, coverage, signed quality, effort and utility remain
 separate outcomes. The opt-in audit channel supplies synthetic truth-correlated
-reports under a declared law; it supplies no deployed accuracy estimate. Its
-responsive policy is scripted. The current LLM prompt renderer omits the audit
-envelope, so these results do not establish model access or response to audits.
+reports under a declared law; it supplies no deployed accuracy estimate. The
+original audit-feedback result measures a scripted policy. The separate
+`ec-audit@1` LLM renderer now exposes validated public findings, while the default
+legacy renderer remains unchanged. Fake-provider and intercepted-request checks
+verify the supplied prompt and provenance; a live model's response and any
+benefit require a separately declared experiment.
 
 Graph comparisons must hold policy, defector placement and payoff aggregation
 explicit. Pairwise cooperation counts directed edge votes; neighbourhood

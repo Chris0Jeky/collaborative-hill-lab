@@ -22,10 +22,12 @@ scheduled public findings, replay/branch support and a separate scripted veto po
 The declared audit-feedback experiment and independent original-artifact audit are
 complete in [PR #107](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/107);
 the complete local gate passed. Use that PR for final hosted checks and merge status.
-The legacy LLM renderer omits audit findings. The planned ADR-0019 follow-up
-([#108](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/108)) has an
-approved design and separate implementation in progress for an explicit audit-aware
-renderer that preserves legacy prompt bytes and hashes.
+The legacy LLM renderer omits audit findings. ADR-0019 and
+[PR #109](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/109) implement an
+explicit `ec-audit@1` renderer with fixed policy/template identity and strict public
+projection. Legacy prompt bytes and hashes are preserved; fake-provider and
+intercepted HTTP checks cover its integration. The PR records final verification
+and merge evidence.
 Current measured findings use synthetic scripted populations. No live provider pilot,
 paid run or human-subject experiment supports them; see `docs/PROVIDER_USAGE.md`.
 
@@ -77,6 +79,7 @@ an equivalent change, so triage it. Whole-episode invariants are fuzzed in
 | Noisy corpus / audit contract | `make check-noisy-corpus` |
 | Audit runtime / scenario | `python -m pytest tests/unit/test_audit_models.py tests/unit/test_audit_scenario.py tests/unit/test_audited_ec.py tests/metamorphic/test_audit_runtime.py tests/metamorphic/test_audit_legacy_compatibility.py` |
 | Audit policy / feedback experiment | `python -m pytest tests/unit/test_ec_audit_contributor.py tests/unit/test_audit_feedback.py tests/unit/test_audit_feedback_execution.py`; `make check-audit-feedback` |
+| Audit LLM prompts | `python -m pytest tests/unit/test_prompt_legacy_compatibility.py tests/unit/test_audit_prompt_adapter.py tests/unit/test_audit_prompt_configuration.py tests/integration/test_audit_prompt_workflow.py` (fake/intercepted providers only) |
 | Sparse exact pTFT | `make check-sparse-ptft` |
 | Provider transport/workflow | `python -m pytest tests/unit/test_openai_compatible_provider.py tests/unit/test_provider_accounting.py tests/integration/test_provider_workflow.py tests/metamorphic/test_replay_provider_failure.py` (mocked transport only) |
 | Provider budgets / failure analysis | `python -m pytest tests/integration/test_provider_budget.py` (mocked requests only) |

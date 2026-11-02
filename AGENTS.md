@@ -37,7 +37,7 @@ MechanismEngine → runner (optional round preparation → observe → propose t
 validate → resolve → checkpoint → seal) → hash-linked `events.jsonl` → replay/branch →
 metrics → reports. LLMs act only
 through the typed-action gate; they never resolve or score world state. Decisions:
-`docs/adr/0001…0018`; synthesis: `docs/FOUNDATION_REVIEW.md`. Legacy `nipd` keeps
+`docs/adr/0001…0019`; synthesis: `docs/FOUNDATION_REVIEW.md`. Legacy `nipd` keeps
 its complete-population contract; `nipd_graph` explicitly selects local graph rules.
 An explicit required audit institution selects the separate EC v3 mechanism and
 observation schema; legacy EC v2 serialization, hashes and behavior remain unchanged.
@@ -133,11 +133,13 @@ The complete local gate passed.
 fixtures in a temporary directory, replays them and compares retained readouts.
 It does not replace or rewrite the original evidence. Current audit-response
 results use a scripted policy and synthetic accuracy/availability assumptions.
-The legacy LLM renderer omits the audit envelope; the planned ADR-0019 follow-up
-([#108](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/108)) defines an
-explicit audit-aware renderer while preserving legacy prompt bytes and hashes.
-Its design is approved and implementation is in progress; no live-model audit
-result is claimed.
+The legacy LLM renderer omits the audit envelope. ADR-0019 and
+[PR #109](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/109) add an explicit
+`ec-audit@1` renderer while preserving legacy prompt bytes and hashes. The adapter
+strictly projects public findings, fixes its identity before observations and
+rejects non-EC use before study/branch output. Fake-provider and intercepted HTTP
+checks cover prompting, provenance, replay and continuation; no live-model audit
+result is claimed. Use the PR for final verification and merge evidence.
 
 ## 7. How to add things
 

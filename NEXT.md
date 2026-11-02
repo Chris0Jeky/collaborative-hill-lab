@@ -5,31 +5,30 @@ model, budget and confirmatory-study decisions remain open. The unchanged
 [human-owned decisions](HANDOFF.md#human-owned-decisions--unchanged) are the home
 for those choices.
 
-## Next feature: versioned audit-aware LLM prompts
+## Next research step: a separately declared model pilot
 
-[Issue #108](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/108) has an
-approved design and a separate implementation in progress. The current LLM EC
-renderer enumerates ordinary fields and omits the new audit envelope. The
-completed audit-feedback result therefore measures the scripted veto policy.
+The audit core is merged in
+[PR #107](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/107), closing
+[#103](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/103). Both platforms
+passed the complete verification/reproduction gate on the published head, and the
+merge has the identical tested tree. [HANDOFF.md](HANDOFF.md) records the exact
+commits, logs and original-evidence commitments.
 
-The follow-up must expose the validated, already-public envelope through an
-explicitly versioned renderer while preserving legacy prompt bytes and template
-hashes. Its offline checks must cover an absent channel, no published findings,
-positive/negative/unavailable reports, malformed envelopes, and the absence of
-hidden truth or future findings. Missing reports cannot establish future selection.
-Correct rendering establishes what a model would receive; it does not establish
-how a live model responds or whether audits improve its outcomes. Any measured
-LLM effect still needs a separately declared experiment and the human decisions
-listed below.
+The separately selected `ec-audit@1` LLM prompt adapter is implemented and
+independently reviewed in
+[PR #109](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/109) for
+[#108](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/108). Its 108 focused
+offline cases cover strict public projection, absent/empty/unavailable channels,
+fixed identity, legacy bytes, retry/accounting, preflight rejection, sealed replay
+and continuation. Use the PR for the final integrated and hosted verification
+and merge record. The original audit-feedback result remains a scripted-policy
+experiment; the adapter establishes what is supplied to a provider, with no
+measured live-model response or benefit.
 
-Issue [#103](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/103)'s six
-ADR-0017 gates are implemented under
-[ADR-0018](docs/adr/0018-opt-in-evidence-commons-audits.md). Its original experiment
-and independent artifact audit are complete in
-[PR #107](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/107), which is
-not merged at this checkpoint. The integrated local 2,063-test suite and complete
-verification/reproduction gate passed; final hosted checks and merge are pending.
-Use the PR for the authoritative final-head/check/merge record.
+A live effect needs its own declared experiment, model/version, institution and
+weight choices, cost ceiling and stopping rule. The existing human decisions and
+the pilot sequence below remain the prerequisites. Later engineering directions
+remain available when a concrete experiment requires them.
 
 ## Completed foundations
 
@@ -115,11 +114,18 @@ Implementation, review and verification evidence is recorded in [HANDOFF.md](HAN
   selective accuracy, coverage and signed quality; the assumed audit law is not
   a measured accuracy claim. The [original-evidence record](experiments/audit-feedback/ORIGINAL_EVIDENCE.md)
   preserves the pre-execution source mapping and 947-file original inventory.
+- **Audit-aware LLM prompting (#108 / [PR #109](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/109)).**
+  ADR-0019 adds an explicit policy-owned renderer with a fixed template/policy
+  identity, strict public projection and early non-EC rejection. Literal legacy
+  fixtures remain unchanged. Fake-provider and intercepted-request checks verify
+  actual prompts, identity, usage, replay and continuation; they do not measure
+  model interpretation or a scientific audit effect.
 
 The earlier combined local gate and 416-run noisy-corpus/ablation archive remain
 historical evidence. The current audit integration also passed the complete local
 gate, including all 76 audit runs, four branch fixtures and 720 exact rows in
-`check-audit-feedback`. Final hosted checks and merge remain separate obligations.
+`check-audit-feedback`; the exact published core also passed Ubuntu and Windows
+checks before merge. The prompt follow-up has its own final-head verification.
 Preserve both original archives and their actual clean source records.
 Verification reruns do not replace evidence or add samples.
 

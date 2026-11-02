@@ -1221,3 +1221,95 @@ the integrated evidence files. The historical handoff body is unchanged apart
 from its two checkpoint headings, and BUILD_LOG is append-only. The human-owned
 decisions and closing paragraphs remain byte-identical, SHA-256
 `bb98e30eb28e12a2d7c3323043244007a5d9b3f584da290fc6a5d9a48e64bafe`.
+
+## 2026-11-02 — Audit core merge and separate LLM prompt adapter
+
+Merged [PR #107](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/107) at
+`3caf6d8fcc58f8627aaec0a8a92ff032fd82f689`, closing #103, after inspecting both
+complete logs in [CI 41454553709](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/41454553709).
+The tested head `7ea6f236692f58c0db80889ac5f668139de305d1` and merge share tree
+`4ad2a6b737d66ae51c7e484aa947d3a13732a9bb`. Ubuntu passed all 2,063 tests; Windows
+passed 2,062 with one skip. Both passed all four StudySpec validations, all 11
+acceptance scenarios, every historical research gate and the new audit reproduction,
+then verified exact checkout identity and cleanliness. The merge's check run is
+[41456028690](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/41456028690).
+
+The separately scoped #108 implementation is in draft
+[PR #109](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/109), based on the
+actual merged main. Its initial public head `72645ddbf24acc6fe1e4a750d62e895049f47ef7`
+matches local `14a62c8a695cb0bda377412d05f4bd2524a13afa` at tree
+`4f184c0a070353fdedd9b8cc2f383210f0ea8c6d`; later integrated checks and publication
+are separate evidence. Repository inspection and publication use the connected
+GitHub tools; the local merged commit was reconstructed from its verified signed
+payload and exact tree, with no shell GitHub networking.
+
+ADR-0019 was committed before implementation. Literal pre-change v1 prompt,
+identity, retry, metadata and ledger fixtures were committed before source edits
+(fixture SHA-256 `98503f015754f9decb98c602435aa32204c51880e8dc2a7e5affa70749c5e035`).
+The opt-in `ec-audit@1` binding uses a fixed template identity and `@2` policy label;
+default/explicit legacy prompting retains prior behavior. The renderer validates
+strict public findings and EC round/candidate context, distinguishes missing and
+unavailable information, and rejects opt-in skin/template drift before a request.
+It adds no HTTP transport field or authority to the findings.
+
+Failing-first evidence included 55 absent core-behavior cases and 19 factory cases.
+Independent review then found an effective-override path that bypassed EC-only
+preflight; fake and compatible regressions failed before the correction. The fix
+preserves valid scripted/legacy replacements of unused originals. Actual branch
+tests now prove rejection before output. Independent intercepted-request checks
+verified the template/provider suffix, actual prompt digest, measured usage and
+zero calls/accounting on invalid envelopes or drift.
+
+The final author slice `b6d441cb` has **108 focused passing cases**: 57 adapter,
+31 configuration, 13 literal legacy and seven sealed workflow cases. The reviewer
+independently reran all of them, plus 14 credential/network-free preflight probes
+and an audit-off EC study with nine absent-channel prompts. Sealed tests cover
+released findings, prompt digests, fixed identities, unknown usage, byte-identical
+branch prefixes, fresh continuation and offline replay after parent relocation.
+Two added tests cover audit-mode format repair and bounded exhaustion, with
+independently calculated actual prompt digests and exactly two unknown-usage
+attempts. Ruff and strict mypy over 58 package files passed in the implementation
+worktree. No blocking review finding remains; the complete merged-main local and
+final published-head hosted gates remain the next verification stage.
+
+Updated usage, claims, roadmap and handoff to distinguish the implemented prompt
+path from the original scripted findings. Architecture and threat-model updates
+cover released audit information and strict institution binding while preserving
+the broader hidden-value, persuasion and authenticity limits. Human/tier authority
+and original science inputs, source records and readouts are unchanged. No live
+provider call, model selection, final weights or study freeze is part of this work.
+
+### Integrated follow-up verification and final documentation review
+
+The complete local command on clean `db6efe00c543525ccc4c0e5fc9adf9a3dc0877f1` exited 0:
+
+```sh
+make check test validate acceptance check-atlas check-study002 check-responsive check-quality-safeguards check-graph check-sparse-ptft check-noisy-corpus check-ec-rule-ablation check-audit-feedback
+```
+
+The full suite passed **2,171 cases with no skips or failures**. Ruff, strict
+package/experiment typing, all four StudySpec validations, all 11 acceptance
+scenarios and every historical research reproduction passed. Audit feedback
+reproduced 76 runs, 76 original-chain replays, four separate branch fixtures and
+720 exact-law rows. The gate left the checkout clean. The later edits correct
+documentation and record these results; they change no production/test bytes.
+
+The core merge's [CI 41456028690](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/41456028690)
+also passed on exact merge `3caf6d8f`, with both complete logs inspected: Ubuntu
+2,063 passed; Windows 2,062 passed and one skipped; every research step and final
+identity/cleanliness guard succeeded.
+
+Independent documentation review confirmed the 108 focused cases from their
+static definitions and found two stale pre-merge/future-work statements plus an
+ambiguous reference to an empty envelope. Those were corrected to merged core,
+implemented opt-in renderer, and envelopes with no published reports. General
+hidden-value/prose-canary, persuasion and authenticity limitations remain explicit.
+Protected authority and the human-owned tail remain exact; BUILD_LOG is append-only.
+
+Final read-only evidence preservation matched the original inventory exactly:
+**947 files / 10,283,384 bytes**, with zero missing, unexpected or changed files.
+The saved ZIP remains **1,515,408 bytes**, SHA-256
+`338f6a15611f4ae8d4db69140d44c857686ab633cda55489b346fab03ff36fe1`.
+No replay or regeneration was used for that preservation check. PR #109 retains
+the final published-head hosted checks and merge record as their authoritative
+evidence; the earlier initial-head run is not its final merge gate.

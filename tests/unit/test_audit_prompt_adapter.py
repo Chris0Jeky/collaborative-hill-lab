@@ -1,5 +1,6 @@
 """Audit-aware prompting is an explicit fixed policy, with public data only."""
 
+import hashlib
 import importlib
 import json
 import random
@@ -132,6 +133,55 @@ def test_public_reports_are_rendered_in_canonical_order_without_mutating_input()
     assert audit_data(prompts[0])["envelope"]["reports"] == reports[::-1]
     obs["audit"]["reports"].reverse()
     assert obs == before
+
+
+@pytest.mark.parametrize("second_response,action_type", [
+    pytest.param(GOOD, "withhold", id="repaired"),
+    pytest.param("still not JSON", "abstain", id="bounded-exhaustion"),
+])
+def test_audit_format_retries_keep_public_data_and_record_actual_prompt_usage(
+    second_response, action_type,
+):
+    prompts = []
+    script = ["not JSON", second_response]
+
+    def respond(prompt, index):
+        prompts.append(prompt)
+        return script[index]
+
+    provider = FakeProvider(respond)
+    policy = LLMPolicy("a1", provider, NarrativeSkin(skin_id="plain"),
+                       max_retries=1, prompt_renderer="ec-audit@1")
+    identity = policy.policy_id, policy.prompt_template_hash
+    obs = observation((report(), report("unavailable", proposition="p1b")))
+    proposal = policy.propose(obs, random.Random(1))
+    assert proposal.action.type == action_type
+    if action_type == "abstain":
+        assert proposal.action.reason == "invalid_llm_output"
+    assert provider.calls == policy.call_count == len(prompts) == 2
+    assert (policy.policy_id, policy.prompt_template_hash) == identity
+    assert audit_section(prompts[0]) == audit_section(prompts[1])
+    assert all(audit_data(prompt) == {"status": "present", "envelope": obs["audit"]}
+               for prompt in prompts)
+    assert "Your previous reply was invalid" not in prompts[0]
+    assert prompts[1].startswith(prompts[0] + "\n## Your previous reply was invalid:")
+    assert [row["attempt"] for row in policy.transcript] == [0, 1]
+    assert [row["raw_text"] for row in policy.transcript] == script
+    assert [row["prompt_sha256"] for row in policy.transcript] == [
+        hashlib.sha256(prompt.encode("utf-8")).hexdigest() for prompt in prompts]
+    assert policy.transcript[0]["outcome"].startswith("invalid:")
+    assert (policy.transcript[1]["outcome"] == "parsed") == (action_type == "withhold")
+    assert all(row["input_tokens"] is None and row["output_tokens"] is None
+               for row in policy.transcript)
+    fields = llm_manifest_fields({"a1": policy})
+    assert fields["prompt_template_hashes"] == {"a1": PLAIN_HASH}
+    assert fields["provider_usage"]["a1"] == {
+        "completion_calls": 2, "request_attempts": 2,
+        "known_input_tokens": 0, "known_output_tokens": 0,
+        "input_measured_attempts": 0, "output_measured_attempts": 0,
+        "input_tokens": None, "output_tokens": None,
+    }
+    assert fields["input_tokens"] is fields["output_tokens"] is fields["cost_usd"] is None
 
 
 @pytest.mark.parametrize("damage", [
