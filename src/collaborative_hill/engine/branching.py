@@ -63,14 +63,13 @@ def _begin_budgeted_continuation(policies: dict[str, Any], budget: Any) -> None:
     """Require one shared budget object, then mark the fork without resetting it."""
     from collaborative_hill.agents.llm import LLMPolicy
 
-    if budget is None:
-        return
     for policy in policies.values():
         if (isinstance(policy, LLMPolicy) and hasattr(policy.provider, "budget")
                 and policy.provider.budget is not budget):
             raise ValueError("a network-backed policy must share the continuation's "
                              "request_budget object")
-    budget.begin("continuation")
+    if budget is not None:
+        budget.begin("continuation")
 
 
 def branch_run(
@@ -94,6 +93,8 @@ def branch_run(
     by the fork: its counters continue, so pass the object already used for the
     parent to keep one cumulative limit, or a fresh one for an independent limit.
     A network-backed override must have been constructed with that same object.
+    If an override already has a budget, pass it explicitly as ``request_budget``;
+    omitting it is allowed only when every network-backed policy is unbudgeted.
     """
     parent_dir = Path(parent_dir)
     child_dir = Path(child_dir)
