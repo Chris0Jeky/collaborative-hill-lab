@@ -1,0 +1,30 @@
+{
+  "config": {
+    "contract_version": "ec-audit-observation@1",
+    "audit_id": "toy-audit",
+    "accuracy": "3/4",
+    "accuracy_semantics": "symmetric-conditional-on-availability",
+    "oracle_kind": "synthetic-trusted-oracle",
+    "dependence": "independent-of-source-errors",
+    "visibility": "public",
+    "selection": "fixed-ex-ante-targets",
+    "unavailable_semantics": "explicit-no-verdict",
+    "schedule": [
+      {"slot_id": "s1", "proposition_id": "p", "publish_round": 2},
+      {"slot_id": "s1", "proposition_id": "q", "publish_round": 4}
+    ]
+  },
+  "findings": [
+    {"slot_id": "s1", "proposition_id": "q", "publish_round": 4, "verdict": "unavailable"},
+    {"slot_id": "s1", "proposition_id": "p", "publish_round": 2, "verdict": "positive"}
+  ],
+  "expected_public_verdicts_by_round": {
+    "0": [],
+    "1": [],
+    "2": ["positive"],
+    "3": ["positive"],
+    "4": ["positive", "unavailable"],
+    "5": ["positive", "unavailable"]
+  },
+  "scope": "Validation/projection fixture only; findings were supplied, not sampled or calibrated."
+}
