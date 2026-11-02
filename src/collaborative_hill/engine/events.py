@@ -28,6 +28,7 @@ class EventType(StrEnum):
     ACTION_ACCEPTED = "ActionAccepted"
     TOOL_INVOKED = "ToolInvoked"
     MESSAGE_SENT = "MessageSent"
+    AUDIT_PUBLISHED = "AuditPublished"
     EVIDENCE_INSPECTED = "EvidenceInspected"
     EVIDENCE_SHARED = "EvidenceShared"
     CLAIM_PROPOSED = "ClaimProposed"

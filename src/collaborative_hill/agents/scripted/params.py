@@ -31,6 +31,9 @@ EC_POLICY_PARAMS: dict[str, frozenset[str]] = {
         "evidence_screen", "share_contradictions", "challenge_claims", "require_read_citation",
         "min_sources", "peer_threshold", "warmup_rounds", "share_evidence",
     }),
+    "ec_audit_veto_contributor": frozenset({
+        "min_sources", "peer_threshold", "warmup_rounds", "share_evidence",
+    }),
     "ec_freerider": frozenset(),
     "ec_verifier": frozenset(),
     "ec_misinformer": frozenset(),

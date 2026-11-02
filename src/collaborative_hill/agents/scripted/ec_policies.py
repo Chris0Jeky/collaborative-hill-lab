@@ -360,4 +360,9 @@ def build_ec_policy(name: str, params: dict[str, Any]) -> Any:
 
         coerce_policy_params(name, params)
         return ECAblationContributorPolicy(**params)
+    if name == "ec_audit_veto_contributor":
+        from collaborative_hill.agents.scripted.ec_audit import ECAuditVetoContributorPolicy
+
+        coerce_policy_params(name, params)
+        return ECAuditVetoContributorPolicy(**params)
     raise ValueError(f"unknown scripted EC policy: {name}")

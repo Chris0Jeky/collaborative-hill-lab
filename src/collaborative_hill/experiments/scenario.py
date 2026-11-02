@@ -28,7 +28,8 @@ from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, Strict
 
 from collaborative_hill.agents.scripted.params import coerce_policy_params
 from collaborative_hill.domain.evidence import EvidenceSpec
-from collaborative_hill.domain.institutions import InstitutionConfig
+from collaborative_hill.domain.institutions import AuditInstitutionConfig, InstitutionConfig
+from collaborative_hill.domain.world.audited_evidence_commons import AuditedEvidenceCommonsMechanism
 from collaborative_hill.domain.world.evidence_commons import (
     ECParams,
     ECWorldSpec,
@@ -161,11 +162,14 @@ class ScenarioSpec(BaseModel):
     world: NIPDWorld | GraphNIPDWorld | ECWorld = Field(discriminator="kind")
     information: InformationPlane = InformationPlane()
     interaction: InteractionPlane
-    institution: InstitutionConfig = InstitutionConfig()
+    institution: AuditInstitutionConfig | InstitutionConfig = InstitutionConfig()
     cognition: CognitionPlane
 
     @model_validator(mode="after")
     def _check_combination(self) -> "ScenarioSpec":
+        if (isinstance(self.institution, AuditInstitutionConfig)
+                and not isinstance(self.world, ECWorld)):
+            raise ValueError("audit institutions require an Evidence Commons world")
         ids = [a.agent_id for a in self.cognition.agents]
         if len(set(ids)) != len(ids):
             raise ValueError("duplicate agent ids in cognition plane")
@@ -214,12 +218,15 @@ def mechanism_view(spec: ScenarioSpec) -> dict[str, Any]:
     minds and not the prose. Agent roster (ids) is structural; policies are not.
     ``engine_version`` binds the hash to the resolution SEMANTICS, so a
     behaviour-changing engine fix can never silently keep old hashes."""
+    from collaborative_hill.domain.world.audited_evidence_commons import EC_AUDIT_ENGINE_VERSION
     from collaborative_hill.domain.world.evidence_commons import EC_ENGINE_VERSION
     from collaborative_hill.domain.world.graph_nipd import GRAPH_NIPD_ENGINE_VERSION
     from collaborative_hill.domain.world.nipd import NIPD_ENGINE_VERSION
 
     ids = [a.agent_id for a in spec.cognition.agents]
-    if isinstance(spec.world, GraphNIPDWorld):
+    if isinstance(spec.institution, AuditInstitutionConfig):
+        engine_version = EC_AUDIT_ENGINE_VERSION
+    elif isinstance(spec.world, GraphNIPDWorld):
         engine_version = GRAPH_NIPD_ENGINE_VERSION
         ids = sorted(ids)
     else:
@@ -285,6 +292,8 @@ def _validate_skin_references(spec: ScenarioSpec, skin: NarrativeSkin) -> None:
 
 def build_mechanism(spec: ScenarioSpec) -> Any:
     agent_ids = [a.agent_id for a in spec.cognition.agents]
+    if isinstance(spec.institution, AuditInstitutionConfig) and not isinstance(spec.world, ECWorld):
+        raise ValueError("audit institutions require an Evidence Commons world")
     if isinstance(spec.world, GraphNIPDWorld):
         graph = spec.interaction.graph
         if not isinstance(graph, UndirectedGraph):
@@ -308,6 +317,8 @@ def build_mechanism(spec: ScenarioSpec) -> Any:
         evidence=spec.information.evidence,
         params=spec.world.params,
     )
+    if isinstance(spec.institution, AuditInstitutionConfig):
+        return AuditedEvidenceCommonsMechanism(spec=ec_spec, institution=spec.institution)
     return EvidenceCommonsMechanism(spec=ec_spec, institution=spec.institution)
 
 

@@ -39,6 +39,16 @@ describe the current filesystem layout: they are not a transaction against
 another process swapping ancestor directories concurrently. No permission or
 power-loss guarantee is inferred from a successful preflight.
 
+## Optional Evidence Commons audits
+
+An explicit `institution.audit` selects the separate EC v3 mechanism. Its public
+contract and generation law are required, strict and hash-bound. Targets must be
+unique slot/candidate pairs within the world, and each publication round must be
+an integer before the horizon. Canonical probability strings, candidate IDs and
+seed components are validated before episode output. Omit `audit` for unchanged
+legacy execution; a null opt-in is rejected. See [audit usage](AUDIT_USAGE.md)
+for the complete configuration and the separate scripted audit-veto policy.
+
 ## Optional provider execution
 
 `llm_openai_compatible` parameters are validated without resolving credentials or

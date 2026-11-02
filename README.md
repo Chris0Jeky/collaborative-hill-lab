@@ -38,9 +38,11 @@ different accountability and information rules.
   switches screening, contradiction sharing, challenges and citation reading. A
   separate exact noisy-corpus model tests declared independent and correlated
   source errors. Both retain their pre-execution predictions and complete outcomes.
-- **Audit contract foundation.** `ec-audit-observation@1` validates a declared
-  synthetic audit and projects public reports at fixed times. It is a standalone
-  contract; audit-enabled engine execution remains a separate integration task.
+- **Opt-in public audits.** A separate EC v3 mechanism publishes the versioned
+  `ec-audit-observation@1` envelope before observations, with exact declared error
+  and unavailability laws and isolated target streams. A new scripted negative-veto
+  policy responds to findings. Existing EC v2 inputs, policies and replay hashes
+  remain unchanged. See [audit configuration and limits](docs/AUDIT_USAGE.md).
 - **Configurable provider transport.** An optional OpenAI-compatible Chat
   Completions adapter records requested/reported models and measured request
   usage. Explicit execution opt-in, bounded retries, redacted errors and
@@ -163,8 +165,9 @@ raw-run archive receives a separate integrity audit. Published source mappings
 preserve the actual original clean execution commits and their equal public source trees.
 
 The [audit contract](docs/adr/0017-noisy-corpus-and-audit-contract.md) is separate
-from these executed experiments. [Issue #103](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/103)
-tracks the six integration gates required before audit-enabled episodes.
+from these historical experiments. Its opt-in engine integration is described
+in [ADR-0018](docs/adr/0018-opt-in-evidence-commons-audits.md) and the
+[audit usage guide](docs/AUDIT_USAGE.md); it does not alter those original runs.
 
 ### Local graph N-IPD
 
@@ -243,7 +246,7 @@ flowchart TD
 
 The mechanism controls world truth, legality and payoffs. Policies see only allowed
 observations; scorers do not influence live execution. Decisions and rationale are
-in [ADRs 0001–0017](docs/adr/) and the [foundation review](docs/FOUNDATION_REVIEW.md).
+in [ADRs 0001–0018](docs/adr/) and the [foundation review](docs/FOUNDATION_REVIEW.md).
 
 ## Scientific limits
 
@@ -261,8 +264,10 @@ label is not evidence of independence, and a contradiction does not establish
 which claim is false. The noisy-corpus results add an explicit synthetic relation
 between source reports and truth; they do not calibrate real sources. Accuracy
 conditional on acceptance, coverage, signed quality, effort and utility remain
-separate outcomes. The audit prototype supplies no deployed accuracy estimate,
-live truth feedback or audit-responsive behavior.
+separate outcomes. The opt-in audit channel supplies synthetic truth-correlated
+reports under a declared law; it supplies no deployed accuracy estimate. Its
+responsive policy is scripted. The current LLM prompt renderer omits the audit
+envelope, so these results do not establish model access or response to audits.
 
 Graph comparisons must hold policy, defector placement and payoff aggregation
 explicit. Pairwise cooperation counts directed edge votes; neighbourhood
@@ -295,9 +300,11 @@ and current [handoff](HANDOFF.md) retain the remaining qualifications.
 | `experiments/quality-safeguards/` | Skeptical rule design, truth negative control and full finite readout |
 | `experiments/ec-rule-ablation/` | Four-component factorial, literal predictions, exact interactions and 288 sealed-run checks |
 | `experiments/noisy-corpus/` | Exact source-error model, 128 sealed-run checks and standalone versioned audit contract |
+| `experiments/audit-feedback/` | Predeclared audit timing, accuracy and unavailability experiment with exact conditional predictions |
 | `experiments/sparse-ptft/` | Exact labeled-state pTFT on small graphs and its history oracle |
 | `experiments/graph-topology/` | Canonical local-graph controls, analytical predictions, measured readout and source commitments |
 | `docs/PROVIDER_USAGE.md` | Optional provider configuration, execution boundary and request accounting |
+| `docs/AUDIT_USAGE.md` | Opt-in audit configuration, scripted response, seed/replay semantics and scientific limits |
 | `docs/adr/`, `docs/research/` | Architecture decisions, methods, research context and analysis contract |
 | `tests/`, `.github/workflows/ci.yml` | Unit, property, metamorphic and integration checks; persistent CI |
 | `artifacts/` | Generated sealed runs and reports, ignored by Git |
