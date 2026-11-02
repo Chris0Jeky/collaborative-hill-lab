@@ -1,7 +1,10 @@
 # PLAN — Collaborative Hill Lab
 
-Milestones as of 2026-10-29. [NEXT.md](NEXT.md) gives dependencies and acceptance
+Milestones as of 2026-11-02. [NEXT.md](NEXT.md) gives dependencies and acceptance
 criteria; [HANDOFF.md](HANDOFF.md) records evidence and remaining decisions.
+Checked engineering follow-ups are implemented, reviewed and locally verified.
+Core PRs #99–#102 are merged after exact-head Ubuntu/Windows checks; the seed
+follow-up's public check and merge record is [PR #105](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/105).
 
 ## M0 — Offline foundation
 
@@ -18,14 +21,16 @@ criteria; [HANDOFF.md](HANDOFF.md) records evidence and remaining decisions.
 - [x] Independent and declared paired-policy analysis with input-integrity checks
 - [x] Finite-strategy incentive atlas with exact constraints and boundary controls
 - [x] Input/path safety and shared built-in policy parameter validation
+- [x] Shared recorded-seed validation, actual-artifact/CLI regressions and valid legacy/paired compatibility (#104)
 - [x] Persistent exact-commit CI, full regression suite and A–K acceptance checks
-- [x] Architecture records 0001–0012, research documentation and current handoff
+- [x] Architecture records 0001–0017, research documentation and current handoff
 
 ## M1 — First live pilot
 
 - [x] Observation-responsive scripted institutional baselines and controls (#76 / #81)
 - [x] Configurable provider transport, mocked contract tests and measured-usage accounting (#77 / #82)
-- [ ] Offline request planning and cumulative provider attempt budgets (#86)
+- [x] Offline request planning and cumulative provider attempt budgets (#86)
+- [x] Continuation budget identity/accounting, stable analysis stop reasons and crash limits (#92)
 - [ ] Human-approved pilot specification: institutions/weights, outcomes, model,
       sampling settings, skins, cost ceiling and stopping rules
 - [ ] Declared pilot executed with measured variance, invalid-output rate and cost
@@ -46,8 +51,11 @@ criteria; [HANDOFF.md](HANDOFF.md) records evidence and remaining decisions.
 - [x] Versioned sparse graph semantics and complete-graph equivalence controls (#78 / #83)
 - [x] Executed complete/ring/star controls with 18 exact predicted trajectories
 - [x] Responsive EC grid with harmful/null controls and separate C1/C2/C3 diagnostics
-- [ ] Observation-grounded quality safeguards for responsive EC (#84)
-- [ ] Exact labeled-state sparse-graph pTFT benchmark (#85)
+- [x] Observation-grounded quality safeguards for responsive EC (#84)
+- [x] Exact labeled-state sparse-graph pTFT benchmark (#85)
+- [x] Independent four-component EC ablation: 192 behavioral episodes and 96 controls (#95)
+- [x] Exact declared noisy-corpus model and versioned audit observation contract (#96)
+- [ ] Audit-enabled engine integration through the six ADR-0017 gates (#103)
 - [ ] Deception-capable verification, with unchanged v0 controls
 - [ ] Reputation/sanction institutions with responsive policies and integrity checks
 - [ ] Concordia cognition adapter behind the observation firewall

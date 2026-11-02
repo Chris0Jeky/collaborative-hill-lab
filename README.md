@@ -12,11 +12,12 @@ Prisoner's Dilemma lineage, then tests its assumptions and extends the laborator
 to **Evidence Commons**: agents contribute, share and verify evidence under
 different accountability and information rules.
 
-## Current capabilities — 2026-10-31
+## Current capabilities — 2026-11-02
 
 - **Reproducible engine.** Typed five-plane scenarios, exact-fraction payoffs,
   hierarchical seeds, hash-linked sealed ledgers, replay, checkpoint branching and
-  read-only counterfactual comparison. Narrative skins cannot change the rules.
+  read-only counterfactual comparison. Recorded seed metadata is validated before
+  replay or branch output. Narrative skins cannot change the rules.
 - **Versioned mechanisms.** Legacy N-IPD retains its complete-population pairwise
   and neighbourhood rules. `nipd_graph` adds explicit undirected graphs, local
   observations and sum/mean edge payoffs. Evidence Commons v0 supports provenance,
@@ -33,18 +34,28 @@ different accountability and information rules.
   uses visible contribution history. Its finite sensitivity experiment keeps
   beneficial, harmful and null accountability contrasts, alongside separate
   incentive and same-action integrity checks.
+- **Separated evidence-rule components.** A versioned ablation policy independently
+  switches screening, contradiction sharing, challenges and citation reading. A
+  separate exact noisy-corpus model tests declared independent and correlated
+  source errors. Both retain their pre-execution predictions and complete outcomes.
+- **Audit contract foundation.** `ec-audit-observation@1` validates a declared
+  synthetic audit and projects public reports at fixed times. It is a standalone
+  contract; audit-enabled engine execution remains a separate integration task.
 - **Configurable provider transport.** An optional OpenAI-compatible Chat
   Completions adapter records requested/reported models and measured request
   usage. Explicit execution opt-in, bounded retries, redacted errors and
   continuation accounting are covered by offline HTTP fixtures.
 - **Provider request limits.** `chl study plan` shows worst-case completions and HTTP
   attempts offline. An explicit cumulative attempt budget charges each attempt before
-  sending; a stop seals `RunFailed` and replays offline. No default limit is implied.
+  sending; a stop seals `RunFailed` and replays offline. Budgeted continuations require the
+  same explicitly supplied budget object, and analysis retains stable stop reasons.
+  Abrupt process termination does not establish final request accounting. No default
+  limit is implied.
 - **Fast, visible feedback.** `make quick` selects checks from the diff, `chl lab` shows
   per-agent film strips from verified ledgers, `make mutants` samples test gaps, and a
   Hypothesis fuzzer checks whole-episode invariants on random small scenarios.
   The console validates scenario and branch provenance, labels continuation policies
-  and inherited actions, and keeps sibling branches in separate summaries.
+  and inherited actions, and separates branches even when their default run IDs match.
 - **Persistent verification.** GitHub Actions tests each exact PR head and `main`
   commit on Ubuntu and Windows, including the complete suite, all shipped study definitions, acceptance
   scenarios and reproducible standalone research outputs. Inputs reject unsafe
@@ -66,6 +77,8 @@ execution boundary and [current priorities](NEXT.md) for the remaining work.
 | Exact pTFT benchmark | A finite-state model derives means, variances and absorption probabilities for the ideal rational Bernoulli process. It explains why positive late cooperation expectations can coexist with all-zero observed final windows. | [Post hoc benchmark](studies/002-nipd-sensitivity/EXACT_PTFT_BENCHMARK.md) |
 | Responsive EC | The 320 deterministic behavioral episodes give 160 matched contrasts: quality rises in 2, falls in 2 and is unchanged in 156. All 160 separate same-action replays preserve briefing, effort, quality and total utility. These are exact findings for the declared finite grid. | [Results and source record](experiments/responsive-commons/RESULTS.md) |
 | Quality safeguards | Across 220 accurate/misleading pairs the skeptical rule acts identically with opposite quality, so it cannot separate truth from unanimous false support. On conflicted evidence it trades: it gains where structure tracks truth and loses where structure inverts it. For its two designated strategies and placeholder settings, C1 and C2 hold together in 0 of 48 groups. | [Results](experiments/quality-safeguards/RESULTS.md) |
+| EC component ablation | 192 behavioral episodes and 96 fixed-action controls isolate four independently switched components. All P1–P6 predictions hold and 288 ledger replays match. Sharing, challenges and screening interact; the citation-read gate acts in the limited-inspection probe. All 96 truth pairs retain identical actions and observations. | [Ablation readout](experiments/ec-rule-ablation/RESULTS.md) |
+| Declared noisy corpora | 64 behavioral episodes and 64 accounting controls satisfy P1–P8. With independent errors, skepticism can improve accuracy among accepted claims while reducing coverage and signed quality. Fully correlated errors give a null rule contrast with distinct labels. These are synthetic assumptions, not estimated source reliability. | [Exact expectations](experiments/noisy-corpus/RESULTS.md) |
 | Sparse exact pTFT | Sixteen exact cells on small graphs match an independent history oracle, and the Study 002 benchmark on complete graphs. Total cooperator count is not a sufficient state on the four-cycle. No topology ranking follows. | [Readout](experiments/sparse-ptft/EXACT.md) |
 | Graph topology controls | All 18 eight-round cooperation curves match their pre-execution predictions, and all sealed runs replay. The N=5 design fixes one AllD and mean edge payoff while separating complete/ring/star topology, defector placement and reciprocity rule. | [Exact readout](experiments/graph-topology/RESULTS.md) |
 
@@ -76,14 +89,16 @@ From a checkout, using Python 3.12 or later:
 ```bash
 make setup
 make doctor
-make check test validate acceptance check-atlas check-study002 check-responsive check-quality-safeguards check-graph check-sparse-ptft
+make check test validate acceptance check-atlas check-study002 check-responsive check-quality-safeguards check-graph check-sparse-ptft check-noisy-corpus check-ec-rule-ablation
 ```
 
 `make setup` installs the committed `requirements-lock.txt`, builds the editable
 package using the pinned backend without build isolation, and runs `pip check`.
 It does not rewrite the lock. Setup downloads dependencies; the subsequent science
-checks use synthetic data and no model provider. CI currently verifies Ubuntu
-24.04 with Python 3.12; this is not a cross-platform test matrix or network sandbox.
+checks use synthetic data and no model provider. The CI matrix uses Ubuntu and
+Windows with Python 3.12; it does not cover macOS, multiple Python versions or
+live providers. Exact-head verification and merge records are in
+[HANDOFF.md](HANDOFF.md).
 
 Make selects `.venv/bin/python` on POSIX and `.venv/Scripts/python.exe` on Windows
 (run make from Git Bash). Use `make setup PYTHON="/path/to/python"` to select the
@@ -128,6 +143,28 @@ regenerates the complete grid in a temporary directory and compares the committe
 JSON and Markdown byte for byte. The [design](experiments/responsive-commons/DESIGN.md)
 fixes both accurate and misleading corpora, all five policy rules and all eight
 labeled active/freerider profiles; no cell is selected by its outcome.
+
+### Evidence-rule components and declared source noise
+
+```bash
+python experiments/ec-rule-ablation/ec_rule_ablation.py --out artifacts/ec-ablation-new
+make check-ec-rule-ablation
+python experiments/noisy-corpus/noisy_corpus.py --out artifacts/noisy-corpus-new
+make check-noisy-corpus
+```
+
+Each execution requires clean committed source and a fresh output directory.
+The ablation retains all 16 component combinations in six contexts under both
+hidden truths. The noisy-corpus experiment reweights the same 64 finite outcomes
+at six declared error rates; those weights are not additional samples. Each gate
+checks standalone code, regenerates the declared sealed runs, replays every
+regenerated chain and compares the retained readouts byte for byte. The original
+raw-run archive receives a separate integrity audit. Published source mappings
+preserve the actual original clean execution commits and their equal public source trees.
+
+The [audit contract](docs/adr/0017-noisy-corpus-and-audit-contract.md) is separate
+from these executed experiments. [Issue #103](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/103)
+tracks the six integration gates required before audit-enabled episodes.
 
 ### Local graph N-IPD
 
@@ -182,6 +219,15 @@ This read-only audit includes the study identity, protocol, declared blocks and
 kernel seed paths. Matching streams do not establish scientific comparability,
 paired provider randomness or reduced variance.
 
+Replay and branching validate recorded roots, protocol and scenario block in both
+the manifest and the sealed `RunStarted` payload before creating output. Malformed
+seed metadata raises `ValueError` through the Python API; `chl replay` and `chl branch`
+exit 2 with an error message and no traceback. Validation leaves the source artifacts
+unchanged. Integer/string seed aliases, empty mechanism-root prefixes and legacy
+records without an explicit protocol remain supported, with valid replay hashes
+and paired-policy allocation preserved. See [PR #105](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/105)
+and the [verification record](HANDOFF.md#shared-recorded-seed-validation).
+
 ## Architecture
 
 ```mermaid
@@ -197,7 +243,7 @@ flowchart TD
 
 The mechanism controls world truth, legality and payoffs. Policies see only allowed
 observations; scorers do not influence live execution. Decisions and rationale are
-in [ADRs 0001–0012](docs/adr/) and the [foundation review](docs/FOUNDATION_REVIEW.md).
+in [ADRs 0001–0017](docs/adr/) and the [foundation review](docs/FOUNDATION_REVIEW.md).
 
 ## Scientific limits
 
@@ -209,6 +255,14 @@ attribution and utility weights. The conditional contributor responds to visible
 history, but does not evaluate truth or monetary incentives. Its harmful as well
 as beneficial outcomes show why incentive inequalities and contribution counts
 alone cannot demonstrate institutional improvement.
+
+The skeptical and ablation policies read evidence structure, not truth. A source
+label is not evidence of independence, and a contradiction does not establish
+which claim is false. The noisy-corpus results add an explicit synthetic relation
+between source reports and truth; they do not calibrate real sources. Accuracy
+conditional on acceptance, coverage, signed quality, effort and utility remain
+separate outcomes. The audit prototype supplies no deployed accuracy estimate,
+live truth feedback or audit-responsive behavior.
 
 Graph comparisons must hold policy, defector placement and payoff aggregation
 explicit. Pairwise cooperation counts directed edge votes; neighbourhood
@@ -239,6 +293,8 @@ and current [handoff](HANDOFF.md) retain the remaining qualifications.
 | `experiments/incentive-atlas/` | Exact finite-strategy incentive-region exploration |
 | `experiments/responsive-commons/` | Pre-execution design, full finite EC sensitivity readout and source commitments |
 | `experiments/quality-safeguards/` | Skeptical rule design, truth negative control and full finite readout |
+| `experiments/ec-rule-ablation/` | Four-component factorial, literal predictions, exact interactions and 288 sealed-run checks |
+| `experiments/noisy-corpus/` | Exact source-error model, 128 sealed-run checks and standalone versioned audit contract |
 | `experiments/sparse-ptft/` | Exact labeled-state pTFT on small graphs and its history oracle |
 | `experiments/graph-topology/` | Canonical local-graph controls, analytical predictions, measured readout and source commitments |
 | `docs/PROVIDER_USAGE.md` | Optional provider configuration, execution boundary and request accounting |

@@ -36,7 +36,7 @@ Scenario (5 planes) → compiler (content hashes; mechanism ≠ narrative) → d
 MechanismEngine → runner (observe → propose typed action → validate → resolve → checkpoint
 → seal) → hash-linked `events.jsonl` → replay/branch → metrics → reports. LLMs act only
 through the typed-action gate; they never resolve or score world state. Decisions:
-`docs/adr/0001…0015`; synthesis: `docs/FOUNDATION_REVIEW.md`. Legacy `nipd` keeps
+`docs/adr/0001…0017`; synthesis: `docs/FOUNDATION_REVIEW.md`. Legacy `nipd` keeps
 its complete-population contract; `nipd_graph` explicitly selects local graph rules.
 
 ## 4. Repository map
@@ -45,7 +45,7 @@ its complete-population contract; `nipd_graph` explicitly selects local graph ru
 |---|---|
 | `src/collaborative_hill/engine/` | hashing, seeds, events, store, runner, replay, branching, interfaces |
 | `src/collaborative_hill/domain/` | actions (typed union), evidence, claims, institutions, `world/` mechanisms (nipd, graph_nipd, evidence_commons) |
-| `src/collaborative_hill/agents/` | `scripted/` (global/local TFT, EC personas and contribution quorum), `replay.py`, `llm/` (policy, transport, accounting, rendering) |
+| `src/collaborative_hill/agents/` | `scripted/` (global/local TFT, EC personas, quorum, skeptical rule and component ablation), `replay.py`, `llm/` (policy, transport, accounting, rendering) |
 | `src/collaborative_hill/experiments/` | scenario (5 planes + skins + compiler), study lifecycle, manifests |
 | `src/collaborative_hill/metrics/` | cooperation, epistemics, distribution, operations (versioned) |
 | `src/collaborative_hill/reporting/` | run/study reports, counterfactual comparison, sealed factorial analysis |
@@ -53,6 +53,8 @@ its complete-population contract; `nipd_graph` explicitly selects local graph ru
 | `experiments/incentive-atlas/` | exact finite-strategy incentive-region exploration |
 | `experiments/responsive-commons/` | deterministic contribution-history sensitivity, finite incentives and fixed-action controls |
 | `experiments/quality-safeguards/` | skeptical EC rule, truth negative control, finite incentives and fixed-action controls |
+| `experiments/ec-rule-ablation/` | separately versioned four-component factorial, hand-derived predictions, interactions and fixed-action controls |
+| `experiments/noisy-corpus/` | exact declared source noise/dependence, label controls and standalone audit observation contract |
 | `experiments/sparse-ptft/` | exact labeled-state pTFT on small connected graphs with an independent history oracle |
 | `experiments/graph-topology/` | explicit graph/placement/policy controls and original-artifact readout tooling |
 | `docs/PROVIDER_USAGE.md` | optional network transport, explicit opt-in, redaction and measured usage contract |
@@ -84,7 +86,8 @@ its complete-population contract; `nipd_graph` explicitly selects local graph ru
 ## 6. Commands
 
 `make doctor | setup | quick | lab | mutants | check | test | validate | acceptance | check-atlas |
-check-study002 | check-responsive | check-quality-safeguards | check-graph | check-sparse-ptft | study-000 | study-001-smoke | study-002-plan | study-002 |
+check-study002 | check-responsive | check-quality-safeguards | check-graph | check-sparse-ptft |
+check-noisy-corpus | check-ec-rule-ablation | study-000 | study-001-smoke | study-002-plan | study-002 |
 replay-smoke | report | clean-generated`; CLI: `chl scenario validate`, `chl study
 validate|audit-seeds|freeze`, `chl run`, `chl replay`, `chl branch`, `chl compare`,
 `chl analyze`, `chl report`, `chl lab`, `chl doctor`.
@@ -93,7 +96,8 @@ Quote all paths (spaces).
 
 Feedback loop: `make quick` runs ruff, mypy, tests and gates selected from the diff
 against `origin/main` by import graph and path mentions (`scripts/quick.py --plan`
-shows the selection; unclassified files select everything). `make lab` regenerates a
+shows the selection; unclassified files select everything). The new noisy-corpus
+and ablation gates participate in that selection automatically. `make lab` regenerates a
 small sealed sample and renders per-agent film strips to the terminal and
 `artifacts/lab/console.html`; `chl lab <dir>` does the same for any run or artifacts
 root and exits 1 on a broken ledger. Neither replaces the complete CI gate.
@@ -101,13 +105,18 @@ root and exits 1 on a broken ledger. Neither replaces the complete CI gate.
 `make validate` checks all four shipped StudySpecs (Study 002 has two components).
 `make study-002` needs a fresh output root; choose another with
 `STUDY002_ARTIFACTS=artifacts/study-002-repeat`. Persistent CI runs
-`make check test validate acceptance check-atlas check-study002 check-responsive check-quality-safeguards check-graph check-sparse-ptft` on the exact
+`make check test validate acceptance check-atlas check-study002 check-responsive check-quality-safeguards check-graph check-sparse-ptft check-noisy-corpus check-ec-rule-ablation` on the exact
 published commit and checks that verification leaves the checkout clean.
 Setup downloads pinned dependencies; the science checks call no model provider.
 `chl run` and `chl branch` require `--allow-provider-requests` for effective network
 policies. Validation and recorded-action replay remain offline. A scripted override
 can replace a provider policy without resolving its credentials. This engineering
 boundary does not select a live model, authorize spend or freeze a study.
+
+The audit projector in `experiments/noisy-corpus/` is not an engine integration.
+ADR-0017 and issue #103 require opt-in version/hash routing, exact audit generation,
+publication/replay/branch support, a versioned policy, integrated integrity tests
+and a separately committed experimental design before audit-enabled episodes.
 
 ## 7. How to add things
 
@@ -133,7 +142,8 @@ boundary does not select a live model, authorize spend or freeze a study.
 1. `make check` and `make test` green (or failures explained in HANDOFF.md).
 2. `make validate` passes for all shipped StudySpecs; changed standalone research
    code also passes `make check-atlas`, `make check-study002`, `make check-responsive`,
-   `make check-quality-safeguards`, `make check-graph` or `make check-sparse-ptft` as applicable.
+   `make check-quality-safeguards`, `make check-graph`, `make check-sparse-ptft`,
+   `make check-noisy-corpus` or `make check-ec-rule-ablation` as applicable.
 3. After any review fix, rerun the relevant gates on the new exact HEAD.
 4. HANDOFF.md updated: state, failures, open questions, next tasks, verify commands.
 5. BUILD_LOG.md appended with decisions + commands actually run.
