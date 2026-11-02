@@ -1,6 +1,8 @@
 """Request-attempt admission, planning and continuation scope over a mocked HTTP boundary.
 
 No test here opens a socket: ``wire`` replaces the opener and fails on a real connection.
+Retry sleep doubles replace only the transport's time binding; provenance subprocess
+polling must keep the real standard-library time module.
 """
 
 # ruff: noqa: F811  (the imported ``wire`` fixture is re-requested as a test argument)
@@ -8,6 +10,7 @@ import io
 import itertools
 import json
 import urllib.error
+from types import SimpleNamespace
 
 import pytest
 from typer.testing import CliRunner
@@ -73,7 +76,8 @@ def test_exhaustion_before_the_first_request_sends_nothing_and_seals_run_failed(
 
 def test_repair_and_429_retries_all_draw_on_one_episode_budget(tmp_path, wire, monkeypatch):
     sleeps = []
-    monkeypatch.setattr("time.sleep", sleeps.append)
+    monkeypatch.setattr("collaborative_hill.agents.llm.openai_compatible.time",
+                        SimpleNamespace(sleep=sleeps.append))
     params = {**PARAMS, "max_retries": 1, "rate_limit_retries": 1, "retry_delay_seconds": 2}
     # round 0: 429, invalid JSON (attempt 2), repair (attempt 3); round 1 is refused.
     results, (manifest,), _ = execute(
@@ -115,7 +119,8 @@ def test_two_provider_agents_share_one_episode_budget(tmp_path, wire):
 
 def test_429_with_unknown_usage_stops_before_the_retry_and_its_sleep(tmp_path, wire, monkeypatch):
     sleeps = []
-    monkeypatch.setattr("time.sleep", sleeps.append)
+    monkeypatch.setattr("collaborative_hill.agents.llm.openai_compatible.time",
+                        SimpleNamespace(sleep=sleeps.append))
     params = {**PARAMS, "rate_limit_retries": 1, "retry_delay_seconds": 1}
     results, (manifest,), _ = execute(
         tmp_path, wire, RequestBudget(max_episode_attempts=1), params=params,
@@ -217,7 +222,8 @@ def test_cancellation_is_checked_between_requests(tmp_path, wire):
 def test_deadline_that_the_retry_delay_would_pass_refuses_the_retry_before_sleeping(
         tmp_path, wire, monkeypatch):
     sleeps = []
-    monkeypatch.setattr("time.sleep", sleeps.append)
+    monkeypatch.setattr("collaborative_hill.agents.llm.openai_compatible.time",
+                        SimpleNamespace(sleep=sleeps.append))
     params = {**PARAMS, "rate_limit_retries": 1, "retry_delay_seconds": 10}
     budget = RequestBudget(deadline_seconds=5, clock=lambda: 0.0)
     # deadline 5 > now 0, so the first POST is admitted; a 10 s delay would pass it.
@@ -237,7 +243,8 @@ def test_stop_during_the_retry_delay_refuses_the_retry_without_charging_it(
         state["cancelled"] = stop == "cancel"
         state["now"] += 100.0 if stop == "overrun" else seconds  # A sleep may overrun.
 
-    monkeypatch.setattr("time.sleep", sleep)
+    monkeypatch.setattr("collaborative_hill.agents.llm.openai_compatible.time",
+                        SimpleNamespace(sleep=sleep))
     params = {**PARAMS, "rate_limit_retries": 1, "retry_delay_seconds": 1}
     budget = RequestBudget(deadline_seconds=5, cancelled=lambda: state["cancelled"],
                            clock=lambda: state["now"])
