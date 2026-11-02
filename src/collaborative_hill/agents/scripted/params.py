@@ -27,6 +27,10 @@ EC_POLICY_PARAMS: dict[str, frozenset[str]] = {
     "ec_skeptical_contributor": frozenset({
         "min_sources", "peer_threshold", "warmup_rounds", "share_evidence",
     }),
+    "ec_ablation_contributor": frozenset({
+        "evidence_screen", "share_contradictions", "challenge_claims", "require_read_citation",
+        "min_sources", "peer_threshold", "warmup_rounds", "share_evidence",
+    }),
     "ec_freerider": frozenset(),
     "ec_verifier": frozenset(),
     "ec_misinformer": frozenset(),
@@ -56,7 +60,8 @@ def coerce_policy_params(name: str, params: Mapping[str, object]) -> dict[str, o
             coerced[key] = _coerce_integer_at_least(key, value, int(key == "min_sources"))
         elif key in ("threshold_num", "threshold_den"):
             coerced[key] = _coerce_threshold(key, value)
-        elif key == "share_evidence":
+        elif key in ("share_evidence", "evidence_screen", "share_contradictions",
+                     "challenge_claims", "require_read_citation"):
             coerced[key] = _coerce_bool(key, value)
         elif key == "denominator":
             coerced[key] = _coerce_denominator(key, value)

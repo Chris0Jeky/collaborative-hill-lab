@@ -87,6 +87,9 @@ jobs:
       - name: Verify exact noisy-corpus expectations and audit contract
         run: make check-noisy-corpus
 
+      - name: Verify skeptical EC component ablations and controls
+        run: make check-ec-rule-ablation
+
       - name: Verify the tested commit and clean workspace
         run: |
           test "$(git rev-parse HEAD)" = "$CHL_EXPECTED_SHA"

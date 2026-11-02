@@ -1,0 +1,20 @@
+{
+  "checked_source_file_count": 62,
+  "design_tree": "999bf25ed4299bc0a9c11171a4185488d34d56d3",
+  "execution_tree": "894ba0718172fba36985dd019e7972b188e8a619",
+  "experiment": "ec-rule-ablation",
+  "local_design_commit": "2ea2d56d605d9f16d450bd2acf5f7d0928fd0c8b",
+  "local_execution_commit": "160ed5bbda0828c4180530c9deb3d07e0726e73f",
+  "original_artifact_archive": "collaborative-hill-original-evidence-2026-11-02.zip",
+  "original_readout_sha256": {
+    "RESULTS.json": "3de8158d23f44e9cb37692d1db7fb31f711ea0ddbb5a2c2e899b60e861324f0e",
+    "RESULTS.md": "090d6802c9ad651a17983f41c6b55ae10606ac7e597d3b12c76232c732d4cb2a",
+    "SOURCE_PROVENANCE.json": "641a374621245322d601c54bdbf899279ccf2e55dd8344161e4478aa7a6716c0"
+  },
+  "publication_order": "Design and identical full source tree were published before the original --out execution.",
+  "published_design_commit": "dde9b1bf8a8dd9858bb107dda1aa6d350d6d99fc",
+  "published_execution_commit": "768c9a74899018eceb48cdfabbd62ef5fa4c9fbb",
+  "schema": "chl.published-experiment-source.v1",
+  "scope": "Source correspondence and original readout commitments. Later integration/check executions are reproductions and do not replace the original execution provenance.",
+  "source_file_check": "Every SHA-256 in SOURCE_PROVENANCE.json matched its blob in the local execution commit; the published source has the identical full Git tree."
+}
