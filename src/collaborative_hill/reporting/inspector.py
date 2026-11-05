@@ -74,9 +74,10 @@ border:1px solid var(--line);border-radius:5px;padding:7px;max-width:100%}
 .inspect-round{display:flex;align-items:center;gap:12px;margin:14px 0;flex-wrap:wrap}
 .inspect-round input{flex:1;min-width:130px;accent-color:var(--ec)}
 .inspect-round label{min-width:160px}.inspect-grid{display:grid;
-grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
 .inspect-panel{padding:14px;border:1px solid var(--line);border-radius:7px;min-width:0}
 .inspect-panel.wide{grid-column:1/-1}.inspector p{margin:6px 0 10px}
+#inspect-actions{max-height:420px;overflow:auto;padding-right:4px}
 .inspector pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:320px;overflow:auto;
 background:var(--bg);padding:10px;font:12px/1.45 ui-monospace,Consolas,monospace}
 .inspector table{border-collapse:collapse;width:100%;font-size:12px;margin:8px 0}
@@ -118,7 +119,8 @@ received before acting. Outcomes are recorded later; they are not added to that 
 <section class="inspect-panel"><h3>Before actions · agent observation</h3>
 <div id="inspect-observation"></div></section>
 <section class="inspect-panel"><h3>Actions in this round</h3>
-<div id="inspect-actions"></div></section>
+<div id="inspect-actions" tabindex="0" role="region" aria-label="Recorded action events"></div>
+</section>
 <section class="inspect-panel"><h3>Public audit publications</h3>
 <div id="inspect-audits"></div></section>
 <section class="inspect-panel"><h3>Round outcomes · researcher view</h3>

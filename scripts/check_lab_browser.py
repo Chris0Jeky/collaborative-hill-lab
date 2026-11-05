@@ -20,6 +20,9 @@ from typing import Any
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "src"))
 
+from collaborative_hill.agents.scripted.nipd_policies import AllCPolicy
+from collaborative_hill.engine.branching import branch_run
+from collaborative_hill.engine.store import FileCheckpointStore, RunPaths
 from collaborative_hill.experiments.study import run_study
 from collaborative_hill.reporting.lab import write_console
 
@@ -50,7 +53,7 @@ CHECK_JS = r"""<script>
     const runs = JSON.parse(el('inspection-data').textContent);
     const select = el('inspect-run'), agent = el('inspect-agent'), slider = el('inspect-round');
     check(!el('run-inspector').hidden, 'inspector did not initialize');
-    check(runs.length === 5 && select.options.length === runs.length, 'missing run options');
+    check(runs.length === 6 && select.options.length === runs.length, 'missing run options');
     runs.forEach((run, index) => {
       change(select, index);
       check(agent.options.length === Object.keys(run.policies).length, 'missing agent options');
@@ -111,16 +114,38 @@ CHECK_JS = r"""<script>
     check(svg.querySelectorAll('line').length === 5, 'ring graph has the wrong edge count');
     check(el('inspect-outcomes').textContent.includes('Forward move'),
       'graph has no exact move table');
+    const branchIndex = runs.findIndex(run => run.parent_run);
+    check(branchIndex >= 0, 'branch fixture missing');
+    change(select, branchIndex);
+    const branch = runs[branchIndex];
+    check(el('inspect-run-status').textContent.includes(`at round ${branch.fork_round}`),
+      'branch continuation boundary missing');
+    check(el('inspect-run-status').textContent.includes('Continuation policies'),
+      'branch policies mislabeled');
+    check(el('inspect-actions').textContent.includes('inherited prefix'),
+      'branch prefix missing its inherited labels');
+    change(slider, branch.frames.findIndex(frame => frame.round === branch.fork_round), 'input');
+    check(!el('inspect-actions').textContent.includes('inherited prefix'),
+      'continuation actions incorrectly labeled as inherited');
+    if (location.hash !== '#branch') {
+      choose('ring-d-a1-targeted');
+      change(slider, 1, 'input');
+    }
     if (location.hash === '#audit') {
       choose('behavior-tp-rq-negative-3');
       change(slider, 3, 'input');
     }
     check(document.documentElement.scrollWidth <= innerWidth + 1, 'page overflows viewport');
     check(window.browserCheckErrors.length === 0, window.browserCheckErrors.join('; '));
-    result.dataset.status = 'passed';
-    result.dataset.assertions = String(assertions);
-    result.textContent = `${assertions} browser assertions passed at ${innerWidth}px`;
-    el('run-inspector').scrollIntoView();
+    // Give layout/paint a task boundary before scrolling and taking the screenshot.
+    setTimeout(() => {
+      const target = location.hash === '#graph-detail'
+        ? el('inspect-outcomes').parentElement : el('run-inspector');
+      window.scrollTo(0, target.getBoundingClientRect().top + scrollY - 16);
+      result.dataset.status = 'passed';
+      result.dataset.assertions = String(assertions);
+      result.textContent = `${assertions} browser assertions passed at ${innerWidth}px`;
+    }, 100);
   } catch (error) {
     result.textContent = String(error.stack || error);
     result.scrollIntoView();
@@ -157,6 +182,15 @@ def fixtures(root: Path) -> None:
     demo = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(demo)
     demo.audit_samples(root)
+    parent = next(path.parent for path in root.rglob("events.jsonl")
+                  if path.parent.parent.name == "pw-2tft-alld")
+    fork = FileCheckpointStore(RunPaths(parent).checkpoints).list_seqs()[0]
+    result, _ = branch_run(parent_dir=parent, fork_seq=fork, child_dir=root / "branch-demo",
+                           child_run_id="browser-branch", policy_overrides={
+                               "a3": AllCPolicy("pairwise"),
+                           })
+    if result.status != "completed":
+        raise RuntimeError("browser branch fixture did not complete")
 
 
 def snapshot(browser: str, page: Path, output: Path, name: str,
@@ -196,7 +230,7 @@ def main() -> int:
     fixtures(output / "runs")
     console = output / "console.html"
     _, traces = write_console(output / "runs", console, verify_replay=True)
-    if len(traces) != 5 or any(trace.get("replay_identical") is not True for trace in traces):
+    if len(traces) != 6 or any(trace.get("replay_identical") is not True for trace in traces):
         raise RuntimeError("browser fixtures must all be sealed and replay identical")
     page = output / "browser-check.html"
     html = console.read_text(encoding="utf-8").replace("<head>", "<head>" + CAPTURE_ERRORS, 1)
@@ -206,6 +240,8 @@ def main() -> int:
                              text=True, encoding="utf-8", timeout=15).stdout.strip()
     snapshots = [snapshot(args.browser, page, output, *view) for view in (
         ("desktop-graph", 1440, 1600, "graph"),
+        ("graph-detail", 1440, 1100, "graph-detail"),
+        ("desktop-branch", 1440, 1400, "branch"),
         ("mobile-audit", 420, 1800, "audit"),
     )]
     report = {"schema_version": 1, "browser": version, "runs": len(traces),
