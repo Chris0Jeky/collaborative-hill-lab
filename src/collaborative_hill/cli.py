@@ -13,6 +13,10 @@
     chl analyze <study-artifacts-dir> [--out FILE]
     chl lab <run-or-artifacts-dir> [--out FILE] [--verify-replay]
     chl monitor <run-or-artifacts-dir> [--json]
+    chl catalog [--json]
+    chl experiment plan <id> [--out DIR] [--check] [--json]
+    chl experiment run <id> --out NEW_DIR
+    chl experiment check <id>
     chl doctor
 """
 
@@ -24,10 +28,88 @@ import typer
 app = typer.Typer(add_completion=False, no_args_is_help=True)
 scenario_app = typer.Typer(no_args_is_help=True)
 study_app = typer.Typer(no_args_is_help=True)
+experiment_app = typer.Typer(no_args_is_help=True)
 app.add_typer(scenario_app, name="scenario")
 app.add_typer(study_app, name="study")
+app.add_typer(experiment_app, name="experiment")
 
 DEFAULT_ARTIFACTS = Path("artifacts")
+
+
+@app.command("catalog")
+def catalog(
+    json_output: bool = typer.Option(False, "--json", help="Print catalog schema v1"),
+) -> None:
+    """Discover shipped studies, experiments, exact analyses and historical references."""
+    from collaborative_hill.experiments.catalog import catalog_data, repository_root
+
+    try:
+        data = catalog_data(repository_root())
+    except (ValueError, OSError) as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(code=2) from exc
+    if json_output:
+        typer.echo(json.dumps(data, indent=2, sort_keys=True))
+        return
+    typer.echo(data["evidence_scope"])
+    for entry in data["entries"]:
+        capabilities = "/".join(
+            name for name in ("run", "check") if entry[f"{name}_steps"]
+        ) or "reference"
+        typer.echo(f"\n{entry['experiment_id']} [{entry['kind']}; {capabilities}] "
+                   f"— {entry['title']}")
+        typer.echo(f"  {entry['question']}\n  {entry['evidence']}\n  Source: {entry['source']}")
+    typer.echo("\nNext: chl experiment plan ID [--out NEW_DIR] [--check] [--json]")
+
+
+@experiment_app.command("plan")
+def experiment_plan(
+    experiment_id: str,
+    out: Path | None = typer.Option(None, "--out", help="New artifact directory for a run"),
+    check: bool = typer.Option(False, "--check", help="Plan the verification recipe"),
+    json_output: bool = typer.Option(False, "--json", help="Print cwd and argv arrays as JSON"),
+) -> None:
+    """Inspect an offline recipe and its evidence limits without writing or executing anything."""
+    from collaborative_hill.experiments.catalog import (
+        experiment_plan as build_plan,
+    )
+    from collaborative_hill.experiments.catalog import render_plan, repository_root
+
+    try:
+        plan = build_plan(repository_root(), experiment_id, output=out, check=check)
+    except (ValueError, OSError) as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(code=2) from exc
+    typer.echo(json.dumps(plan, indent=2, sort_keys=True) if json_output else render_plan(plan),
+               nl=json_output)
+
+
+def _execute_experiment(experiment_id: str, *, out: Path | None, check: bool) -> None:
+    from collaborative_hill.experiments.catalog import execute_experiment, repository_root
+
+    try:
+        code = execute_experiment(repository_root(), experiment_id, output=out, check=check)
+    except (ValueError, OSError) as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(code=2) from exc
+    if code:
+        typer.echo("experiment failed; any partial output was retained", err=True)
+        raise typer.Exit(code=code)
+
+
+@experiment_app.command("run")
+def experiment_run(
+    experiment_id: str,
+    out: Path = typer.Option(..., "--out", help="Required new directory; never overwritten"),
+) -> None:
+    """Execute the catalog's existing offline runner in a fresh directory."""
+    _execute_experiment(experiment_id, out=out, check=False)
+
+
+@experiment_app.command("check")
+def experiment_check(experiment_id: str) -> None:
+    """Run the catalog's declared verification recipe, preserving original evidence."""
+    _execute_experiment(experiment_id, out=None, check=True)
 
 
 @scenario_app.command("validate")
@@ -315,7 +397,11 @@ def lab(
     """Print each condition's film strip from sealed ledgers; exit 1 if any is broken."""
     from collaborative_hill.reporting.lab import write_console
 
-    text, traces = write_console(target, out, verify_replay=verify_replay)
+    try:
+        text, traces = write_console(target, out, verify_replay=verify_replay)
+    except (ValueError, OSError) as exc:
+        typer.echo(f"cannot write lab console: {exc}", err=True)
+        raise typer.Exit(code=2) from exc
     if not traces:
         typer.echo(f"error: no run ledgers under {target}", err=True)
         raise typer.Exit(code=2)

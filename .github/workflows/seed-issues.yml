@@ -1,0 +1,58 @@
+name: Seed roadmap issues
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Create missing curated issues after a successful preview
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: chl-roadmap-issue-seeding
+  cancel-in-progress: false
+
+jobs:
+  preview:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Validate the curated queue
+        run: python scripts/seed_issues.py --check
+      - name: Preview against all open and closed issues
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python scripts/seed_issues.py --remote
+
+  publish:
+    if: ${{ inputs.publish }}
+    needs: preview
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Reconcile again and create only missing issues
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python scripts/seed_issues.py --publish

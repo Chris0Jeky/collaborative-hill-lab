@@ -51,9 +51,9 @@ observation schema; legacy EC v2 serialization, hashes and behavior remain uncha
 | `src/collaborative_hill/domain/audit.py` | strict public audit schemas, opt-in mechanism configuration, exact synthetic generator and released-findings projection |
 | `src/collaborative_hill/domain/world/audited_evidence_commons.py` | EC v3 scheduled publication, published-only state and audit observations; inherited task rules |
 | `src/collaborative_hill/agents/` | `scripted/` (global/local TFT, EC personas, quorum, skeptical rule, component ablation and `ec_audit.py` negative-veto policy), `replay.py`, `llm/` (policy, transport, accounting, rendering) |
-| `src/collaborative_hill/experiments/` | scenario (5 planes + skins + compiler), study lifecycle, manifests |
+| `src/collaborative_hill/experiments/` | scenario (5 planes + skins + compiler), study lifecycle, manifests, curated catalog and safe execution plans |
 | `src/collaborative_hill/metrics/` | cooperation, epistemics, distribution, operations (versioned) |
-| `src/collaborative_hill/reporting/` | run/study reports, counterfactual comparison, sealed factorial analysis |
+| `src/collaborative_hill/reporting/` | run/study reports, counterfactual comparison, sealed factorial analysis, read-only monitor and interactive round inspector |
 | `studies/000-…`, `studies/001-…`, `studies/002-…` | executable studies, methods and research readouts |
 | `experiments/incentive-atlas/` | exact finite-strategy incentive-region exploration |
 | `experiments/responsive-commons/` | deterministic contribution-history sensitivity, finite incentives and fixed-action controls |
@@ -97,7 +97,24 @@ check-study002 | check-responsive | check-quality-safeguards | check-graph | che
 check-noisy-corpus | check-ec-rule-ablation | check-audit-feedback | study-000 | study-001-smoke | study-002-plan | study-002 |
 replay-smoke | report | clean-generated`; CLI: `chl scenario validate`, `chl study
 validate|audit-seeds|freeze`, `chl run`, `chl replay`, `chl branch`, `chl compare`,
-`chl analyze`, `chl report`, `chl lab`, `chl doctor`.
+`chl analyze`, `chl report`, `chl lab`, `chl monitor`, `chl catalog`,
+`chl experiment plan|run|check`, `chl doctor`.
+
+Start with [the lab walkthrough](docs/LAB_WALKTHROUGH.md) for discovery through
+replay inspection. Catalog plans use argument arrays and do not execute or create
+outputs. Runs require fresh destinations and retain each experiment's source and
+evidence safeguards. Reference-only and analytical entries are explicit.
+`chl monitor` is an artifact snapshot; unsealed prefixes do not prove liveness.
+`chl lab` requires sealed inputs and exports outside evidence-run directories to
+a new file. The interactive inspector shows agent observations before actions,
+later outcomes and inherited branch events separately.
+
+`python scripts/seed_issues.py --check` validates the curated queue;
+`--remote` previews against open and closed GitHub issues. Publishing is explicit
+and never reopens completed work. See [ROADMAP.md](ROADMAP.md) for the lifecycle.
+`make check-lab-browser` exercises real Chrome when available and retains desktop/
+mobile review artifacts under a fresh `artifacts/browser-smoke` directory. CI runs
+this on Ubuntu; Chrome is not an application dependency.
 Venv python: `.venv/bin/python` on POSIX, `.venv/Scripts/python.exe` on Windows.
 Quote all paths (spaces).
 

@@ -83,7 +83,10 @@ an equivalent change, so triage it. Whole-episode invariants are fuzzed in
 | Sparse exact pTFT | `make check-sparse-ptft` |
 | Provider transport/workflow | `python -m pytest tests/unit/test_openai_compatible_provider.py tests/unit/test_provider_accounting.py tests/integration/test_provider_workflow.py tests/metamorphic/test_replay_provider_failure.py` (mocked transport only) |
 | Provider budgets / failure analysis | `python -m pytest tests/integration/test_provider_budget.py` (mocked requests only) |
-| Lab branch summaries | `python -m pytest tests/integration/test_lab_console.py` |
+| Lab inspector and export safety | `python -m pytest tests/integration/test_lab_console.py`; `make check-lab-browser` with Chrome |
+| Catalog, demos and walkthrough | `python -m pytest tests/unit/test_experiment_catalog.py tests/integration/test_lab_demo.py tests/integration/test_lab_walkthrough.py` |
+| Run health monitor | `python -m pytest tests/integration/test_run_monitor.py` |
+| Roadmap issue lifecycle | `python scripts/seed_issues.py --check`; `python -m pytest tests/unit/test_issue_seeds.py` |
 | Recorded seed metadata | `python -m pytest tests/unit/test_seed_protocol.py tests/integration/test_recorded_seed_validation.py tests/integration/test_seed_protocol.py tests/property/test_seed_properties.py` |
 | Scenario, skin or study JSON | `make validate` and the affected standalone experiment check |
 | Sealed artifacts and replay | `make acceptance`; `make replay-smoke` additionally needs a generated run under `artifacts/` |

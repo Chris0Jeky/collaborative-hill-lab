@@ -2,9 +2,11 @@
 
 import importlib.util
 import json
+import os
 import shutil
 import subprocess
 import sys
+from copy import deepcopy
 from pathlib import Path
 
 import pytest
@@ -14,9 +16,11 @@ from collaborative_hill.agents.scripted.nipd_policies import AllCPolicy, AllDPol
 from collaborative_hill.cli import app
 from collaborative_hill.engine.branching import branch_run
 from collaborative_hill.engine.events import Event, EventType
+from collaborative_hill.engine.replay import load_run
 from collaborative_hill.engine.store import FileCheckpointStore, RunPaths
 from collaborative_hill.experiments.study import run_study
 from collaborative_hill.reporting import lab
+from collaborative_hill.reporting.inspector import round_frames
 from collaborative_hill.reporting.lab import (
     render_html,
     render_text,
@@ -28,6 +32,27 @@ from collaborative_hill.reporting.lab import (
 REPO = Path(__file__).resolve().parents[2]
 STUDY_000 = REPO / "studies/000-legacy-reproduction"
 STUDY_001 = REPO / "studies/001-evidence-commons"
+
+
+@pytest.mark.parametrize("fork", [10, "ten"])
+def test_root_fork_metadata_cannot_invent_inherited_history(nipd_root, tmp_path, fork):
+    source = next(nipd_root.rglob("events.jsonl")).parent
+    run = tmp_path / "root-with-stray-fork"
+    shutil.copytree(source, run)
+    path = run / "manifest.json"
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    assert not manifest.get("parent_run")
+    manifest["fork_seq"] = fork
+    path.write_text(json.dumps(manifest), encoding="utf-8", newline="\n")
+    # The existing loader intentionally ignores unused root-manifest extras.
+    # A new display must not turn that unbound field into verified ancestry.
+    load_run(run)
+    before = {str(p.relative_to(run)): p.read_bytes() for p in run.rglob("*") if p.is_file()}
+    trace = run_trace(run)
+    assert "broken" in trace and "fork_seq" in trace["broken"]
+    assert "frames" not in trace
+    assert {str(p.relative_to(run)): p.read_bytes()
+            for p in run.rglob("*") if p.is_file()} == before
 
 
 @pytest.fixture(scope="module")
@@ -239,6 +264,10 @@ def test_real_branches_show_continuation_policies_without_pooling(
         assert trace["policies"]["a1"] == policy.policy_id
         assert trace["fork_round"] == branch.fork_round
         assert trace["replay_identical"] is True
+        for frame in trace["frames"]:
+            records = [event for value in frame.values() if isinstance(value, list)
+                       for event in value]
+            assert all(event["inherited"] == (event["seq"] <= fork) for event in records)
         if name == "cooperative-child":
             assert trace["strips"]["a1"][branch.fork_round:] == "C" * (50 - branch.fork_round)
         else:
@@ -365,3 +394,247 @@ def test_quick_plan_runs_against_the_repository():
                           capture_output=True, text=True, check=False)
     assert done.returncode == 0, done.stderr
     assert "against HEAD" in done.stdout
+
+
+def _inspection_data(page):
+    marker = '<script type="application/json" id="inspection-data">'
+    return json.loads(page.split(marker, 1)[1].split("</script>", 1)[0])
+
+
+def test_round_inspector_preserves_exact_observations_actions_and_seal(nipd_root):
+    run = next(path.parent for path in nipd_root.rglob("events.jsonl")
+               if path.parent.parent.name == "pw-2tft-alld")
+    events, _, _ = load_run(run)
+    trace = run_trace(run)
+    frames = trace["frames"]
+    for event in events:
+        if event.event_type == EventType.RUN_STARTED:
+            continue
+        frame = next(row for row in frames if row["round"] == event.logical_time)
+        records = [item for value in frame.values() if isinstance(value, list) for item in value]
+        record, = [item for item in records if item["seq"] == event.seq]
+        assert record["payload"] == event.payload
+        assert record["event_hash"] == event.event_hash
+        assert record["inherited"] is False
+    first = frames[0]
+    assert first["round"] == 0
+    assert len(first["observations"]) == 3
+    # Outcomes are not merged into any earlier observation.
+    assert all(item["payload"]["observation"]["moves_against_me"] is None
+               for item in first["observations"])
+    assert any(item["event_type"] == "WorldTransitioned" for item in first["outcomes"])
+    assert frames[-1]["round"] == 50
+    assert frames[-1]["observations"] == frames[-1]["actions"] == []
+    assert frames[-1]["terminal"][0]["event_type"] == "RunCompleted"
+    assert _inspection_data(render_html([trace]))[0]["frames"] == frames
+
+
+def test_inspector_does_not_read_checkpoint_state_or_unhashed_metadata(ec_root, tmp_path):
+    source = next(ec_root.rglob("events.jsonl")).parent
+    run = tmp_path / "copy"
+    shutil.copytree(source, run)
+    ledger = run / "events.jsonl"
+    rows = [json.loads(line) for line in ledger.read_text(encoding="utf-8").splitlines()]
+    for row in rows:
+        row["meta"] = {"untrusted_note": "DO-NOT-PROJECT-UNHASHED-METADATA"}
+    ledger.write_text("".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8")
+    for path in (run / "checkpoints").glob("*.json"):
+        path.write_text('{"private": "DO-NOT-PROJECT-CHECKPOINT-STATE"}', encoding="utf-8")
+    before = {path.relative_to(run): path.read_bytes() for path in run.rglob("*") if path.is_file()}
+    trace = run_trace(run)
+    assert "broken" not in trace
+    page = render_html([trace])
+    for forbidden in ("DO-NOT-PROJECT", "true_propositions", "truth_aligned"):
+        assert forbidden not in page
+    assert {path.relative_to(run): path.read_bytes()
+            for path in run.rglob("*") if path.is_file()} == before
+
+
+def test_round_inspector_keeps_released_audits_rejections_and_inherited_prefix_separate():
+    report = {"slot_id": "s1", "proposition_id": "p1", "publish_round": 2,
+              "verdict": "unavailable"}
+    events = [
+        _event(EventType.OBSERVATION_ISSUED, 0, agent_id="a1", observation={"round": 0}),
+        _event(EventType.AUDIT_PUBLISHED, 2, report=report),
+        _event(EventType.OBSERVATION_ISSUED, 2, agent_id="a1",
+               observation={"round": 2, "audit": {"reports": [report]}}),
+        _event(EventType.ACTION_REJECTED, 2, agent_id="a1", reason="budget exhausted"),
+        _event(EventType.ACTION_ACCEPTED, 2, agent_id="a1",
+               action={"type": "abstain"}, fallback=True),
+        _event(EventType.RUN_FAILED, 3, reason="provider unavailable"),
+    ]
+    events = [event.model_copy(update={"seq": seq, "meta": {"ignored": "mutable"}})
+              for seq, event in enumerate(events)]
+    frames = round_frames(events, fork_seq=0)
+    assert [frame["round"] for frame in frames] == [0, 2, 3]
+    assert frames[0]["audits"] == []
+    assert frames[0]["observations"][0]["inherited"] is True
+    assert "audit" not in frames[0]["observations"][0]["payload"]["observation"]
+    assert frames[1]["audits"][0]["payload"]["report"] == report
+    assert frames[1]["audits"][0]["inherited"] is False
+    assert [item["event_type"] for item in frames[1]["actions"]] == [
+        "ActionRejected", "ActionAccepted"]
+    assert frames[2]["observations"] == []
+    assert frames[2]["terminal"][0]["payload"]["reason"] == "provider unavailable"
+    assert "mutable" not in json.dumps(frames)
+
+
+def test_inspector_projects_a_real_audited_run_without_future_findings(tmp_path):
+    path = REPO / "experiments/audit-feedback/audit_feedback.py"
+    spec = importlib.util.spec_from_file_location("lab_audit_fixture", path)
+    assert spec is not None and spec.loader is not None
+    experiment = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(experiment)
+    declaration, resolved = experiment.design()
+    cell = {"kind": "audited_behavior", "truth": "q", "report": "p", "verdict": "negative",
+            "publish_round": 4, "trace": None}
+    cid = experiment.cell_id(cell)
+    run = tmp_path / "audited"
+    experiment.run_cell(cell, resolved[cid], run, declaration["design_hash"])
+    trace = run_trace(run, verify_replay=True)
+    assert "broken" not in trace
+    assert trace["replay_identical"] is True
+    report = {"slot_id": "s1", "proposition_id": "p", "publish_round": 4,
+              "verdict": "negative"}
+    for frame in trace["frames"]:
+        assert len(frame["audits"]) == (1 if frame["round"] == 4 else 0)
+        for event in frame["observations"]:
+            reports = event["payload"]["observation"]["audit"]["reports"]
+            assert reports == ([] if frame["round"] < 4 else [report])
+    data, = _inspection_data(render_html([trace]))
+    serialized = json.dumps(data)
+    for key in experiment.HIDDEN_KEYS:
+        assert f'"{key}":' not in serialized
+
+
+def test_failed_run_inspector_keeps_partial_round_and_diagnostic(tmp_path, monkeypatch):
+    from collaborative_hill.experiments import study
+
+    original = study.build_policies
+
+    def failing_policies(resolved, *, allow_provider_requests=False, overrides=None):
+        policies = original(resolved, allow_provider_requests=allow_provider_requests,
+                            overrides=overrides)
+
+        def fail(*args):
+            raise RuntimeError("synthetic provider outage")
+
+        policies["a1"].propose = fail
+        return policies
+
+    monkeypatch.setattr(study, "build_policies", failing_policies)
+    run_study(STUDY_001, tmp_path, only_condition="attr-priv-misinfo", replicates_override=1)
+    run = next(tmp_path.rglob("events.jsonl")).parent
+    trace = run_trace(run)
+    assert trace["status"] == "failed"
+    assert trace["kind"] == "ec"
+    assert "quality" not in trace
+    frame, = trace["frames"]
+    assert len(frame["observations"]) == 3
+    assert frame["actions"] == frame["outcomes"] == []
+    assert frame["terminal"][0]["event_type"] == "RunFailed"
+    assert "synthetic provider outage" in render_html([trace])
+    assert "FAILED" in render_text([trace])
+
+
+def test_inspector_has_every_verified_run_even_when_static_details_are_capped(nipd_root):
+    traces = trace_runs(nipd_root)
+    broken = {"run_id": "broken", "condition_id": "c", "study_id": "s", "broken": "invalid"}
+    runs = _inspection_data(render_html([*traces, broken], max_detail=1))
+    assert len(runs) == len(traces)
+    assert [run["run_id"] for run in runs] == [trace["run_id"] for trace in traces]
+
+
+def test_inspector_embedded_data_is_inert_and_round_trips(nipd_root):
+    trace = deepcopy(trace_runs(nipd_root)[0])
+    hostile = '</script><script>window.injected=true</script><img src=x onerror="boom">&\u2028'
+    trace["run_id"] = hostile
+    trace["frames"][0]["observations"][0]["payload"]["observation"]["label"] = hostile
+    page = render_html([trace])
+    assert hostile not in page
+    assert "\\u003c/script\\u003e" in page
+    decoded, = _inspection_data(page)
+    assert decoded["run_id"] == hostile
+    assert decoded["frames"][0]["observations"][0]["payload"]["observation"]["label"] == hostile
+    assert ".innerHTML" not in page
+    assert "fetch(" not in page
+
+
+@pytest.mark.parametrize("relative", ["events.jsonl", "manifest.json", "scenario.resolved.json",
+                                      "new.html", "checkpoints/new.html"])
+def test_console_refuses_outputs_inside_evidence_runs(nipd_root, relative):
+    run = next(nipd_root.rglob("events.jsonl")).parent
+    before = {path.relative_to(run): path.read_bytes() for path in run.rglob("*") if path.is_file()}
+    with pytest.raises(ValueError, match="outside every run"):
+        write_console(nipd_root, run / relative)
+    assert {path.relative_to(run): path.read_bytes()
+            for path in run.rglob("*") if path.is_file()} == before
+
+
+def test_console_refuses_overwrite_and_symlink_aliases(nipd_root, tmp_path):
+    out = tmp_path / "existing.html"
+    out.write_text("preserve existing output", encoding="utf-8")
+    with pytest.raises(FileExistsError, match="already exists"):
+        write_console(nipd_root, out)
+    assert out.read_text(encoding="utf-8") == "preserve existing output"
+    run = next(nipd_root.rglob("events.jsonl")).parent
+    alias = tmp_path / "alias"
+    try:
+        alias.symlink_to(run, target_is_directory=True)
+    except OSError:
+        pytest.skip("directory symlinks are unavailable on this platform")
+    with pytest.raises(ValueError, match="outside every run"):
+        write_console(nipd_root, alias / "new.html")
+    assert not (run / "new.html").exists()
+
+
+def test_console_exclusive_create_catches_output_appearing_during_render(
+        nipd_root, tmp_path, monkeypatch):
+    out = tmp_path / "racing.html"
+    original = lab.render_html
+
+    def render_and_create(*args, **kwargs):
+        page = original(*args, **kwargs)
+        out.write_text("another writer", encoding="utf-8")
+        return page
+
+    monkeypatch.setattr(lab, "render_html", render_and_create)
+    with pytest.raises(FileExistsError):
+        write_console(nipd_root, out)
+    assert out.read_text(encoding="utf-8") == "another writer"
+
+
+@pytest.mark.parametrize("ancestor", [False, True])
+def test_console_parent_swap_during_render_cannot_redirect_into_evidence(
+        nipd_root, tmp_path, monkeypatch, ancestor):
+    source = next(nipd_root.rglob("events.jsonl")).parent
+    run = tmp_path / "evidence"
+    shutil.copytree(source, run)
+    before = {p.relative_to(run): p.read_bytes() for p in run.rglob("*") if p.is_file()}
+    parent = tmp_path / "reports"
+    (parent / "nested").mkdir(parents=True)
+    out = parent / "nested" / "new.html"
+    swapping = parent if ancestor else out.parent
+    displaced = tmp_path / "displaced"
+    original = lab.render_html
+    attempted = []
+
+    def render_and_swap(*args, **kwargs):
+        page = original(*args, **kwargs)
+        attempted.append(True)
+        if os.name == "nt":
+            # This assertion runs on Windows without requiring symlink privileges:
+            # every ancestor must remain locked against rename during the callback.
+            with pytest.raises(PermissionError):
+                swapping.rename(displaced)
+        else:
+            swapping.rename(displaced)
+            swapping.symlink_to(run, target_is_directory=True)
+        return page
+
+    monkeypatch.setattr(lab, "render_html", render_and_swap)
+    write_console(run, out)
+    assert attempted == [True]
+    assert {p.relative_to(run): p.read_bytes() for p in run.rglob("*") if p.is_file()} == before
+    actual = out if os.name == "nt" else displaced / ("nested/new.html" if ancestor else "new.html")
+    assert "<!doctype html>" in actual.read_text(encoding="utf-8")

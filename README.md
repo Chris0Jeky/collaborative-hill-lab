@@ -12,7 +12,30 @@ Prisoner's Dilemma lineage, then tests its assumptions and extends the laborator
 to **Evidence Commons**: agents contribute, share and verify evidence under
 different accountability and information rules.
 
-## Current capabilities — 2026-11-02
+**Current development goal:** connect the existing experiments into one offline
+workflow: discover a question, plan and run it into fresh output, monitor its
+artifacts, inspect individual rounds, and verify its source record. Start with the
+[lab walkthrough](docs/LAB_WALKTHROUGH.md). The [roadmap](ROADMAP.md) separates
+active engineering, the next declared research question and owner scientific
+decisions; [NEXT.md](NEXT.md) is the short working queue.
+
+The curated [issue seeds](scripts/issue_seeds.json) carry concrete acceptance
+criteria. `python scripts/seed_issues.py --check` validates them offline;
+`--remote` previews missing work against both open and closed issues. Publication
+is explicit, and completed issues are never reopened by the seeder.
+
+## Current capabilities — 2026-11-05
+
+- **Connected experiment workflow.** `chl catalog` indexes all shipped studies and
+  experiment packs with source records, evidence status and available operations.
+  `chl experiment plan|run|check` exposes the existing runners with inspectable
+  plans and fresh output directories. Start with the
+  [graph experiment walkthrough](docs/LAB_WALKTHROUGH.md).
+- **Artifact health and round inspection.** `chl monitor TARGET --json` separates
+  completed, failed, unsealed and broken artifacts. `chl lab` exports a standalone
+  inspector with run/agent/round navigation, recorded observations, actions,
+  graph interactions and released audit reports. State hashes and branch context
+  remain visible; unsealed artifacts do not establish process liveness.
 
 - **Reproducible engine.** Typed five-plane scenarios, exact-fraction payoffs,
   hierarchical seeds, hash-linked sealed ledgers, replay, checkpoint branching and
@@ -62,10 +85,13 @@ different accountability and information rules.
   Hypothesis fuzzer checks whole-episode invariants on random small scenarios.
   The console validates scenario and branch provenance, labels continuation policies
   and inherited actions, and separates branches even when their default run IDs match.
+  `make lab` includes clearly labeled Study 002 and audit-feedback inspection samples.
 - **Persistent verification.** GitHub Actions tests each exact PR head and `main`
   commit on Ubuntu and Windows, including the complete suite, all shipped study definitions, acceptance
   scenarios and reproducible standalone research outputs. Inputs reject unsafe
   output paths, invalid execution counts and misspelled built-in policy parameters.
+  The Ubuntu job also exercises the inspector in Chrome at desktop and mobile
+  widths and retains screenshots and DOM snapshots for review.
 
 No live provider call or human-subject experiment supports the current findings.
 The provider integration is implemented and tested offline; model selection, a live pilot and its

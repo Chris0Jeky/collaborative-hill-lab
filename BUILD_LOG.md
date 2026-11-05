@@ -1313,3 +1313,57 @@ The saved ZIP remains **1,515,408 bytes**, SHA-256
 No replay or regeneration was used for that preservation check. PR #109 retains
 the final published-head hosted checks and merge record as their authoritative
 evidence; the earlier initial-head run is not its final merge gate.
+
+## 2026-11-05 — Connect discovery, monitoring, inspection and the development queue
+
+The repository began this pass at `b8e072041f97314c6d4e8c00cbdd3dea8f208435`
+with no open issues or pull requests. The uploaded source matched all 418 live
+GitHub tree blobs. The committed dependency lock installed cleanly, `pip check`
+passed, and the local baseline passed 2,171 tests. Main CI 41459865315 passed
+both platforms; full job logs confirmed the tested commit and clean checkout.
+
+Inspection found all eight standalone experiment packs already implemented with
+readouts and verification gates. The integration gap was discovery, consistent
+execution entry points, representative demos and detailed visual inspection.
+The coherent-lab specification and plan record the chosen scope. Isolated
+implementation worktrees supplied a 12-entry catalog, a sealed-run inspector and
+an explicit, validated issue-seeding workflow. The integration lane supplied the
+read-only run monitor, public-command walkthrough and browser check.
+
+The monitor has 19 focused regression cases covering valid seals/failures,
+unsealed prefixes, partial final records, corrupt complete records, reservations,
+source-byte preservation and non-provider execution. Its published tree exactly
+matches the local implementation tree. Draft PR #114 at
+`608ee950ea31e8bba740697e3a5fe8e05842a5fa` passed complete Ubuntu and Windows
+[CI 42079937314](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/42079937314).
+Both full logs were inspected, including all research reproduction gates and final
+checkout checks. Independent review remains pending at this checkpoint.
+
+Catalog planning/execution tests verify safe argument arrays, source/output
+boundaries, honest check/reference-only entries and existing runner provenance.
+The expanded demonstration adds two Study 002 samples and three declared audit
+cells, explicitly marked as incomplete inspection samples. The inspector adds
+all-run, agent and round selection, observed claims/budgets, released audits,
+actions, pairwise interactions, recorded hashes and branch context; existing
+outputs and evidence directories are protected from exports. Curated seeds
+#110–113 and #115–118 are pinned in the manifest. The seeder previews by default,
+reconciles all pages of open/closed issues, never reopens closed seeds, and
+stops after an unconfirmed write failure.
+
+Actual commands executed on the integrated tree at this checkpoint:
+
+- Focused catalog/demo/walkthrough/monitor suite: 48 passed.
+- Focused console/demo/walkthrough suite: 41 passed.
+- `python -m ruff check src tests studies scripts`: passed.
+- Strict mypy on `scripts/check_lab_browser.py` and `scripts/seed_issues.py`: passed.
+- Browser fixture generation: five completed runs, all replay identical; Node
+  syntax validation of the browser harness and DOM-result parser probes passed.
+
+Local Chromium cannot open its required socket in this managed workspace. No
+sandbox bypass was attempted. The new Ubuntu Actions step runs the real Chrome
+CLI against local generated HTML, exercises round/agent/run navigation and audit
+publication timing, and retains desktop/mobile screenshots and DOM snapshots.
+Actual browser execution and integrated complete-gate results are still pending
+at this checkpoint. The shared workflow, roadmap, handoff and agent command maps
+now document the same interfaces. Original studies, scenarios, research scripts,
+results, policy identities and human-owned scientific decisions are unchanged.

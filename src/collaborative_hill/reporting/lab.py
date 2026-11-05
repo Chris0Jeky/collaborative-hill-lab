@@ -15,6 +15,9 @@ from typing import Any
 from collaborative_hill.engine.events import ChainError, Event, EventType
 from collaborative_hill.engine.replay import load_run, replay_run
 from collaborative_hill.engine.validation import effective_policy_ids
+from collaborative_hill.reporting.export import write_new_text
+from collaborative_hill.reporting.inspector import render_inspector, round_frames
+from collaborative_hill.reporting.provenance import display_fork_seq
 
 EC_GLYPHS = {
     "inspect_evidence": "i", "share_evidence": "s", "propose_claim": "p",
@@ -76,14 +79,13 @@ def _mark_rejections(strips: dict[str, str], events: list[Event]) -> dict[str, s
 
 
 def _trace(events: list[Event], manifest: dict[str, Any],
-           replay: bool | None) -> dict[str, Any]:
+           replay: bool | None, mechanism: str) -> dict[str, Any]:
+    fork = display_fork_seq(events, manifest)
     started = events[0].payload
     agents = list(started["agents"])
     transitions = [event.payload for event in events
                    if event.event_type == EventType.WORLD_TRANSITIONED]
     votes = [payload for payload in transitions if "cooperative_votes" in payload]
-    mechanism = next((event.payload["observation"].get("mechanism") for event in events
-                      if event.event_type == EventType.OBSERVATION_ISSUED), None)
     terminal = events[-1]
     condition = manifest["condition_id"]
     if manifest.get("parent_run"):  # Branches share their parent's prefix: never pool them.
@@ -95,10 +97,10 @@ def _trace(events: list[Event], manifest: dict[str, Any],
         "status": manifest["status"], "failure_reason": manifest.get("failure_reason"),
         "policies": {agent: manifest["policies"][agent] for agent in agents},
         "events": len(events), "final_event_hash": terminal.event_hash,
-        "parent_run": manifest.get("parent_run"), "fork_seq": manifest.get("fork_seq"),
-        "fork_round": (events[manifest["fork_seq"] + 1].logical_time
-                       if manifest.get("parent_run") else None),
+        "parent_run": manifest.get("parent_run"), "fork_seq": fork,
+        "fork_round": events[fork + 1].logical_time if fork is not None else None,
         "replay_identical": replay,
+        "frames": round_frames(events, fork),
     }
     if mechanism != "evidence_commons":
         trace["kind"] = "nipd"
@@ -124,12 +126,12 @@ def run_trace(run_dir: Path, *, verify_replay: bool = False) -> dict[str, Any]:
     """Verified film strip of one run; a broken ledger yields ``{"broken": reason}``."""
     run_dir = Path(run_dir)
     try:
-        events, _, manifest = load_run(run_dir)
+        events, resolved, manifest = load_run(run_dir)
         # Old branch manifests retain root labels. Resolve the local, validated
         # branch partition without rewriting provenance or reading parent paths.
         manifest = {**manifest, "policies": effective_policy_ids(run_dir, events, manifest)}
         replay = replay_run(run_dir).chains_match if verify_replay else None
-        return _trace(events, manifest, replay)
+        return _trace(events, manifest, replay, resolved.spec.world.kind)
     except (ChainError, ValueError, KeyError, TypeError, IndexError, OSError) as exc:
         return {"run_id": run_dir.name, "condition_id": run_dir.parent.name,
                 "study_id": run_dir.parent.parent.name,
@@ -202,6 +204,8 @@ def render_text(traces: list[dict[str, Any]]) -> str:
         for trace in rows:
             if "broken" in trace:
                 lines.append(f"  BROKEN {trace['run_id']}: {trace['broken']}")
+            elif trace.get("failure_reason"):
+                lines.append(f"  FAILED {trace['run_id']}: {trace['failure_reason']}")
         sample = next((trace for trace in rows if "broken" not in trace), None)
         if sample is not None:
             if sample.get("parent_run"):
@@ -257,7 +261,7 @@ LEGEND = (
     '<div class="legend"><span><b class="g-C"></b>cooperate</span>'
     '<span><b class="g-D"></b>defect</span><span><b class="g-m"></b>mixed pairwise</span>'
     '<span><b class="g-e"></b>Evidence Commons action: i inspect, s share, p propose, '
-    'v verify, x challenge, a approve, w withhold</span>'
+    'v verify, x challenge, a approve, w withhold, . abstain</span>'
     '<span><b class="g-r"></b>rejected</span><span><b></b>no action</span></div>'
 )
 
@@ -279,11 +283,16 @@ def _strip_html(trace: dict[str, Any]) -> str:
         policy = escape(trace["policies"][agent])
         cells.append(f'<span class="who" title="{policy}">{escape(agent)} '
                      f'{escape(_short_policy(trace["policies"][agent]))}</span>')
-        cells += [f'<b class="{_glyph_class(glyph)}">{escape(glyph)}</b>' for glyph in strip]
+        cells += [f'<b class="{_glyph_class(glyph)}" '
+                  f'title="{escape(agent)} · round {t} · {escape(glyph)}">{escape(glyph)}</b>'
+                  for t, glyph in enumerate(strip)]
     boundary = (f'<div class="dim">Continuation policies from round {trace["fork_round"]}'
                 ' (zero-based); earlier actions are inherited.</div>'
                 if trace.get("parent_run") else "")
-    return (f'{boundary}<div class="mono dim">{escape(trace["run_id"])} · '
+    failure = (f'<div class="broken">{escape(trace["failure_reason"])}</div>'
+               if trace.get("failure_reason") else "")
+    return (f'{boundary}{failure}<div class="mono dim">{escape(trace["run_id"])} · '
+            f'{escape(trace["status"])} · '
             f'{trace["events"]} events · '
             f'{trace["final_event_hash"][:12]}</div>'
             f'<div class="strip" style="--n:{rounds}">{"".join(cells)}</div>')
@@ -294,8 +303,11 @@ def _heat_html(rows: list[dict[str, Any]]) -> str:
     if not series:
         return ""
     columns = max(len(row) for row in series)
-    cells = "".join("".join(f'<i style="--p:{round(value * 100)}%"></i>' for value in row)
-                    + '<i class="gap"></i>' * (columns - len(row)) for row in series)
+    cells = "".join("".join(f'<i style="--p:{round(value * 100)}%" '
+                            f'title="replicate row {r + 1} · round {t} · '
+                            f'cooperation {value:.3f}"></i>' for t, value in enumerate(row))
+                    + '<i class="gap"></i>' * (columns - len(row))
+                    for r, row in enumerate(series))
     return (f'<div class="heat" style="grid-template-columns:repeat({columns},minmax(0,1fr))" '
             f'role="img" aria-label="cooperation rate by round for each replicate">{cells}</div>')
 
@@ -317,6 +329,9 @@ def _card_html(condition: str, rows: list[dict[str, Any]], max_detail: int) -> s
     body = [f'<div class="card{" bad" if bad or failed else ""}">',
             f'<h3>{escape(condition)}</h3><p>{escape(_summary(rows))}</p>',
             _curve_html(_mean_series(good)), _heat_html(good)]
+    if any(trace.get("cooperation") for trace in good):
+        body.append('<p class="inspect-meta">Means use only runs that reached each round; '
+                    'the contributing count can decrease. Gaps are unobserved rounds.</p>')
     body += [f'<div class="broken">BROKEN {escape(trace["run_id"])}: {escape(trace["broken"])}'
              '</div>' for trace in bad]
     if good:
@@ -355,16 +370,16 @@ def render_html(traces: list[dict[str, Any]], *, max_detail: int = 4) -> str:
         "<h1>Lab Console</h1>"
         '<p class="note">Derived only from hash-verified sealed ledgers. Runs here are '
         "deterministic simulations; nothing on this page is a prediction about people or LLMs."
-        f'</p><div class="tiles">{tile_html}</div>{LEGEND}{"".join(sections)}'
+        f'</p><div class="tiles">{tile_html}</div>{render_inspector(traces)}'
+        f'{LEGEND}{"".join(sections)}'
         "</main></body></html>\n"
     )
 
 
 def write_console(root: Path, out: Path | None, *, verify_replay: bool = False,
                   max_detail: int = 4) -> tuple[str, list[dict[str, Any]]]:
-    traces = trace_runs(root, verify_replay=verify_replay)
+    runs = find_runs(root)
+    traces = [run_trace(run_dir, verify_replay=verify_replay) for run_dir in runs]
     if out is not None and traces:
-        out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_text(render_html(traces, max_detail=max_detail), encoding="utf-8",
-                       newline="\n")
+        write_new_text(out, runs, lambda: render_html(traces, max_detail=max_detail))
     return render_text(traces), traces
