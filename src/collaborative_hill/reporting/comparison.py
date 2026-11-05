@@ -66,6 +66,14 @@ def compare_runs(left: Path, right: Path, *, verify_replay: bool = False) -> dic
     verifies deterministic engine transitions; neither mode re-calls providers.
     Deltas cover the entire episode, including shared pre-fork history.
     """
+    result, _ = compare_runs_with_events(left, right, verify_replay=verify_replay)
+    return result
+
+
+def compare_runs_with_events(
+    left: Path, right: Path, *, verify_replay: bool = False,
+) -> tuple[dict[str, Any], dict[str, list[Event]]]:
+    """Return the existing comparison and its same verified event snapshots for views."""
     left, right = Path(left), Path(right)
     a_events, a_resolved, a_manifest = load_run(left)
     b_events, b_resolved, b_manifest = load_run(right)
@@ -91,7 +99,7 @@ def compare_runs(left: Path, right: Path, *, verify_replay: bool = False) -> dic
             raise ValueError("completed utility vectors have different agent rosters")
         delta = {agent: str(Fraction(b["utilities_exact"][agent]) - Fraction(value))
                  for agent, value in a["utilities_exact"].items()}
-    return {
+    result = {
         "schema_version": 1,
         "scope": "descriptive_run_comparison",
         "direction": "right_minus_left",
@@ -111,3 +119,4 @@ def compare_runs(left: Path, right: Path, *, verify_replay: bool = False) -> dic
             "Failed episodes retain operational metrics but have no outcome delta.",
         ],
     }
+    return result, {"left": a_events, "right": b_events}

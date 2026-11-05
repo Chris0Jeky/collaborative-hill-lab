@@ -31,6 +31,15 @@ and merge evidence.
 Current measured findings use synthetic scripted populations. No live provider pilot,
 paid run or human-subject experiment supports them; see `docs/PROVIDER_USAGE.md`.
 
+The catalog, fresh-run entry points, round inspector, roadmap/seeder and graph
+walkthrough are merged in PR #119; the monitor is merged in PR #114 and the pilot
+decision aid in PR #120. Optional `chl compare LEFT RIGHT --out VIEW.html` is
+implemented, independently reviewed and verified, with delivery recorded in PR #121.
+Default comparison JSON is preserved; HTML aligns
+recorded state/actions and labels shared history without adding inference.
+`HANDOFF.md` tracks the exact checkpoint. `NEXT.md` makes audit cost/timing #117
+the next research design; all pilot scientific and spending choices remain open.
+
 Audit modules: `domain/audit.py` defines strict schemas, opt-in settings, exact
 synthetic generation and public projection;
 `domain/world/audited_evidence_commons.py` publishes complete due batches before
@@ -83,7 +92,8 @@ an equivalent change, so triage it. Whole-episode invariants are fuzzed in
 | Sparse exact pTFT | `make check-sparse-ptft` |
 | Provider transport/workflow | `python -m pytest tests/unit/test_openai_compatible_provider.py tests/unit/test_provider_accounting.py tests/integration/test_provider_workflow.py tests/metamorphic/test_replay_provider_failure.py` (mocked transport only) |
 | Provider budgets / failure analysis | `python -m pytest tests/integration/test_provider_budget.py` (mocked requests only) |
-| Lab inspector and export safety | `python -m pytest tests/integration/test_lab_console.py`; `make check-lab-browser` with Chrome |
+| Lab inspector, provenance and export safety | `python -m pytest tests/integration/test_lab_console.py tests/unit/test_report_export.py`; `make check-lab-browser` with Chrome |
+| Descriptive JSON/HTML comparison | `python -m pytest tests/metamorphic/test_run_comparison.py tests/metamorphic/test_comparison_view.py`; `make check-lab-browser` with Chrome |
 | Catalog, demos and walkthrough | `python -m pytest tests/unit/test_experiment_catalog.py tests/integration/test_lab_demo.py tests/integration/test_lab_walkthrough.py` |
 | Run health monitor | `python -m pytest tests/integration/test_run_monitor.py` |
 | Roadmap issue lifecycle | `python scripts/seed_issues.py --check`; `python -m pytest tests/unit/test_issue_seeds.py` |

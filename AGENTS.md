@@ -53,7 +53,7 @@ observation schema; legacy EC v2 serialization, hashes and behavior remain uncha
 | `src/collaborative_hill/agents/` | `scripted/` (global/local TFT, EC personas, quorum, skeptical rule, component ablation and `ec_audit.py` negative-veto policy), `replay.py`, `llm/` (policy, transport, accounting, rendering) |
 | `src/collaborative_hill/experiments/` | scenario (5 planes + skins + compiler), study lifecycle, manifests, curated catalog and safe execution plans |
 | `src/collaborative_hill/metrics/` | cooperation, epistemics, distribution, operations (versioned) |
-| `src/collaborative_hill/reporting/` | run/study reports, counterfactual comparison, sealed factorial analysis, read-only monitor and interactive round inspector |
+| `src/collaborative_hill/reporting/` | run/study reports, descriptive JSON/HTML comparison, sealed factorial analysis, read-only monitor, round inspector and shared guarded exports |
 | `studies/000-…`, `studies/001-…`, `studies/002-…` | executable studies, methods and research readouts |
 | `experiments/incentive-atlas/` | exact finite-strategy incentive-region exploration |
 | `experiments/responsive-commons/` | deterministic contribution-history sensitivity, finite incentives and fixed-action controls |
@@ -109,12 +109,23 @@ evidence safeguards. Reference-only and analytical entries are explicit.
 a new file. The interactive inspector shows agent observations before actions,
 later outcomes and inherited branch events separately.
 
+`chl compare LEFT RIGHT` prints descriptive JSON. `--out VIEW.html` also creates
+an offline aligned comparison outside both evidence directories, using a fresh
+filename; `--verify-replay` remains offline. Inputs require matching mechanism
+hashes. Configuration differences, missing observations and inherited/shared
+history stay explicit; full-episode utility deltas include the shared prefix.
+Matching streams do not establish paired provider randomness or an effect estimate.
+
 `python scripts/seed_issues.py --check` validates the curated queue;
 `--remote` previews against open and closed GitHub issues. Publishing is explicit
 and never reopens completed work. See [ROADMAP.md](ROADMAP.md) for the lifecycle.
-`make check-lab-browser` exercises real Chrome when available and retains desktop/
-mobile review artifacts under a fresh `artifacts/browser-smoke` directory. CI runs
-this on Ubuntu; Chrome is not an application dependency.
+`make check-lab-browser` exercises the inspector and comparison in real Chrome,
+retaining desktop/mobile review artifacts under fresh `artifacts/browser-smoke`
+and `artifacts/comparison-browser` directories. CI runs this on Ubuntu; Chrome is
+not an application dependency. Current implementation, review and merge status
+are in [HANDOFF.md](HANDOFF.md); [NEXT.md](NEXT.md) makes research #117 and the
+unresolved owner decisions actionable. The prepared
+[pilot decision aid](docs/research/PILOT_DECISION_RECORD.md) leaves owner choices open.
 Venv python: `.venv/bin/python` on POSIX, `.venv/Scripts/python.exe` on Windows.
 Quote all paths (spaces).
 

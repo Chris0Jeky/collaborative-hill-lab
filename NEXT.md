@@ -1,42 +1,39 @@
 # Next work
 
-The immediate goal is a coherent offline laboratory workflow, with existing
-scientific evidence and original artifacts preserved. [ROADMAP.md](ROADMAP.md)
-defines the priorities, evidence boundaries and issue lifecycle;
-[HANDOFF.md](HANDOFF.md) records actual verification and merge status.
+The next development task is the separately declared audit cost/timing experiment
+(#117). The offline workflow and HTML comparison are implemented, reviewed and
+verified. [HANDOFF.md](HANDOFF.md) records tested revisions and delivery records;
+[ROADMAP.md](ROADMAP.md) defines the evidence boundaries and issue lifecycle.
+The [lab walkthrough](docs/LAB_WALKTHROUGH.md) covers the available interfaces,
+and [PR #121](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/121) retains
+the comparison's publication record.
 
-## Finish the current workflow
+## Next research: declare audit cost and timing (#117)
 
-| Order | Work | Tracking |
-|---|---|---|
-| In parallel | Discover and deliberately run existing experiments through the catalog | [#110](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/110) |
-| In parallel | Inspect verified rounds, observations, graph interactions and released audits | [#111](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/111) |
-| In parallel | Monitor completed, failed, unsealed and broken run artifacts | [#112](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/112) |
-| In parallel | Establish the roadmap and validated manual issue seeder | [#113](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/113) |
-| Integration | Exercise one documented question-to-inspection walkthrough from a clean checkout | [#115](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/115) |
+For [#117](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/117), first
+write a separate design with a bounded question, predicted contrasts and exact
+charging semantics. State who pays, when the charge occurs, and how timing,
+unavailability and failed requests affect the declared budget. Keep the existing
+free-audit reference and original evidence intact.
 
-Completion requires reviewed, verified behavior. A checked plan or attractive
-console alone does not establish a scientific finding. Follow the
-[lab walkthrough](docs/LAB_WALKTHROUGH.md) for the public command sequence.
+Before execution, specify beneficial, harmful, null, late and unavailable
+controls; derive literal accounting and outcome expectations. Any new mechanism
+behavior needs an explicit versioned contract and integrity checks. Report
+accuracy, coverage, signed quality and resource cost separately. This is the next
+research task; no cost/timing result has been produced by the current UI work.
 
-## Then take a bounded next item
+## Owner review remains open
 
-- **Engineering ([#116](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/116)):**
-  explain compatible matched runs and branch continuations with aligned observable
-  differences and explicit comparison assumptions.
-- **Research ([#117](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/117)):**
-  separately declare an audit cost/timing experiment with exact accounting and
-  beneficial, harmful, null, late and unavailable controls.
-- **Owner decision preparation ([#118](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/118)):**
-  use the [prepared draft decision record](docs/research/PILOT_DECISION_RECORD.md)
-  to review unresolved choices and finite-strategy alternatives. Document preparation
-  does not choose a model, weights, budget or confirmatory design.
+Use the [prepared pilot decision record](docs/research/PILOT_DECISION_RECORD.md)
+from merged [PR #120](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/120) to discuss
+the question, incentive alternatives, outcomes, population/model, pairing,
+allocation, spending ceiling and stop rules. Every choice remains unresolved.
 
 The acceptance criteria and dependencies live in
 [scripts/issue_seeds.json](scripts/issue_seeds.json). Preview with
 `python scripts/seed_issues.py --remote`; publication is a separate explicit action.
-Closed seeds remain closed. Completed implementation history belongs in the
-handoff and [milestone record](PLAN.md), so this page stays focused on next work.
+Closed seeds remain closed. Implementation history belongs in the handoff and
+[milestone record](PLAN.md).
 
 ## Scientific decisions before live or confirmatory work
 
@@ -51,5 +48,6 @@ After a declared pilot measures episode variance, invalid-output rate and actual
 usage/cost, the owner can finalize minimum effects, sample size, hypotheses,
 exclusions and the statistical analysis plan. A confirmatory freeze and execution
 follow those recorded decisions. Preserve negative and incomplete results, and
-distinguish kernel seed pairing from provider randomness. None of this blocks the
-offline engineering queue above or turns mocked provider tests into live evidence.
+distinguish kernel seed pairing from provider randomness. The offline research
+design can proceed while these choices remain open. Mocked provider tests remain
+engineering evidence.

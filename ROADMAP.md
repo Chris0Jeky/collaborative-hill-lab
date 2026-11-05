@@ -10,7 +10,9 @@ The current development goal is **one usable offline workflow: discover a
 question → plan a run → execute into fresh output → monitor artifacts → inspect
 rounds → verify the result against its source record**. This makes the accumulated
 experiments useful to contributors and gives new research a reliable starting
-point. It can be completed without selecting a model or running a paid pilot.
+point. The workflow and optional HTML comparison are implemented, reviewed and
+verified. The next research design concerns audit cost and timing; owner pilot
+choices remain separate.
 
 ## Keep four kinds of progress distinct
 
@@ -19,52 +21,51 @@ point. It can be completed without selecting a model or running a paid pilot.
 | Executed synthetic evidence | Results for a declared finite design, policies and assumptions, including harmful and null outcomes | [Evidence table](README.md#what-the-experiments-establish), experiment readouts and original source records |
 | Exploratory research | A question or draft design that still needs predictions, controls and execution | The research queue below and the [research charter](docs/research/RESEARCH_CHARTER.md) |
 | Engineering readiness | A capability has passed relevant implementation and integrity checks | Tests, CI and [HANDOFF.md](HANDOFF.md); a green provider test is not a measured model result |
-| Owner scientific decisions | Chosen weights, outcomes, models, budget, stopping rules and any confirmatory freeze | [Study 001 draft](studies/001-evidence-commons/README.md), [statistical plan](docs/research/STATISTICAL_ANALYSIS_PLAN.md) and an explicit future pilot decision record |
+| Owner scientific decisions | Chosen weights, outcomes, models, budget, stopping rules and any confirmatory freeze | [Prepared pilot decision aid](docs/research/PILOT_DECISION_RECORD.md), [Study 001 draft](studies/001-evidence-commons/README.md) and [statistical plan](docs/research/STATISTICAL_ANALYSIS_PLAN.md); choices remain unresolved |
 
 A verification rerun checks reproduction; it does not enlarge the original sample.
 A visual inspector explains an existing record; it does not add evidence. A branch
 inherits history, so its shared prefix is not an independent replicate.
 
-## Current delivery: make existing work usable together
+## Available workflow and delivery records
 
-| Work | Completion criterion | Tracking |
+| Work | Delivered behavior | Delivery status |
 |---|---|---|
-| Experiment catalog | Every shipped experiment has a stable ID, evidence status, source/readout paths and an honest run/check/reference boundary; plans are inspectable before execution | [#110](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/110) |
-| Round inspector | Verified accepted actions, available observations, released audits and graph interactions can be inspected without hidden-state leaks or lost branch context | [#111](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/111) |
-| Run monitor | `chl monitor TARGET [--json]` distinguishes completed, failed, unsealed and broken artifacts; it never treats unsealed output as proof of liveness | [#112](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/112) |
-| Direction and issue lifecycle | A small validated queue has rationale, scope, acceptance criteria and dependencies; previews and closed-issue deduplication are tested | [#113](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/113) |
-| Reproduction walkthrough | A clean-checkout graph experiment exercises discovery, fresh execution, monitoring, inspection, replay and safe rerun refusal | [#115](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/115) |
+| Experiment catalog ([#110](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/110)) | Stable IDs, evidence status, source/readout paths and explicit run/check/reference boundaries; inspectable plans | Reviewed, verified and merged in PR #119 |
+| Round inspector ([#111](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/111)) | Recorded actions, available observations, released audits, graph interactions and branch context | Reviewed, verified and merged in PR #119 |
+| Run monitor ([#112](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/112)) | Completed, failed, unsealed and broken artifact states without a liveness claim | Reviewed, verified and merged in PR #114 |
+| Direction and issue lifecycle ([#113](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/113)) | Validated bounded queue, preview-first publication and open/closed issue deduplication | Reviewed, verified and merged in PR #119 |
+| Reproduction walkthrough ([#115](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/115)) | Real graph discovery, fresh execution, monitoring, inspection, replay and safe rerun refusal | Reviewed, verified and merged in PR #119 |
+| HTML comparison ([#116](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/116)) | Aligned observations/actions, exact utilities, compatibility metadata and inherited/shared history | Implemented, independently reviewed and verified; delivery record in PR #121 |
 
 The [lab walkthrough](docs/LAB_WALKTHROUGH.md) is the user-facing integration check.
-This milestone is complete when that workflow works and its changes pass the
-repository's offline gates and reviewed exact-head CI. Issue closure records
-completion; the table describes scope rather than claiming every item is already
-merged. Final implementation and merge evidence belongs in [HANDOFF.md](HANDOFF.md).
+Core [PR #119](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/119) and monitor
+[PR #114](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/114) are merged.
+[PR #121](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/121) records the
+comparison's publication, exact-head checks and merge status.
+[HANDOFF.md](HANDOFF.md) identifies the reviewed and tested revisions. The
+comparison remains descriptive: shared history and two episodes do not establish
+independent replication or a causal effect.
 
-## Next: deepen explanation, then declare the next experiment
+## Next: audit cost/timing research and owner pilot decisions
 
-1. **Valid paired-run comparison ([#116](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/116)).**
-   Extend inspection to two compatible runs or a parent/continuation. Show aligned
-   observable differences and the comparison assumptions, including mechanism,
-   policy identity, seed pairing and inherited history. Reject or identify
-   confounds before drawing an interpretation. Build on existing comparison code
-   and literal controls; do not create a second analysis framework.
-2. **Audit cost and latency experiment ([#117](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/117)).**
-   Declare a separate synthetic question about the resource cost and timing of
-   audits. Prerecord predictions and exact charging semantics, retain the existing
-   free-audit reference, and include harmful, null, late and unavailable controls.
+1. **Audit cost and latency experiment ([#117](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/117)).**
+   This is the next research item. Declare a separate synthetic question about
+   the resource cost and timing of audits. Prerecord predictions and exact charging
+   semantics, retain the existing free-audit reference, and include harmful, null,
+   late and unavailable controls.
    Report accuracy, coverage, signed quality and cost separately. Existing
    mechanism versions, study weights and original evidence stay fixed; any new
    behavior needs its own explicit contract.
-3. **Draft pilot decision record ([#118](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/118)).**
-   The [prepared decision aid](docs/research/PILOT_DECISION_RECORD.md) presents
+2. **Owner pilot decisions.**
+   The [prepared decision aid](docs/research/PILOT_DECISION_RECORD.md), merged in
+   [PR #120](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/120), presents
    source-backed alternatives and leaves unresolved choices visible:
    institutions, weights, outcomes, provider/model, skins, cost ceiling and stopping
    rules. Study 001's current weights fail C2; the incentive atlas offers
-   finite-strategy candidates without choosing a default. This document can be
-   prepared offline alongside engineering work. Selecting scientific defaults,
-   authorizing a live pilot and freezing a confirmatory study remain separate owner
-   decisions.
+   finite-strategy candidates without choosing a default. Owner review can proceed
+   offline alongside research design. Selecting scientific defaults, authorizing a
+   live pilot and freezing a confirmatory study remain separate owner decisions.
 
 These are bounded seeds, not an instruction to execute every proposed experiment
 automatically. A live pilot measures variance, invalid-output rates and actual

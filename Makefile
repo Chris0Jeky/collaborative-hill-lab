@@ -32,8 +32,9 @@ lab:
 # Optional local gate; CI runs this with the Ubuntu runner's installed Chrome.
 # A repeat needs a fresh --out directory when calling the script directly.
 check-lab-browser:
-	"$(PY)" -m mypy --strict --follow-imports=silent scripts/check_lab_browser.py
+	"$(PY)" -m mypy --strict --follow-imports=silent scripts/check_lab_browser.py scripts/check_comparison_browser.py
 	"$(PY)" scripts/check_lab_browser.py
+	"$(PY)" scripts/check_comparison_browser.py
 
 # Slow development probe: a survivor is a test gap or an equivalent change.
 mutants:
