@@ -12,12 +12,20 @@ Prisoner's Dilemma lineage, then tests its assumptions and extends the laborator
 to **Evidence Commons**: agents contribute, share and verify evidence under
 different accountability and information rules.
 
-**Current development goal:** connect the existing experiments into one offline
-workflow: discover a question, plan and run it into fresh output, monitor its
-artifacts, inspect individual rounds, and verify its source record. Start with the
+**Current workflow:** discover a question, plan and run it into fresh output,
+monitor its artifacts, inspect individual rounds, compare compatible sealed runs,
+and verify their source records. These interfaces are implemented. Start with the
 [lab walkthrough](docs/LAB_WALKTHROUGH.md). The [roadmap](ROADMAP.md) separates
 active engineering, the next declared research question and owner scientific
 decisions; [NEXT.md](NEXT.md) is the short working queue.
+
+**Delivery records:** the monitor is merged in
+[PR #114](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/114), the core
+workflow in [PR #119](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/119),
+and the prepared pilot decision aid in [PR #120](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/120).
+The optional HTML comparison is implemented, independently reviewed and verified;
+[PR #121](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/121) records its
+delivery. [HANDOFF.md](HANDOFF.md) lists the exact tested heads and completed gates.
 
 The curated [issue seeds](scripts/issue_seeds.json) carry concrete acceptance
 criteria. `python scripts/seed_issues.py --check` validates them offline;
@@ -36,7 +44,12 @@ is explicit, and completed issues are never reopened by the seeder.
   inspector with run/agent/round navigation, recorded observations, actions,
   graph interactions and released audit reports. State hashes and branch context
   remain visible; unsealed artifacts do not establish process liveness.
-
+- **Aligned descriptive comparisons.** `chl compare LEFT RIGHT` retains its JSON
+  output; `--out VIEW.html` also creates a standalone view of observations,
+  actions, public audits and exact full-episode utilities. It requires matching
+  mechanism hashes, exposes configuration differences and labels inherited/shared
+  history. Missing records remain explicit. See the
+  [comparison walkthrough](docs/LAB_WALKTHROUGH.md#6-compare-two-compatible-sealed-runs-optional).
 - **Reproducible engine.** Typed five-plane scenarios, exact-fraction payoffs,
   hierarchical seeds, hash-linked sealed ledgers, replay, checkpoint branching and
   read-only counterfactual comparison. Recorded seed metadata is validated before
@@ -96,7 +109,8 @@ is explicit, and completed issues are never reopened by the seeder.
 No live provider call or human-subject experiment supports the current findings.
 The provider integration is implemented and tested offline; model selection, a live pilot and its
 scientific design remain open. See [provider usage](docs/PROVIDER_USAGE.md) for the
-execution boundary and [current priorities](NEXT.md) for the remaining work.
+execution boundary, the [prepared pilot decision aid](docs/research/PILOT_DECISION_RECORD.md)
+for unresolved choices, and [current priorities](NEXT.md) for the remaining work.
 
 ## What the experiments establish
 
@@ -276,7 +290,7 @@ exit 2 with an error message and no traceback. Validation leaves the source arti
 unchanged. Integer/string seed aliases, empty mechanism-root prefixes and legacy
 records without an explicit protocol remain supported, with valid replay hashes
 and paired-policy allocation preserved. See [PR #105](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/105)
-and the [verification record](HANDOFF.md#shared-recorded-seed-validation).
+and the [verification record](HANDOFF.md).
 
 ## Architecture
 

@@ -70,7 +70,7 @@ def _compatibility(summary: dict[str, Any]) -> str:
         rows.append(f'<tr id="meta-{key}"><th scope="row">{label}</th>'
                     f'<td class="{style}">{verdict}</td><td><pre>{_value(left)}</pre></td>'
                     f'<td><pre>{_value(right)}</pre></td></tr>')
-    confounds = ("Confounds / differing recorded configuration: " + ", ".join(differences)
+    confounds = ("Confounds / differing recorded configuration: " + ", ".join(differences) + "."
                  if differences else "Listed configuration metadata match.")
     streams = "Match" if summary["same_kernel_streams"] else "Differ"
     return ('<section id="compatibility"><h2>Compatibility and confounds</h2>'

@@ -15,36 +15,53 @@ The previous long checkpoint remains preserved in
 [the November 2 handoff](https://github.com/Chris0Jeky/collaborative-hill-lab/blob/b8e072041f97314c6d4e8c00cbdd3dea8f208435/HANDOFF.md).
 Its pending/next statements describe that historical checkpoint, not today's queue.
 
-## Authoritative baseline and current work
+## Current capabilities and delivery
 
-The connected GitHub repository started this pass at main
-`b8e072041f97314c6d4e8c00cbdd3dea8f208435`, with no open issues or PRs. The uploaded
-ZIP matches all 418 file blobs and tree `17823dff30a1b3f039809168e1e829a3bd117be2`.
-Main's [CI 41459865315](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/41459865315)
-passed Ubuntu and Windows; both logs confirm the commit and all verification gates.
-The local baseline passed all 2,171 tests with the committed dependency versions.
+The core workflow, monitor and pilot decision aid are merged. The optional HTML
+comparison is implemented, independently reviewed and verified; its publication
+record is [PR #121](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/121).
 
-| Work | Tracker | Status at this working checkpoint |
+| Work | Tracker | Delivery record |
 |---|---|---|
-| Experiment catalog and connected entry points | [#110](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/110) | Implemented and integrated; independent review pending |
-| Verified interactive round/state inspector | [#111](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/111) | Implemented; 41 combined console/demo/walkthrough tests pass; browser CI and independent review pending |
-| Operational text/JSON run inventory | [#112](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/112), [PR #114](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/114) | 19 focused tests and both complete CI jobs pass on `608ee950`; independent review pending |
-| Identity, roadmap and repeatable issue seeds | [#113](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/113) | Implemented; 25 seed tests pass; independent review pending |
-| Public-command reproduction walkthrough | [#115](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/115) | Real graph workflow test passes; integrated complete gate pending |
+| Experiment catalog and connected entry points | [#110](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/110) | Reviewed, verified and merged in PR #119 |
+| Verified interactive round/state inspector | [#111](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/111) | Reviewed, verified and merged in PR #119, including ancestry and guarded exports |
+| Operational text/JSON run inventory | [#112](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/112) | Reviewed, verified and merged in PR #114 |
+| Identity, roadmap and repeatable issue seeds | [#113](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/113) | Reviewed, verified and merged in PR #119 |
+| Public-command reproduction walkthrough | [#115](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/115) | Real 18-run graph workflow reviewed, verified and merged in PR #119 |
+| Aligned HTML comparison of sealed runs | [#116](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/116) | Implemented, independently reviewed and verified; delivery recorded in PR #121 |
+| Prepared pilot decision record | [#118](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/118) | Reviewed, verified and merged in PR #120; all owner choices remain unresolved |
+
+[PR #119](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/119) merged as
+`a4e8d43d`; [PR #120](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/120)
+merged as `b7230795`. Monitor delivery is retained in
+[PR #114](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/114). For the
+comparison's published head, final checks and merge status, use
+[PR #121](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/121).
+
+## Completed verification
+
+| Scope | Tested head | Result |
+|---|---|---|
+| Core workflow | `77381713` | Both complete Ubuntu/Windows jobs passed in [CI 42091406335](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/42091406335); full logs and inspector captures reviewed |
+| Pilot decision aid | `f8fb3465` | Both complete platform jobs passed in [CI 42091419268](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/42091419268); full logs reviewed |
+| HTML comparison | `59a4432` | Both complete platform jobs passed in [CI 42091563004](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/42091563004); full logs and all five inspector/comparison captures reviewed |
+| Integrated local checkout | `4231ac9` | Complete required offline gate exited 0; 2,308 tests collected, with 10 native-Windows skips on Linux; checkout clean |
+
+The comparison browser check passed **379 desktop and 379 mobile assertions**.
+Retained views were readable without horizontal overflow. Native Windows checks
+include the corrected directory sharing guards. The table identifies the exact
+tested revisions; PR records retain subsequent publication checks and merge
+history. Earlier checkpoints remain in [BUILD_LOG.md](BUILD_LOG.md).
 
 The implementation design and task plan are in
 [the coherent-lab specification](docs/superpowers/specs/2026-11-05-coherent-lab-design.md)
 and [implementation plan](docs/superpowers/plans/2026-11-05-coherent-lab.md).
-Independent worktrees isolate changes. Remote publication uses connector-created
-branches, commits and draft PRs; exact-head CI and review precede merge.
-
-The bounded next issues are [#116](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/116)
-(paired inspection), [#117](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/117)
-(separate audit cost/timing experiment), and
-[#118](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/118) (draft pilot
-decision record). All eight seeds are pinned to their existing issue numbers.
-Local Chromium is blocked by the workspace socket policy; actual browser
-execution and screenshot review are delegated to the Ubuntu CI gate.
+The next research item is
+[#117](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/117): declare a
+separate audit cost/timing experiment before execution. The
+[pilot decision aid](docs/research/PILOT_DECISION_RECORD.md) is ready for owner
+discussion and leaves weights, outcomes, models, allocation and spending unresolved.
+All eight issue seeds retain their existing pinned numbers; closed work stays closed.
 
 ## Scientific state to preserve
 

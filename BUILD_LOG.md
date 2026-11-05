@@ -1367,3 +1367,115 @@ Actual browser execution and integrated complete-gate results are still pending
 at this checkpoint. The shared workflow, roadmap, handoff and agent command maps
 now document the same interfaces. Original studies, scenarios, research scripts,
 results, policy identities and human-owned scientific decisions are unchanged.
+
+## 2026-11-05 — Delivery checkpoint, HTML comparison and prepared pilot choices
+
+The monitor is reviewed, verified and merged in
+[PR #114](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/114).
+Catalog, inspector, roadmap/seeder and the real graph walkthrough are implemented
+in draft [PR #119](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/119).
+The prepared pilot decision aid is in draft
+[PR #120](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/120), and the
+implemented optional HTML comparison is now in draft
+[PR #121](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/121).
+Final integrated review and CI remain open; these three PRs are not recorded as merged.
+
+The completed predecessor evidence is retained with its actual scope:
+
+- Core `f7c268de1960202d2626321cdc4e8b41941701ee` passed both full platform jobs in
+  [CI 42083386775](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/42083386775);
+  both logs were inspected. Its corresponding local head `24a16d3` passed the
+  full offline gate with 2,258 tests.
+- Browser head `d2571ad0f744f4f24da66113f25fc80f917cca3c` passed the six-fixture
+  Chrome check in [CI 42086283996](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/42086283996).
+  Graph, branch and mobile captures recorded 653, 652 and 654 assertions respectively.
+  Artifact `13444630117` contains the reviewed unscrolled desktop/mobile screenshots;
+  the views were readable at 1440×2400 and 420×2400.
+- The complete local core gate later passed at `23e5089`. This precedes the latest
+  Windows-only export flag correction; it is not native Windows verification of that fix.
+
+Source review found an ancestor-swap export race and misleading root fork metadata.
+Shared guarded exports and presentation provenance checks address those cases.
+Native Windows CI then exposed the attribute-only directory handle's failure to
+enforce sharing restrictions. The corrective directory-access flags have independent
+source review; actual native verification remains pending at this checkpoint.
+The current core published head is `77381713dfadfb91fb440f82b3bbc6828186fc44`, with
+[CI 42091406335](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/42091406335)
+in progress. Pilot head `f8fb34652f1c1a351c41abfe6c3fcc871f01339d` has
+[CI 42091419268](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/42091419268)
+in progress. Comparison PR #121 was opened at
+`59a4432be5450ff62b77abca17c2c52a077a31a1`; its final review and platform/browser gates
+remain pending. The PRs retain the authoritative record for successor heads.
+
+Direction and usage documentation now distinguish implemented features from
+pending delivery gates. NEXT makes the separately declared audit cost/timing
+experiment (#117) the next research design. The pilot decision record remains an
+owner discussion aid: no weights, outcome, model, allocation, budget or stop rule
+has been selected. The walkthrough documents same-mechanism comparisons,
+unchanged default JSON, full-episode utility deltas and inherited/shared history.
+The runtime command maps include the comparison and guarded-export checks.
+
+Documentation verification resolved 94 relative links and checked their Markdown
+anchors. `python scripts/seed_issues.py --check` accepted all eight curated seeds.
+The comparison CLI and comparison-browser `--help` output match the documented
+options. Resolving the two graph examples confirms identical mechanism hashes
+for the targeted and linked policies on the same ring/defector placement.
+The human-owned HANDOFF tail remains byte-identical, SHA-256
+`bb98e30eb28e12a2d7c3323043244007a5d9b3f584da290fc6a5d9a48e64bafe`;
+the prior 86,698-byte BUILD_LOG prefix is preserved. No scientific inputs,
+original results, authority rules or provider settings were changed by this documentation pass.
+
+Before this documentation commit, the corrected core Ubuntu job completed and its
+full log was inspected; Windows passed the native unit and complete pytest steps
+and continued through the remaining research gates. Comparison predecessor
+`59a4432be5450ff62b77abca17c2c52a077a31a1` passed 379 desktop and 379 mobile assertions
+in [CI 42091563004](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/42091563004).
+All five inspector/comparison captures were downloaded, digest-verified and
+visually reviewed as readable without horizontal overflow. Later comparison
+wording and documentation edits still require final integrated-head verification;
+the three delivery PRs remain drafts at this checkpoint.
+
+## 2026-11-05 — Verified workflow and final comparison delivery record
+
+Core [PR #119](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/119) merged as
+`a4e8d43dad17455f680f07a472a36d1582dd87b5` after independent review and complete
+Ubuntu/Windows [CI 42091406335](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/42091406335)
+on `77381713dfadfb91fb440f82b3bbc6828186fc44`. Both full logs and the three inspector
+captures were reviewed; the merge tree matches the reviewed head. This includes
+the corrected native Windows export guards. Monitor PR #114 was already merged.
+
+Pilot decision-record [PR #120](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/120)
+merged as `b7230795caf55ebcdd52f2c605d72d1da729e13f`. Reviewed head
+`f8fb34652f1c1a351c41abfe6c3fcc871f01339d` passed both complete platform jobs in
+[CI 42091419268](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/42091419268),
+and both full logs were inspected. The document is prepared; the scientific and
+spending choices remain unresolved.
+
+Comparison code head `59a4432be5450ff62b77abca17c2c52a077a31a1` passed both complete
+platform jobs in [CI 42091563004](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/42091563004).
+Both full logs and all five inspector/comparison captures were reviewed. Chrome
+recorded 379 desktop and 379 mobile comparison assertions; the captured views were
+readable without horizontal overflow. The comparison implementation has independent
+source review, including shared exports, ancestry and inert rendering.
+
+The full required offline gate then passed on clean integrated local head
+`4231ac9026ddaaa8223b31294c8ce493d50b9de1`, which includes the reviewed documentation
+and minor comparison wording follow-up. Every required target exited successfully;
+the suite collected 2,308 tests, with 10 native-Windows skips on Linux. The gate
+left the checkout clean. This is the verification boundary before the final
+documentation status pass.
+
+Current documentation now records the core, monitor and pilot-document merges,
+the verified comparison implementation, and #117 plus unresolved owner choices
+as the next development work. PLAN records completed review/testing and the
+prepared comparison delivery documentation, with
+[PR #121](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/121) as the
+authoritative publication record. At this historical checkpoint, the final docs
+head still needs publication and new exact-head CI before that PR can merge;
+no PR #121 merge is claimed here.
+
+This final status pass changes documentation only. Verification is limited to
+relative links/anchors, the exact human-owned HANDOFF tail, the unchanged BUILD_LOG
+prefix from `4231ac9`, and a clean diff check. No additional tests or scientific
+regeneration were run. The human-owned tail remains SHA-256
+`bb98e30eb28e12a2d7c3323043244007a5d9b3f584da290fc6a5d9a48e64bafe`.

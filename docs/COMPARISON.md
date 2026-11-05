@@ -56,7 +56,9 @@ The destination must be a new file outside **both** source evidence directories.
 Resolved symlink aliases are checked, existing files and dangling symlinks are
 refused, and exclusive creation protects an output that appears just before the
 write. Sources are read only; parents of a valid fresh destination are created
-after comparison succeeds. Do not use shell redirection into either source.
+after comparison succeeds. Destination ancestry remains pinned while rendering,
+so replacing a parent path cannot redirect the write into either source. Do not
+use shell redirection into either source.
 
 The HTML is a reporting projection, using the existing comparison result and the
 inspector's `round_frames` from the same validated event snapshot. It does not
@@ -74,5 +76,5 @@ python -m pytest tests/metamorphic/test_run_comparison.py tests/metamorphic/test
 Fixtures cover literal matched controls and branch deltas, duplicate default
 IDs, scenario/policy/seed differences, evidence/mechanism rejection, failed and
 missing frames, hostile identities/payloads, exclusive output creation, symlink
-aliases and byte-for-byte source preservation. Full integration and browser
+aliases, concurrent parent replacement and byte-for-byte source preservation. Full integration and browser
 verification remain part of the repository's review and CI gate.

@@ -4,7 +4,9 @@ Historical milestones below are preserved from the 2026-11-02 checkpoint.
 [ROADMAP.md](ROADMAP.md) defines the current development direction and completion
 criteria; [NEXT.md](NEXT.md) is the short working queue. [HANDOFF.md](HANDOFF.md)
 records verification, publication evidence and remaining scientific decisions.
-Checked engineering follow-ups are implemented, reviewed and locally verified.
+Historical checked engineering milestones were reviewed and locally verified.
+The current milestone records reviewed implementations and their verification;
+linked PR records retain publication and merge status.
 Core PRs #99–#102 are merged after exact-head Ubuntu/Windows checks; the seed
 follow-up's public check and merge record is [PR #105](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/105).
 Audit integration and its original experiment are merged in
@@ -37,13 +39,24 @@ the original scientific findings remain scripted and the live-pilot decisions re
 
 ## Current milestone — one usable offline workflow
 
-This integration work can proceed independently of a live pilot:
+The implementations below are reviewed and verified independently of a live pilot.
+The comparison's publication record is [PR #121](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/121).
 
-- [ ] Discover and deliberately execute existing experiments through one catalog (#110)
-- [ ] Inspect verified round observations, actions and audit timing (#111)
-- [ ] Monitor complete, failed, unsealed and broken artifacts without a liveness claim (#112)
-- [ ] Maintain a bounded roadmap and preview-first issue lifecycle (#113)
-- [ ] Exercise the complete offline workflow in a clean-checkout walkthrough (#115)
+- [x] Implement catalog discovery and deliberate execution of existing experiments (#110)
+- [x] Implement verified round observations, actions and audit-timing inspection (#111)
+- [x] Review, verify and merge artifact monitoring without a liveness claim (#112 / PR #114)
+- [x] Implement a bounded roadmap and preview-first issue lifecycle (#113)
+- [x] Exercise discovery through replay inspection in the real graph walkthrough (#115)
+- [x] Implement optional HTML comparison with aligned observations/actions and provenance (#116)
+- [x] Prepare the pilot decision aid with all owner choices unresolved (#118)
+- [x] Complete review, exact-head Ubuntu/Windows and Chrome gates, and merge core PR #119
+- [x] Prepare reviewed, verified HTML comparison implementation and delivery docs (#116 / PR #121)
+- [x] Complete document review and CI, and merge pilot decision-record PR #120
+
+The next research item is a separately declared audit cost/timing design (#117).
+Its predictions, exact charging contract and controls precede execution. See
+[NEXT.md](NEXT.md) for the actionable queue and [HANDOFF.md](HANDOFF.md) for the
+tested heads, completed CI and delivery records.
 
 ## M1 — First live pilot
 

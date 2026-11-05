@@ -3,6 +3,8 @@
 This walkthrough runs the existing graph-topology controls, checks the resulting
 artifacts, and opens a visual replay. It is fully offline after installation.
 The experiment is small: 18 declared conditions, one eight-round episode each.
+The current delivery status and exact tested heads are recorded in
+[HANDOFF.md](../HANDOFF.md).
 
 The question is concrete: **how do network topology, defector placement and the
 reciprocity rule change cooperation?** The design holds its other settings fixed.
@@ -93,7 +95,34 @@ the recorded actions and reports chain equality; it never calls an LLM provider.
 Neither check authenticates an external source or turns a synthetic result into
 a prediction about people.
 
-## 6. Verify a pack or choose the next question
+## 6. Compare two compatible sealed runs (optional)
+
+Use the completed run directories shown by `chl monitor` as `LEFT_RUN` and
+`RIGHT_RUN` below. For this pack, choose `ring-d-a1-targeted` and
+`ring-d-a1-linked`, each ending in its own `*-r000` directory under the generated
+`DRAFT-…` directory. They share the ring topology, defector placement and mechanism
+hash; the recorded reciprocity policies and condition seed roots differ.
+
+```bash
+chl compare LEFT_RUN RIGHT_RUN --verify-replay
+chl compare LEFT_RUN RIGHT_RUN --verify-replay --out artifacts/graph-first-comparison.html
+```
+
+Both commands print the existing descriptive JSON. The second also creates a
+self-contained HTML view at a fresh filename outside both source runs. Open it
+to select a logical round and agent, inspect aligned observations/actions, and
+read the compatibility metadata. Missing frames remain explicit; public audits
+and later outcomes are separate from what an agent observed before acting.
+
+The comparator requires the same mechanism hash. Use the individual-run inspector
+to examine different topologies, whose mechanism hashes differ. A parent/branch
+comparison labels inherited and shared events; its exact utility delta is
+right minus left over the **whole episode**, including shared pre-fork history.
+Two runs, matching IDs or matching kernel streams do not establish independent
+replication, paired provider randomness or a causal effect. Failed episodes retain
+operational information and have no completed-outcome delta.
+
+## 7. Verify a pack or choose the next question
 
 ```bash
 chl experiment plan graph-topology --check --json
@@ -118,11 +147,18 @@ The integration test runs the public command sequence on the real graph design,
 checks all 18 completed ledgers, verifies replay and confirms that inspection and
 a refused repeat leave source inputs and run artifacts unchanged.
 
-On a machine with Chrome, `make check-lab-browser` additionally exercises the
-actual run, agent and round controls, audit publication timing and graph rendering
-at desktop and mobile widths. It writes screenshots, DOM snapshots and a JSON
-result into a fresh `artifacts/browser-smoke` directory. For a repeat, call
-`python scripts/check_lab_browser.py --out artifacts/browser-smoke-repeat`.
+On a machine with Chrome, `make check-lab-browser` additionally exercises run,
+agent and round controls, audit publication timing, branch inheritance and graph
+rendering at desktop and mobile widths. It also checks the aligned comparison
+using a sealed parent/continuation pair. Screenshots, DOM snapshots and JSON
+results go into fresh `artifacts/browser-smoke` and `artifacts/comparison-browser`
+directories. For a repeat, use new destinations for both checks:
+
+```bash
+python scripts/check_lab_browser.py --out artifacts/browser-smoke-repeat
+python scripts/check_comparison_browser.py --fixtures artifacts/browser-smoke-repeat/runs --out artifacts/comparison-browser-repeat
+```
+
 Use `--browser PATH` or `CHROME_BIN` when Chrome is not on the executable path.
 The Ubuntu CI job runs this check and retains its review artifacts for 14 days.
 Chrome is optional for running the lab itself.
