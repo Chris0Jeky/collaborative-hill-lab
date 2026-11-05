@@ -1,626 +1,75 @@
-# HANDOFF — current checkpoint, 2026-11-02
+# HANDOFF — current work, 2026-11-05
 
-## Current checkpoint — audit core merged; explicit LLM prompt adapter
+## Direction
 
-The audit runtime and original feedback experiment are merged in
-[PR #107](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/107), closing
-[#103](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/103). Merge
-`3caf6d8fcc58f8627aaec0a8a92ff032fd82f689` has exactly the tested head
-`7ea6f236692f58c0db80889ac5f668139de305d1`'s tree,
-`4ad2a6b737d66ae51c7e484aa947d3a13732a9bb`. Both complete job logs in
-[CI 41454553709](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/41454553709)
-were inspected before merge: Ubuntu **2,063 passed**, Windows **2,062 passed and
-one skipped**, all verification/reproduction steps successful, and the final
-commit/clean-workspace guard passed. The merge's own
-[CI 41456028690](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/41456028690)
-also passed both platforms; both complete logs were inspected with the same test
-counts, research gates and final identity/cleanliness guard.
+Collaborative Hill Lab is a reproducible laboratory for explaining how interaction,
+information and institutional rules affect cooperation and shared evidence. The
+current research findings describe scripted agents in synthetic environments.
+This engineering pass connects the existing experiments to a coherent discovery,
+run and inspection workflow. It does not change the underlying scientific results.
 
-Issue [#108](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/108) is
-implemented in the separate [PR #109](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/109),
-based on that merged main. It adds the policy-owned
-`prompt_renderer="ec-audit@1"`; the default `legacy@1` retains literal prompt
-bytes, template hashes, policy IDs, metadata, retry behavior and representative
-ledger bytes. [ADR-0019](docs/adr/0019-opt-in-audit-aware-llm-prompts.md) was committed
-before implementation, and the literal v1 fixtures were committed before source
-edits. See [configuration](docs/PROVIDER_USAGE.md#opt-in-audit-aware-evidence-commons-prompts)
-and the [audit usage guide](docs/AUDIT_USAGE.md).
+Use [NEXT.md](NEXT.md) for the prioritized queue, [PLAN.md](PLAN.md) for milestones,
+[BUILD_LOG.md](BUILD_LOG.md) for executed verification, and
+[the research charter](docs/research/RESEARCH_CHARTER.md) for scientific scope.
+The previous long checkpoint remains preserved in
+[the November 2 handoff](https://github.com/Chris0Jeky/collaborative-hill-lab/blob/b8e072041f97314c6d4e8c00cbdd3dea8f208435/HANDOFF.md).
+Its pending/next statements describe that historical checkpoint, not today's queue.
 
-The opt-in adapter has a fixed construction-time template identity and distinct
-`@2` policy ID, preserving the compatible-provider identity suffix. It validates
-EC context and the strict public envelope before a request, renders only released
-allowlisted fields, and rejects nested skin/template drift for fake and compatible
-providers. Absent channels, envelopes with no published reports, unavailable
-reports and reported verdicts are distinct. Missing findings do not distinguish
-pending from unselected;
-the envelope supplies neither accuracy nor a future schedule. JSON escaping is
-scoped to the new section, with no whole-prompt persuasion-resistance claim.
+## Authoritative baseline and current work
 
-Independent review approved the core and intercepted a compatible-provider HTTP
-request offline to verify template/provider identities, transport separation,
-prompt digest and honest accounting. It found one factory defect: effective
-audit-aware policy overrides bypassed non-EC preflight. The fix was preceded by
-failing fake/compatible regressions and independently re-reviewed. Actual branch
-tests now reject these overrides before creating output; valid scripted/legacy
-replacements still bypass unused original provider settings.
+The connected GitHub repository started this pass at main
+`b8e072041f97314c6d4e8c00cbdd3dea8f208435`, with no open issues or PRs. The uploaded
+ZIP matches all 418 file blobs and tree `17823dff30a1b3f039809168e1e829a3bd117be2`.
+Main's [CI 41459865315](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/41459865315)
+passed Ubuntu and Windows; both logs confirm the commit and all verification gates.
+The local baseline passed all 2,171 tests with the committed dependency versions.
 
-All **108 focused compatibility, adapter, configuration and sealed-workflow
-cases** pass. They include actual released reports, fixed manifests, audit-mode
-format repair and exhaustion, unknown usage, byte-exact continuation prefixes,
-fresh continuation policies and offline replay after moving the parent. An
-independent audit-off EC control produced nine absent-channel prompts with the
-same adapter identity and replayed without provider calls. No review blocker
-remains. The complete integrated local gate on `db6efe0` passed **2,171 tests**
-with no failures or skips, Ruff, strict typing, all four StudySpec validations,
-11 acceptance scenarios and every historical/new research reproduction. The
-subsequent changes correct documentation and record that result; production and
-test bytes are unchanged. PR #109 records final published-head Ubuntu/Windows
-checks and merge; an earlier head's checks do not substitute for that gate.
-
-The original experiment and raw archive below are unchanged. All four shipped
-StudySpecs remain unfrozen, and Study 001 still fails C2 at its placeholder
-weights. Prompt plumbing is an offline engineering capability, with no live-model
-audit-response or benefit result. The next research step is a separately declared
-bounded pilot after the existing human-owned decisions; no model, spend or final
-weights are selected by these changes.
-
-## Prior checkpoint — opt-in audits before hosted verification
-
-Issue [#103](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/103) is
-implemented in [PR #107](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/107).
-The original audit-feedback experiment has executed and passed an independent
-read-only artifact audit. **PR #107 is not merged at this checkpoint.** Its PR
-record is authoritative for the final published head, hosted checks and merge.
-The integrated local suite passed **2,063 tests**, with no failures or skips,
-and the complete local verification/reproduction gate passed. Final hosted CI
-and merge remain pending.
-
-The next feature is [#108](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/108),
-a separately versioned audit-aware LLM prompt renderer. Its design is approved
-and implementation is in progress. The current LLM EC renderer omits the audit
-envelope, so the results below concern the registered scripted policy. This
-follow-up preserves legacy prompt bytes and hashes; it does not authorize a live
-provider run or establish an LLM response to audits.
-
-### Implemented runtime and policy contract
-
-The implementation specified by [ADR-0018](docs/adr/0018-opt-in-evidence-commons-audits.md)
-covers all six [ADR-0017](docs/adr/0017-noisy-corpus-and-audit-contract.md) gates. An explicit
-required audit institution selects EC engine and observation schema version 3.
-Legacy institutions retain their serialized shape and EC v2 routing. The exact
-synthetic generator uses separate per-target availability and correctness streams;
-reports publish once before the scheduled round's observations. Checkpoints
-retain only published findings. Replay, nested branches and a failure at a
-publication boundary are covered without provider requests or future verdicts.
-
-`ec_audit_veto_contributor@1` validates every present envelope, then obtains the
-unchanged skeptic's choice. A matching published negative report vetoes only a
-selected proposal or verification. Positive, unavailable, absent and pending
-reports preserve the baseline choice. The wrapper does not rerank candidates,
-create evidence, retract support or change the task's acceptance/reward rules.
-Manifest institution claims are strictly validated and bound to the resolved
-scenario; malformed metadata is rejected without repairing the source artifact.
-
-### Original experiment and its limits
-
-The [pre-execution design](experiments/audit-feedback/DESIGN.md) fixes N=3, one
-slot, eight rounds, aggregate accountability, a shared ledger and three perfectly
-correlated reports with distinct source labels. The
-[readout](experiments/audit-feedback/RESULTS.md) retains **52 behavioral episodes
-and 24 fixed-action controls**, plus **four separate branch-integrity fixtures**.
-All **P1–P8 hold**: 60 same-action C3 comparisons, 42 truth controls and 720 exact
-mixture rows. The forced-action controls still accept a false claim after a
-negative audit, confirming that publication itself does not change task rules.
-
-The intermediate probability rows reweight executed endpoint responses under
-explicit synthetic laws. They are not additional episodes or measured audit
-accuracy. At source error `1/10`, audit accuracy `3/4`, no unavailability and
-round-3 publication, selective accuracy rises from `9/10` to `27/28`, acceptance
-falls from `1` to `7/10`, and signed quality falls from `48/5` to `39/5`. The early
-quality contrast is `12(1-u)(a+e-1)`; at accuracy `9/10` that contrast is zero.
-Round-5 negative reports save effort after the winning claim already has enough
-support, while round 6 is a task null. Complete unavailability preserves baseline
-behavior. Undefined selective or conditional-audit accuracy remains JSON null.
-
-These conclusions use a free audit channel, assumed accuracy and independence,
-and the declared placeholder action costs. They establish no general audit
-benefit, deployed verification accuracy, optimized policy, LLM result or human
-inference. All four shipped StudySpecs retain their bytes and remain unfrozen;
-Study 001 still fails C2 at its placeholder weights.
-
-### Source publication, verification and preserved originals
-
-Both design and complete source were published before original execution:
-
-| Stage | Local commit | Public commit | Identical tree |
-|---|---|---|---|
-| Reviewed design | `e93e8b3` | [a11a11fe](https://github.com/Chris0Jeky/collaborative-hill-lab/commit/a11a11feb8fd27dc619e237e60549de14c935f28) | `e87a3a7caec0596cc5707e50f209f0ed3cf4039f` |
-| Original execution source | `ab9e3ec` | [67275327](https://github.com/Chris0Jeky/collaborative-hill-lab/commit/67275327133d00e161c38d2b56d1b21472927bcb) | `d4494ee3557deb7ef6a4d736336070aae4c73373` |
-
-The original source record retains actual local commit
-`ab9e3ec842c24ad12bc6b60b30a11843353df965`, its exact clean flag, dependency lock
-and 65 source-file digests. The public mapping does not rewrite that identity.
-
-| Completed verification | Evidence |
-|---|---|
-| Runtime integration | 2,026 full-suite tests and 111 final focused tests passed |
-| Corrected experiment source `eec165a` | 2,062 full-suite tests; Ruff; strict mypy over 57 package and 3 experiment files passed |
-| Independent corrected-source review | 36 artifact tests passed, including failed-readout prose, strict source flags and branch-policy identity regressions |
-| Final integrated local gate | 2,063 tests, four StudySpec validations, acceptance and every standalone research gate passed; hosted CI and merge remain pending |
-| Independent original-evidence audit | All 80 chains replayed; 621 checkpoints and 65 source digests verified; recollected JSON/Markdown byte-identical |
-
-The [original-evidence record](experiments/audit-feedback/ORIGINAL_EVIDENCE.md)
-and [independent audit](experiments/audit-feedback/ORIGINAL_AUDIT.json) bind **947
-original files / 10,283,384 bytes**. Their before/after inventory is identical.
-The 76 scientific ledgers contain 8,048 events; the four branch ledgers contain
-409 records including copied prefixes. Branches are software checks, not extra
-scientific samples. Every manifest's source, clean flag, lock, scenario and seal
-binding passed. The new archive
-`collaborative-hill-audit-feedback-original-evidence-2026-11-02.zip` contains the
-947 original files and five metadata/checksum entries: **952 members**, **1,515,408
-bytes**, SHA-256:
-
-```text
-338f6a15611f4ae8d4db69140d44c857686ab633cda55489b346fab03ff36fe1
-```
-
-The original-artifact audit is distinct from
-`python experiments/audit-feedback/audit_feedback.py --check`, which regenerates
-sealed runs and branch fixtures in a temporary directory, replays them and
-compares the retained readouts. The new `make check-audit-feedback` gate passed:
-all 76 runs, four branch fixtures and 720 exact rows reproduced byte for byte.
-The complete local gate also passed `check`, `test`, `validate`, `acceptance`,
-atlas, Study 002, responsive EC, quality safeguards, graph, sparse pTFT, noisy
-corpus and EC ablation. Reproductions do not replace the originals or add
-samples. All 61 preexisting experiment files and the four shipped StudySpecs are
-byte-identical to `e1f8f119`; all 11 preexisting EC policy functions/classes are
-unchanged, with additive factory dispatch only.
-
-The following sections preserve prior checkpoint findings and verification.
-Their earlier next-work and publication statements describe those checkpoints;
-use the current section above and [NEXT.md](NEXT.md) for active work.
-
-## Prior checkpoint — merged core work and recorded-seed follow-up
-
-The provider-budget follow-ups, separate EC component ablation, declared noisy
-corpora/audit contract, and lab branch-integrity fixes are implemented. Independent
-science reviews approved both experiments; provider review and the lab re-review
-also approved their slices. **All four core PRs are merged.** Each merge followed
-inspection of passing Ubuntu and Windows logs on the exact published head, and
-each merge tree equals its tested head's tree:
-
-| PR | Tested head | Merge | Scope | Exact-head CI |
-|---|---|---|---|---|
-| [#99](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/99) | `f501a9a` | `a166a55` | #96 noisy-corpus experiment and audit observation contract | [41386097110](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/41386097110) |
-| [#100](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/100) | `985defa` | `c5f2fa2` | #95 EC rule components and factorial readout | [41386233859](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/41386233859) |
-| [#101](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/101) | `66f50ce` | `a23a68a` | #92 continuation budgets, failure analysis and accounting limits | [41385412412](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/41385412412) |
-| [#102](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/102) | `c0e810b` | `ff3c3e1` | Branch provenance, effective policy labels and separate lab summaries | [41386055377](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/41386055377) |
-
-Issues #92, #95, #96 and the discovered #98 are closed. The shared recorded-seed
-follow-up [#104](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/104) is
-implemented, independently reviewed and locally verified in
-[PR #105](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/105); its public
-check and merge record is linked below. Audit-engine integration through issue
-#103 is the next feature. No original scientific input, prediction or result was
-changed. All four shipped StudySpecs retain their bytes and remain unfrozen;
-Study 001 still fails C2 at its placeholder weights.
-
-### Component ablation: distinct switches and interactions
-
-The [#95 readout](experiments/ec-rule-ablation/RESULTS.md) retains **192 behavioral
-episodes and 96 fixed-action controls**, with **288 verified ledger replays**.
-All P1–P6 hold, including the complete hand-derived outcome table. The 16 settings
-of screening, contradiction sharing, challenges and the read-citation requirement
-are evaluated in six contexts under both hidden truths. All 384 single-component
-contrasts and 396 interactions retain their conditioning bits and null results.
-The first five contexts use the earlier quality-safeguards world inputs; the
-limited-inspection citation probe is labelled separately.
-
-The citation gate is null under full inspection. In the separate probe, enabling
-it changes accurate quality `12 → 0`, total effort `10 → 8`, and total utility
-`7 → -8`; the truth-swapped values are quality `-12 → 0` and utility `-27 → -8`.
-Sharing and challenges interact through reading time, the finite horizon and
-the contribution quorum. Challenges can be followed by verification of the same
-claim, which can reopen peers' participation. All 96 truth pairs have identical
-observations/actions, and all 24 endpoint bridges match unchanged conditional or
-skeptical v1 actions. This isolates components without giving any rule a truth signal.
-
-### Noisy corpora: selective accuracy, coverage and signed quality
-
-The [#96 readout](experiments/noisy-corpus/RESULTS.md) retains **64 behavioral
-episodes and 64 same-action accounting controls**, with **128 verified ledger
-replays**. All P1–P8 hold. Six declared error rates and independent/fully correlated
-error models reweight the same finite worlds; they are assumptions, not empirical
-frequencies or additional samples. Both the synthetic equal truth mixture and
-conditional-on-each-truth expectations are reported.
-
-With independent errors and distinct labels at `e=1/10`, the skeptic's selective
-accuracy is `729/730` versus the conditional rule's `9/10`, but its acceptance
-probability is `73/100` versus `1`, and signed quality is `1092/125` versus `48/5`.
-Discarding correct claims lowers signed quality despite higher accuracy among the
-accepted claims. The exact quality difference is `-12 e(1-e)(1-2e)`. With fully
-correlated errors, distinct labels always agree and the two rules have identical
-expected outcomes. Collapsing labels silences the skeptic even with perfect
-evidence. Effort, contribution, credit and utility remain separate outcomes.
-
-The separately versioned `ec-audit-observation@1` supplies strict validation,
-fixed publication timing, a deterministic public projection and explicit
-unavailability. It does not establish supplied findings' accuracy or enable an
-audit engine, policy or truth-feedback episode. [Issue #103](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/103)
-tracks all six [ADR-0017](docs/adr/0017-noisy-corpus-and-audit-contract.md) integration
-gates: opt-in version/hash routing; exact error/unavailability generation; public
-events and replay/branch timing; a versioned policy; integrated C3/leak/seed/legacy
-tests; and a separately committed experiment design. The original #96 model and
-versioned observation-contract deliverables are complete.
-
-### Provider and lab corrections
-
-Budgeted network continuations require the same budget object explicitly; missing
-or mismatched objects fail before child output or requests. Child manifests retain
-cumulative admission data, and failed-run analysis exposes stable budget stop
-codes while rejecting inconsistent metadata. Shared-agent episode limits are
-tested offline. A process killed before sealing has no established final request
-accounting; there is no automatic cross-process budget recovery. These boundaries
-are documented in [provider usage](docs/PROVIDER_USAGE.md).
-
-The lab checks ancestry and scenario/policy/seed bindings from sealed artifacts,
-labels inherited prefixes, and separates counterfactual summaries. Independent
-review found that matching default run IDs could still pool branches and malformed
-seed fields could crash rendering. Four expected failing regressions preceded
-`4306a2b`; all 25 focused lab tests now pass, and re-review approved the fixes.
-No event or scientific metric definition changed.
-
-### Shared recorded-seed validation
-
-The #104 follow-up validates root shapes, protocol and scenario block in both the
-manifest and the hash-valid sealed `RunStarted` payload before string conversion.
-Malformed metadata raises `ValueError` before replay or branching creates output;
-the CLI exits 2 with an error message and no traceback. Source artifacts are never
-repaired or rewritten. Valid integer/string aliases, empty mechanism-root prefixes,
-legacy records without an explicit protocol, paired streams and replay hashes
-remain supported. `derive_seed`, `rng_for` and `study_seed_roots` are unchanged.
-
-Local source `a7e40e169fc817d93c783df7887a756056cdb10d` maps to public PR #105 head
-`bdc3de068c07a8e61f8db398e6d68a235cf7cb70`; both have tree
-`be5962d74c4fb1d515428e88fc69ccb5f0c65a02`. The
-[PR record](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/105) and
-[CI 41387542882](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/41387542882)
-are the authoritative hosted check and merge record. The verification counts
-below describe completed local runs.
-
-### Verification, provenance and original evidence
-
-| Completed local verification | Scope |
-|---|---|
-| Ablation: 1,475 full-suite tests; 208 focused cases | Original ablation implementation; all 288 replays and exact readout reproduction also passed |
-| Noisy corpus: 158 focused tests, `make check`, `make validate` | Exact 128-run regeneration and standalone strict types passed |
-| Provider: 1,374 full-suite tests; 153 independent focused tests | Mocked transport, budgets, branching and failure analysis |
-| Lab: 25 focused tests and independent re-review | Includes both reproduced review defects and their regressions |
-| Corrected standalone ablation gate | Ruff, strict mypy over 2 modules, all 288 replays and byte-identical readouts at `344b5e2` |
-| Recorded seeds: 53 failing-before cases; 119 focused and 303 targeted tests passed | Actual-artifact and CLI regressions; Ruff and strict mypy over 54 package files passed |
-| Recorded seeds: 1,762 full-suite tests passed in 209.87 seconds | All four StudySpecs, 11 acceptance scenarios, quality-safeguards, noisy-corpus and ablation gates passed |
-| Independent seed review: 119 focused plus 23 compatibility tests passed | Approved exact `a7e40e1`; actual empty-root parents and children replayed under both protocols with original bytes and branch prefixes preserved |
-
-A flaky provider retry fixture was traced to a global `time.sleep` patch affecting
-subprocess provenance collection. The fixtures now bind the provider clock alone.
-The new standalone ablation typing gate found four errors. Commit `344b5e2` fixes
-tuple unpacking, removes obsolete ignores and asserts the paired root is non-null. Original
-source records, pre-execution predictions and readout bytes remain unchanged.
-The complete combined local gate exited successfully: `check`, `test`, `validate`,
-`acceptance`, atlas, Study 002, responsive EC, quality safeguards, graph, sparse
-pTFT, noisy-corpus and EC ablation. Before the seed follow-up, the suite collected
-1,658 tests, and all original research readouts were preserved. The four core published
-heads subsequently passed both hosted operating systems and merged as recorded
-above. The seed follow-up's local results and hosted record remain distinct. Independent
-integration review approved `344b5e2` and verified all 62 original ablation source
-commitments plus the public design/source trees.
-
-Both research designs and identical public source trees were published before
-original execution. The [ablation mapping](experiments/ec-rule-ablation/PUBLISHED_SOURCE.json)
-binds local `160ed5b` to public `768c9a7` and checks 62 source-file digests; the
-[noisy-corpus mapping](experiments/noisy-corpus/PUBLISHED_SOURCE.json) binds local
-`f8c466d` to public `f04fa8a` and checks 61. Their original `SOURCE_PROVENANCE.json`
-records retain the actual clean local execution identities. Later verification
-runs are reproductions, not replacement provenance or added samples.
-
-`collaborative-hill-original-evidence-2026-11-02.zip` preserves both original
-experiments: **416 sealed runs, 61,400 events, 1,930 original files and 54,450,912
-original bytes**. Its **1,936 entries** include six additional mapping/manifest/
-README/repack/checksum records. Archive size: **6,130,217 bytes**. SHA-256:
-
-```text
-ca58443e691fcd74f7b2311c1aaee825e577f551f7da46f0f1d3e9870504a17a
-```
-
-All 416 runs pass the source-commit, clean-worktree, dependency-lock, seal, scenario
-and manifest binding checks; their terminal hashes match the retained readouts.
-Original readout/provenance bytes
-match Git; original file contents were not changed. Events split as 12,296 noisy-
-corpus and 49,104 ablation records. No live or paid provider, study freeze,
-final-weight selection or human-subject inference supports this checkpoint.
-
-The sections below preserve the earlier checkpoint evidence and historical checks.
-Use the current status above for pending work and publication state.
-
-## Portability, feedback tooling and issues #84–#86
-
-Native Windows reproduction was broken and invisible: `core.autocrlf` plus text-mode
-writes changed bytes that evidence commits to. [#88](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/88) forces LF, fixes
-every text write and runs the full gate on Windows in CI. No evidence byte or Linux
-output changed.
-
-Feedback tools from [#89](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/89) and [#93](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/93): `make quick`
-(diff-selected checks), `chl lab` / `make lab` (film strips from verified ledgers,
-terminal and HTML), `make mutants` (reproducible token-mutant sampler) and a
-Hypothesis whole-episode fuzzer. A one-off 500-example fuzz search found no engine
-defect. The first 72-mutant sample killed 55 using fast tests only; survivors
-clustered in reported metrics, now pinned by `tests/unit/test_metric_oracles.py`.
-
-[#90](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/90) (closes #86) adds `chl study plan` and `RequestBudget` (ADR-0015):
-attempts are charged at admission, scopes never reset on a retry or fork, stops seal
-`RunFailed` and replay offline, deadlines apply between requests only, and budget
-configuration enters no hash. There is no default limit. All verification is mocked.
-
-[#91](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/91) (closes #85) adds the
-[exact sparse pTFT benchmark](experiments/sparse-ptft/EXACT.md): 16 exact cells,
-complete-graph agreement with Study 002, an independent history oracle and the
-four-cycle non-lumpability witness. An independent review re-derived key values by hand.
-
-[#94](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/94) (closes #84) adds `ec_skeptical_contributor@1` (ADR-0013) and the
-unfrozen [quality-safeguards experiment](experiments/quality-safeguards/RESULTS.md):
-440 behavioral episodes and 220 same-action controls. **The rule does not separate
-accurate from misleading evidence**: all 220 truth pairs have identical actions and
-opposite quality, and unanimous false corroboration passes. Its bundled rule effect
-trades on conflicted evidence, gaining where structure tracks truth and losing where
-it inverts. One named skeptic blocks every accurate conflicted claim. C1 and C2 hold
-together in 0 of 48 groups; C3 holds in all 220 replays. Sealed raw runs are local at
-`C:/Users/Cristian3/chl-wt/kept-artifacts/quality-safeguards/`, outside Git and not
-archived elsewhere; the checked-in readout retains terminal hashes.
-
-Exact-head hosted CI passed on Ubuntu and Windows for every PR in this section. No study was
-frozen, no provider was called, and the ten human decisions below are unchanged.
-Follow-ups: [#92](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/92), [#95](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/95), [#96](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/96).
-
-## Research engine advancement
-
-The owner authorized broad repository work, parallel implementation and verified
-merges in this session. The earlier bounded-work/feature-park checkpoint is
-preserved byte-for-byte in
-[the historical handoff](docs/history/HANDOFF-before-research-engine-2026-10-29.md).
-Its no-CI statements and narrower session scope are historical. Repository tier,
-hook trust, licensing and the ten human decisions below are unchanged.
-
-### Implementation references
-
-| PR | Result | Exact-head CI |
+| Work | Tracker | Status at this working checkpoint |
 |---|---|---|
-| [#69](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/69) | Persistent CI with pinned actions, read-only token, exact checkout and clean-workspace checks | [40802143735](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/40802143735) |
-| [#70](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/70) | Reject confounded factorial populations and conflicting retries; retain valid golden results | [40802529028](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/40802529028) |
-| [#73](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/73) | Study 002 design, execution, sealed-ledger readout and source provenance | [40803286824](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/40803286824) |
-| [#74](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/74) | Shared built-in policy parameter validation without rewriting scenario values | [40803342268](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/40803342268) |
-| [#75](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/75) | Strict study counts/IDs and complete output preflight, including aliases and nested destinations | [40803377416](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/40803377416) |
-| [#79](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/79) | Exact post hoc pTFT benchmark, reproducible figure, experiment targets and extended CI | [40805239775](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/40805239775) |
-| [#81](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/81) | Observation-responsive EC baseline, strict parameter primitives and 480-run sensitivity/control record | [40811251496](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/40811251496) |
-| [#82](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/82) | Configured provider transport, explicit execution opt-in, request accounting and continuation provenance | [40812620936](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/40812620936) |
-| [#83](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/83) | Versioned local graph N-IPD, 18 exact controls and historical-evidence regression gate | [40813963880](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/40813963880) |
+| Experiment catalog and connected entry points | [#110](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/110) | Implemented and integrated; independent review pending |
+| Verified interactive round/state inspector | [#111](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/111) | Implemented; 41 combined console/demo/walkthrough tests pass; browser CI and independent review pending |
+| Operational text/JSON run inventory | [#112](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/112), [PR #114](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/114) | 19 focused tests and both complete CI jobs pass on `608ee950`; independent review pending |
+| Identity, roadmap and repeatable issue seeds | [#113](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/113) | Implemented; 25 seed tests pass; independent review pending |
+| Public-command reproduction walkthrough | [#115](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/115) | Real graph workflow test passes; integrated complete gate pending |
 
-The implementation PRs retain their exact review and check records. The combined first five
-merges also passed [main-commit CI](https://github.com/Chris0Jeky/collaborative-hill-lab/actions/runs/40803992791)
-at `bfd49d5c3e1e00bcfba2497b42ba05e04373bf9b`. Use checks on the exact commit
-being evaluated; a previous green run is not evidence for a changed head.
+The implementation design and task plan are in
+[the coherent-lab specification](docs/superpowers/specs/2026-11-05-coherent-lab-design.md)
+and [implementation plan](docs/superpowers/plans/2026-11-05-coherent-lab.md).
+Independent worktrees isolate changes. Remote publication uses connector-created
+branches, commits and draft PRs; exact-head CI and review precede merge.
 
-### Current responsive Evidence Commons result
+The bounded next issues are [#116](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/116)
+(paired inspection), [#117](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/117)
+(separate audit cost/timing experiment), and
+[#118](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/118) (draft pilot
+decision record). All eight seeds are pinned to their existing issue numbers.
+Local Chromium is blocked by the workspace socket policy; actual browser
+execution and screenshot review are delegated to the Ubuntu CI gate.
 
-The new `ec_conditional_contributor` uses only visible contribution history. Its
-exact peer quorum, warmup and anonymous lower-bound semantics are versioned in
-ADR-0012. Legacy contributor/freerider policies and Study 001 are unchanged. Policy
-inputs now reject float/byte coercion before normalization can alter their identity.
+## Scientific state to preserve
 
-The [declared finite design](experiments/responsive-commons/DESIGN.md) executed
-320 deterministic behavioral episodes and 160 separate fixed-action controls.
-Across the 160 attributable-minus-aggregate contrasts, quality increased in 2,
-decreased in 2 and was unchanged in 156; actions differed in 4. All 160 identical-
-action controls preserved briefing, effort, quality and total utility. Nine of
-40 two-strategy cells satisfy the declared strict C1/C2 pair. These are distinct
-tests, not a general social-dilemma certificate or a population effect estimate.
+- Studies 000, 001 and both 002 components remain unfrozen.
+- Study 001's placeholder weights still fail collective stakes (C2); the configured
+  dilemma is not certified. The incentive atlas describes finite-strategy alternatives.
+- Graph, responsive-commons, quality-safeguards, rule-ablation, noisy-corpus and
+  audit-feedback findings retain their original inputs, source records and results.
+- Audit-feedback originals and the separate audit-aware prompt adapter are merged
+  in [#107](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/107) and
+  [#109](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/109).
+- Provider transport and audit-aware prompts are capabilities verified offline.
+  No measured live-model audit response or benefit has been established.
+- Reproducing a result in verification does not replace original evidence or add samples.
 
-Attribution sustains useful and harmful contribution in this grid. The rule does
-not inspect hidden truth, assess evidence quality or optimize utility weights.
-The [full readout](experiments/responsive-commons/RESULTS.md) preserves every cell,
-the inaccurate-evidence cases and the warmup/threshold null controls. No inferential
-interval is manufactured for deterministic enumeration.
-
-### Current graph result
-
-The new `nipd_graph` world has canonical undirected adjacency, local observations,
-explicit sum/mean payoff aggregation and defined isolate semantics (ADR-0011).
-It retains the historical complete-population engine and input hashes. The
-[18-cell exploratory experiment](experiments/graph-topology/RESULTS.md) fixes N=5,
-one AllD, eight rounds and mean edge payoff. All full cooperation curves match
-the predictions made before execution; all original sealed runs replay.
-
-The ring delays linked TFT's defection cascade by one round relative to the
-complete graph. Star outcomes depend strongly on whether AllD occupies the hub
-or a leaf. Pairwise cooperation counts directed edge votes, whereas neighborhood
-cooperation counts one vote per nonisolated agent; these units must stay explicit.
-Symmetry-equivalent seats add no independent replication. A four-cycle exact
-counterexample shows why total cooperator count is insufficient to determine
-the sparse-graph pTFT transition law. The complete-graph benchmark is not reused
-without a new state-space justification.
-
-### Provider execution capability
-
-[PR #82](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/82) supplies an
-explicit non-streaming OpenAI-compatible transport, selected-credential preflight,
-run/branch opt-in and stable failure categories. Validation and recorded-action
-replay stay offline. Measured per-request partial sums and coverage accompany
-honest null totals when any usage is unknown. Costs remain null. A continuation
-records only its own calls/transcripts and current source/runtime provenance;
-known transport or reported-model confounds are rejected by factorial analysis.
-
-Every transport response/failure used in verification was mocked. This does not
-establish live compatibility, billing, provider determinism, a total wall-clock
-deadline or an episode dollar budget. Configuration and operator commands are in
-[PROVIDER_USAGE.md](docs/PROVIDER_USAGE.md).
-
-### Preserved Study 002 result
-
-Study 002 is an **executed, unfrozen exploratory experiment**, with 29 deterministic
-controls and six stochastic pTFT cells × 32 independently seeded episodes, each
-50 rounds long. All 29 deterministic full trajectories and payoff vectors match
-local pre-execution predictions. The quorum boundary is inclusive at
-`(m−1)/(N−1)`: 1/2 for N=3,m=2; 3/4 for N=5,m=4; and 1/2 for N=5,m=3.
-The two-defector control shows why population composition cannot be ignored.
-Targeted and linked pairwise TFT differ on the same interaction structure.
-
-All 192 sampled stochastic episodes reached all-D by the last observed round;
-all final ten-round windows were zero. The analytical expectations remain
-positive. The original N=3,m=2 include-self analytical mean falls outside its
-reported marginal bootstrap interval, and that discrepancy is retained in
-[RESULTS.md](studies/002-nipd-sensitivity/RESULTS.md). No extra samples or retuned
-settings were used to erase it.
-
-The [exact benchmark](studies/002-nipd-sensitivity/EXACT_PTFT_BENCHMARK.md) was added
-**after** those observations. It computes ideal rational-Bernoulli means, variances
-including cross-round covariance, and absorption probabilities. Absorption by
-`t=40` means the entire final ten-round window is zero; `t=49` means absorption by
-the last observed round. For N=5,m=4 include-self, the ideal probability that all
-32 final windows are zero is about 0.991639. A zero empirical variance therefore
-coexists with positive model variance. Model MCSEs and event probabilities are
-not normal confidence intervals or p-values. The SVG distinguishes observed
-means from model expectations and retains all 50 rounds.
-
-### Execution provenance and unchanged inputs
-
-The original Study 002 episodes ran from clean local commit
-`d4b8de90fe8317a0522764ca53b86727db93179c`. The
-[published source snapshot](https://github.com/Chris0Jeky/collaborative-hill-lab/commit/16e7c45634eb2fdaa0d70e1933c7a966f3da6967)
-has its exact Git tree, `4fb241428f18e8e4013324be6905d31b986edfe4`.
-[SOURCE_PROVENANCE.json](studies/002-nipd-sensitivity/SOURCE_PROVENANCE.json)
-records 88 per-file SHA-256 commitments. Local pre-execution predictions are not
-claimed to be an externally timestamped preregistration. Later validation and
-reporting changes do not become the source of the original run retroactively.
-
-Original ledgers are generated artifacts outside Git. The original 221-run record
-is also preserved in the session deliverable
-`Study002_Original_Sealed_Runs_2026-10-29.zip` (archive SHA-256
-`1a72382d9ca014b3856af4451c3c425b03fa3034a9a38674bf58627a49c3108d`).
-Its 1,768 original files have individual SHA-256 commitments; all 221 terminal
-hashes were matched to the retained readout before packaging. The checked-in readout retains
-terminal event commitments, episode outcomes and exact analytical/measured curves.
-The post hoc benchmark audits that summary's identities and arithmetic; it does
-not independently reverify absent raw ledgers. Its source RESULTS.json SHA-256 is
-`b0208013a4bbfe2b5cb59b8b4d767059a08c0c6093c6259d413d680bc5bc0080`.
-
-| StudySpec | Content hash | Frozen |
-|---|---|---|
-| Study 000 | `5dcde1a9b6c98c576ca71bc03ea65dcc96175b6d8803c4db89e6c56ac8a15e9f` | false |
-| Study 001 | `a3bffdfcf1715ebd65aa45b469f3e32c720d22633cfc80769b11020bcbd37bbe` | false |
-| Study 002 deterministic | `175140649a108a4f5ea33a4c7a1decf74cdc777a9d47057839a54b7e24ed22eb` | false |
-| Study 002 stochastic | `728392210a4aa437ba2a1f6e4d8be73f99b96b896e596e81a8969c121623754f` | false |
-
-Studies 000/001 retain their original input bytes and hashes. Study 001's current
-placeholder weights still give C1=true, C2=false in every institution and no C3
-violation: **social dilemma not certified; tested same-behavior accountability
-integrity certified**. The incentive atlas gives finite-strategy admissible
-regions, without choosing weights or demonstrating a behavioral response.
-
-The responsive EC original source was clean local
-`25904e5ce84d9ed642bed5874192391ff1297729`, identical in full tree to the
-[published source](https://github.com/Chris0Jeky/collaborative-hill-lab/commit/0e12c42fc8819e6d92c4153f06760c7996a5d237).
-Its [provenance](experiments/responsive-commons/SOURCE_PROVENANCE.json) records
-the actual original environment, including setuptools 84.0.0; later full-lock
-84.1.0 validation reproduced the readout without rewriting that history.
-
-The graph original source was clean local
-`873666aa9dfe1de7cc76d31275b4828fa44e065d`, matching the published
-[source checkpoint](https://github.com/Chris0Jeky/collaborative-hill-lab/commit/78caa2a98c62c1818227e90886525d6f2aa19eb0)
-and tree `875823c171036dcf40a0b9f2834074bce7ad05f9` before execution. Its
-[separate source mapping](experiments/graph-topology/SOURCE_PROVENANCE.json)
-preserves the original JSON/Markdown/execution-source bytes and verifies 71 file
-commitments. Original graph RESULTS.json SHA-256 is
-`69349116386452e913e1eabc546082a9d052d8993fc3a2dbb5f134658fe6a099`.
-Both new experiments remain unfrozen and separate from Studies 000/001/002.
-
-The original 498-run evidence is also retained in the session deliverable
-`collaborative-hill-pass2-original-evidence-2026-10-29.zip`, SHA-256
-`107ea42fd282130b9f8d4cb3899d828205b1e37337c9cb73d13bcc83e0522459`.
-It contains 2,374 original files, separate published-source mapping records,
-per-file checksums and a byte-reproducible repack script. All 498 seals, 66,714
-event records, 552 checkpoint bindings and 120 source-file commitments were
-verified before packaging. Original on-disk artifact contents and modification
-times are unchanged; ZIP entries use fixed timestamps for reproducible packaging.
-
-## Reproduce and verify
+## Verification commands
 
 ```bash
-make setup
-make check test validate acceptance check-atlas check-study002 check-responsive check-quality-safeguards check-graph check-sparse-ptft check-noisy-corpus check-ec-rule-ablation
-make study-002-plan
-make study-002 STUDY002_ARTIFACTS=artifacts/study-002-fresh
+make check test validate acceptance check-atlas check-study002 check-responsive check-quality-safeguards check-graph check-sparse-ptft check-noisy-corpus check-ec-rule-ablation check-audit-feedback
 ```
 
-Use a fresh artifact root for execution. The last command generates both component
-studies and their report. `make check-study002` validates canonical inputs and
-byte-identical benchmark JSON/Markdown/SVG without running more episodes or
-rewriting evidence. Setup downloads pinned dependencies; science gates call no
-model provider. Direct commands and other workflows are in README and Makefile.
-
-The final graph head `535ad44062657023e50bc1ab48a714d823640abe` passed the full
-**1,198-test suite** in hosted CI, Ruff, strict package mypy in 50 files, all four
-historical StudySpec validations, **11/11 acceptance scenarios**, atlas/Study 002
-checks, all 480 responsive regenerations and the 18-run graph gate. Its final
-checkout was clean. All 38 committed dependency pins were installed, including
-setuptools 84.1.0. Local integration used Python 3.12.14; hosted CI used 3.12.15.
-The strengthened historical-provenance checks have 37 focused regression cases.
-Engineering verification reruns add no independent scientific samples.
-
-Independent reviews checked policy observation boundaries, provider failures and
-continuation accounting, exact graph arithmetic and all 18 trajectories using a
-separate payoff/action oracle. The graph gate compares all scientific/identity/
-seal fields while allowing a new execution to record its own source annotations.
-It separately checks the untouched original source and published-mapping records.
-
-Exact published-head Actions logs are the hosted verification record. The final
-integration/documentation PR carries its own current check; no human review is
-claimed from automated or agent reviews. CI now covers Ubuntu and Windows on Python 3.12,
-not macOS or a multi-version matrix.
-
-## Dependency maintenance following the integration checkpoint
-
-[PR #71](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/71) updates the
-setuptools lock pin from 84.0.0 to 84.1.0. Its original successful CI predated
-Study 002, so it was refreshed onto the integrated main branch for the complete
-current gate set. The PR retains the original bot commit, review evidence and
-exact-head checks; no force update was used.
-
-A separate venv passed fresh locked setup/editable installation, all 38 pin checks,
-sdist-to-wheel construction with the installed backend, wheel-content/license/
-entry-point checks, `pip check`, and isolated installed-package CLI/Study 000
-validation from outside the checkout. The original shared environment and run
-records were not rewritten. This follow-up changes the build dependency pin and
-the maintenance record, not simulator behavior or any scientific input/result.
-
-## Prior checkpoint — remaining directions and limits
-
-Issues #76–#78 and #84–#86 are complete. The #92, #95 and #96 follow-ups are
-merged, and the lab branch-integrity fixes are merged. Issue #103 is the next
-feature, with explicit audit-engine integration gates. NEXT keeps those offline tasks separate
-from pilot-dependent hypotheses, weights, sample size and freeze decisions.
-The lab review also opened [#104](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/104)
-for shared recorded-seed validation; that implementation is complete and reviewed,
-with the local evidence and public PR #105 check record above.
-
-The legacy C/F baselines do not respond to incentives or attribution; the new
-conditional policy responds to visible participation, not utility weights. All measured
-findings concern scripted algorithms, not LLMs or people. Exact pTFT calculations
-use ideal rational Bernoulli assumptions; the simulator's finite-precision draws
-are unchanged. Matching kernel seeds do not pair provider randomness. Factorial
-metadata checks cannot authenticate code or reveal entire missing runs; incomplete
-or unverifiable paired designs retain descriptive values but withhold inference.
-Output preflight checks a static filesystem and does not claim an atomic defense
-against concurrent ancestor replacement. Hash links establish consistency relative
-to retained commitments, not authenticity against wholesale replacement.
+Use the committed dependency lock through `make setup`. The CI matrix is Ubuntu
+24.04 / Windows 2025 and Python 3.12. Preserve exact commit and clean-workspace
+checks. For focused local commands consult [AGENTS.md](AGENTS.md) and the relevant
+PR; final hosted evidence belongs to the exact published head, not its predecessor.
 
 ## Human-owned decisions — unchanged
 

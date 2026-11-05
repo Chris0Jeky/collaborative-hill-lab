@@ -1,0 +1,110 @@
+{
+  "version": "chl-roadmap@1",
+  "repository": "Chris0Jeky/collaborative-hill-lab",
+  "seeds": [
+    {
+      "id": "experiment-catalog",
+      "issue_number": 110,
+      "title": "Make existing experiments discoverable and deliberately runnable",
+      "status": "active",
+      "lane": "engineering",
+      "rationale": "Existing studies and standalone experiments have useful evidence but separate commands. A validated catalog should connect each question to its inputs, readout and execution boundary.",
+      "scope": ["Catalog every shipped study and experiment with stable IDs and evidence status.", "Expose text/JSON discovery, offline plans and explicit execution or verification recipes."],
+      "acceptance": ["Every experiment directory is represented or explicitly classified as reference-only.", "Plans identify commands, fresh output requirements and source provenance without executing them.", "Stale paths and unsafe output destinations fail before execution."],
+      "verification": ["Run catalog tests for coverage, path validation, planning and output protection.", "Exercise one deterministic experiment through its declared catalog entry."],
+      "dependencies": [],
+      "sources": ["README.md", "experiments/audit-feedback/README.md", "studies/002-nipd-sensitivity/README.md"]
+    },
+    {
+      "id": "round-inspector",
+      "issue_number": 111,
+      "title": "Inspect verified rounds, observations and audit timing in the lab console",
+      "status": "active",
+      "lane": "engineering",
+      "rationale": "Episode summaries cannot explain how visible evidence, accepted actions and released audits produced an outcome.",
+      "scope": ["Extend the self-contained lab view with verified round navigation and public or agent-observed state.", "Retain branch ancestry, integrity status and explicit missing-data labels."],
+      "acceptance": ["A reader can inspect actions and released information at the round where they were available.", "Hidden truth and future audit results never become policy-visible observations.", "Hostile ledger strings remain inert; source artifacts and branch boundaries remain protected."],
+      "verification": ["Run inspector regressions for literal state, branches, malformed artifacts and HTML escaping.", "Open a generated console and inspect an actual run and continuation."],
+      "dependencies": [],
+      "sources": ["README.md", "docs/AUDIT_USAGE.md", "src/collaborative_hill/reporting/lab.py"]
+    },
+    {
+      "id": "run-monitor",
+      "issue_number": 112,
+      "title": "Report honest run-artifact status without claiming process liveness",
+      "status": "active",
+      "lane": "engineering",
+      "rationale": "A directory of long-running experiments needs a read-only status snapshot that separates verified completion from failures, unfinished writes and corruption.",
+      "scope": ["Add chl monitor TARGET with text and chl-monitor@1 JSON output.", "Count completed, failed, unsealed and broken artifacts without provider calls or artifact mutation."],
+      "acceptance": ["Only fully validated sealed runs are reported as verified.", "A partial final write is distinguished from a malformed complete event record.", "Unsealed means incomplete artifacts; it does not claim a process is alive or usage accounting complete."],
+      "verification": ["Exercise completed, failed, reserved, truncated and tampered run fixtures.", "Verify deterministic JSON and unchanged input bytes."],
+      "dependencies": [],
+      "sources": ["README.md", "docs/PROVIDER_USAGE.md"]
+    },
+    {
+      "id": "project-direction",
+      "issue_number": 113,
+      "title": "Establish a coherent laboratory roadmap and curated issue lifecycle",
+      "status": "active",
+      "lane": "engineering",
+      "rationale": "Completed implementation history and a pending live pilot obscure useful next work. Contributors need an ordered offline goal and a bounded queue with clear completion criteria.",
+      "scope": ["Connect project identity, present evidence, current workflow and deferred scientific choices.", "Add at most eight curated issue seeds with preview-first manual publication and stable deduplication markers."],
+      "acceptance": ["Current engineering work can proceed independently of owner scientific decisions.", "Seed validation checks IDs, dependencies, acceptance criteria and real source paths.", "Publication reconciles every page of open and closed issues, never edits or reopens existing discussions, and reports partial failure honestly."],
+      "verification": ["Run the manifest validator and offline seeder tests.", "Review a remote preview before deliberate publication."],
+      "dependencies": [],
+      "sources": ["README.md", "NEXT.md", "PLAN.md", "docs/research/RESEARCH_CHARTER.md"]
+    },
+    {
+      "id": "reproduction-walkthrough",
+      "issue_number": 115,
+      "title": "Document and verify one complete offline laboratory walkthrough",
+      "status": "active",
+      "lane": "engineering",
+      "rationale": "The catalog, monitor and inspector need one exercised path that a new contributor can follow from a research question to verified artifacts and their scientific limits.",
+      "scope": ["Choose a small existing synthetic experiment and document catalog discovery, planning, fresh execution, monitoring and round inspection.", "Link the resulting view back to the existing declared predictions, readout and reproduction check."],
+      "acceptance": ["The documented commands work from a clean checkout without credentials or paid calls.", "The walkthrough uses fresh output and leaves original evidence unchanged.", "It explains the difference between a verification rerun, an independent sample and an inspection view."],
+      "verification": ["Execute the full walkthrough and record exact commands and artifact identities.", "Check the generated console visually and run the experiment's existing reproduction gate."],
+      "dependencies": ["experiment-catalog", "round-inspector", "run-monitor", "project-direction"],
+      "sources": ["README.md", "experiments/graph-topology/README.md", "experiments/audit-feedback/README.md"]
+    },
+    {
+      "id": "paired-run-comparison",
+      "issue_number": 116,
+      "title": "Explain valid matched-run and branch differences in the inspector",
+      "status": "next",
+      "lane": "engineering",
+      "rationale": "The lab can already replay and branch, but readers need an explicit comparison contract to understand what changed without treating inherited history or duplicate IDs as independent evidence.",
+      "scope": ["Define a bounded comparison view for two compatible existing runs or a run and its continuation.", "Show aligned round actions and visible-state differences together with mechanism, policy, seed and ancestry metadata."],
+      "acceptance": ["Incompatible mechanisms or undeclared confounds are rejected or clearly identified before a comparison is interpreted.", "Inherited prefixes and independent episodes remain distinguishable.", "The view reports observable differences and never invents causal or statistical claims."],
+      "verification": ["Use literal matched-control and branch fixtures with known differences.", "Test mismatched scenarios, shared prefixes and duplicate default run IDs."],
+      "dependencies": ["experiment-catalog", "round-inspector"],
+      "sources": ["README.md", "scripts/counterfactual_demo.py", "src/collaborative_hill/reporting/lab.py"]
+    },
+    {
+      "id": "audit-cost-latency",
+      "issue_number": 117,
+      "title": "Declare a synthetic audit cost and timing experiment with harmful and null controls",
+      "status": "next",
+      "lane": "research",
+      "rationale": "The current audit-feedback experiment studies declared accuracy, unavailability and release timing with free audits. A separate experiment can test which improvements survive an explicit resource cost and timing tradeoff.",
+      "scope": ["Write a separate question, exact cost semantics, finite design and pre-execution predictions before running new outputs.", "Retain beneficial, harmful, null, late and unavailable audit controls and the original free-audit reference."],
+      "acceptance": ["Original mechanism versions, study weights and evidence bytes remain unchanged.", "Cost charging and timing have literal independent accounting oracles and explicit observation boundaries.", "The readout separates accepted-claim accuracy, coverage, signed quality and cost, including negative results.", "Synthetic assumptions are stated; no measured provider or real-world audit reliability is implied."],
+      "verification": ["Review the declaration before execution and test exact accounting and no-op controls.", "Replay every new sealed run and preserve source provenance with the complete outcome grid."],
+      "dependencies": ["experiment-catalog", "round-inspector"],
+      "sources": ["docs/AUDIT_USAGE.md", "experiments/audit-feedback/README.md", "experiments/audit-feedback/RESULTS.md"]
+    },
+    {
+      "id": "pilot-decision-record",
+      "issue_number": 118,
+      "title": "Prepare a draft pilot decision record with explicit unresolved owner choices",
+      "status": "owner-decision",
+      "lane": "owner-decision",
+      "rationale": "Provider plumbing is tested offline, but Study 001's placeholder weights fail collective stakes. A pilot needs explicit scientific and budget choices; implemented transport is not a declared experiment.",
+      "scope": ["Prepare a draft decision record linking existing incentive constraints, provider limits and statistical planning.", "List candidate designs and unresolved choices for institutions, weights, outcomes, models, skins, cost ceiling and stopping rules."],
+      "acceptance": ["Unchosen values remain explicitly unresolved, with source-backed alternatives and tradeoffs.", "Pilot sample counts are labeled budget candidates rather than power claims.", "The record does not freeze a study, select scientific defaults, authorize a paid call or imply live model results.", "Owner decisions and any later execution are recorded separately from engineering completion."],
+      "verification": ["Validate any draft StudySpec offline and retain its actual certificate results.", "Review the decision record against the charter, incentive atlas and provider boundary."],
+      "dependencies": ["project-direction"],
+      "sources": ["studies/001-evidence-commons/README.md", "experiments/incentive-atlas/README.md", "docs/PROVIDER_USAGE.md", "docs/research/STATISTICAL_ANALYSIS_PLAN.md"]
+    }
+  ]
+}

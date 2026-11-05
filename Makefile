@@ -11,7 +11,7 @@ endif
 CHL := "$(PY)" -m collaborative_hill.cli
 STUDY002_ARTIFACTS ?= artifacts/study-002
 
-.PHONY: doctor setup quick lab mutants check check-atlas check-study002 check-responsive check-quality-safeguards check-graph check-sparse-ptft check-noisy-corpus check-ec-rule-ablation check-audit-feedback test validate acceptance study-000 study-001-smoke study-002-plan study-002 replay-smoke report clean-generated
+.PHONY: doctor setup quick lab mutants check check-lab-browser check-atlas check-study002 check-responsive check-quality-safeguards check-graph check-sparse-ptft check-noisy-corpus check-ec-rule-ablation check-audit-feedback test validate acceptance study-000 study-001-smoke study-002-plan study-002 replay-smoke report clean-generated
 
 doctor:
 	$(CHL) doctor
@@ -28,6 +28,12 @@ quick:
 
 lab:
 	"$(PY)" scripts/lab.py
+
+# Optional local gate; CI runs this with the Ubuntu runner's installed Chrome.
+# A repeat needs a fresh --out directory when calling the script directly.
+check-lab-browser:
+	"$(PY)" -m mypy --strict --follow-imports=silent scripts/check_lab_browser.py
+	"$(PY)" scripts/check_lab_browser.py
 
 # Slow development probe: a survivor is a test gap or an equivalent change.
 mutants:

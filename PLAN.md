@@ -1,7 +1,9 @@
 # PLAN — Collaborative Hill Lab
 
-Milestones as of 2026-11-02. [NEXT.md](NEXT.md) gives dependencies and acceptance
-criteria; [HANDOFF.md](HANDOFF.md) records evidence and remaining decisions.
+Historical milestones below are preserved from the 2026-11-02 checkpoint.
+[ROADMAP.md](ROADMAP.md) defines the current development direction and completion
+criteria; [NEXT.md](NEXT.md) is the short working queue. [HANDOFF.md](HANDOFF.md)
+records verification, publication evidence and remaining scientific decisions.
 Checked engineering follow-ups are implemented, reviewed and locally verified.
 Core PRs #99–#102 are merged after exact-head Ubuntu/Windows checks; the seed
 follow-up's public check and merge record is [PR #105](https://github.com/Chris0Jeky/collaborative-hill-lab/pull/105).
@@ -33,7 +35,19 @@ the original scientific findings remain scripted and the live-pilot decisions re
 - [x] Persistent exact-commit CI, full regression suite and A–K acceptance checks
 - [x] Architecture records 0001–0019, research documentation and current handoff
 
+## Current milestone — one usable offline workflow
+
+This integration work can proceed independently of a live pilot:
+
+- [ ] Discover and deliberately execute existing experiments through one catalog (#110)
+- [ ] Inspect verified round observations, actions and audit timing (#111)
+- [ ] Monitor complete, failed, unsealed and broken artifacts without a liveness claim (#112)
+- [ ] Maintain a bounded roadmap and preview-first issue lifecycle (#113)
+- [ ] Exercise the complete offline workflow in a clean-checkout walkthrough (#115)
+
 ## M1 — First live pilot
+
+This scientific milestone follows an explicitly declared owner decision.
 
 - [x] Observation-responsive scripted institutional baselines and controls (#76 / #81)
 - [x] Configurable provider transport, mocked contract tests and measured-usage accounting (#77 / #82)

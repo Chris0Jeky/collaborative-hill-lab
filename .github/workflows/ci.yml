@@ -66,6 +66,23 @@ jobs:
       - name: Run offline acceptance scenarios
         run: make acceptance
 
+      - name: Exercise the inspector in Chrome
+        if: runner.os == 'Linux'
+        run: make check-lab-browser
+
+      - name: Retain browser review artifacts
+        if: always() && runner.os == 'Linux'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: lab-browser-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            artifacts/browser-smoke/*.html
+            artifacts/browser-smoke/*.png
+            artifacts/browser-smoke/*.txt
+            artifacts/browser-smoke/RESULTS.json
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Verify the incentive atlas
         run: make check-atlas
 
