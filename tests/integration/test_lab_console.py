@@ -2,6 +2,7 @@
 
 import importlib.util
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -31,6 +32,27 @@ from collaborative_hill.reporting.lab import (
 REPO = Path(__file__).resolve().parents[2]
 STUDY_000 = REPO / "studies/000-legacy-reproduction"
 STUDY_001 = REPO / "studies/001-evidence-commons"
+
+
+@pytest.mark.parametrize("fork", [10, "ten"])
+def test_root_fork_metadata_cannot_invent_inherited_history(nipd_root, tmp_path, fork):
+    source = next(nipd_root.rglob("events.jsonl")).parent
+    run = tmp_path / "root-with-stray-fork"
+    shutil.copytree(source, run)
+    path = run / "manifest.json"
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    assert not manifest.get("parent_run")
+    manifest["fork_seq"] = fork
+    path.write_text(json.dumps(manifest), encoding="utf-8", newline="\n")
+    # The existing loader intentionally ignores unused root-manifest extras.
+    # A new display must not turn that unbound field into verified ancestry.
+    load_run(run)
+    before = {str(p.relative_to(run)): p.read_bytes() for p in run.rglob("*") if p.is_file()}
+    trace = run_trace(run)
+    assert "broken" in trace and "fork_seq" in trace["broken"]
+    assert "frames" not in trace
+    assert {str(p.relative_to(run)): p.read_bytes()
+            for p in run.rglob("*") if p.is_file()} == before
 
 
 @pytest.fixture(scope="module")
@@ -580,3 +602,39 @@ def test_console_exclusive_create_catches_output_appearing_during_render(
     with pytest.raises(FileExistsError):
         write_console(nipd_root, out)
     assert out.read_text(encoding="utf-8") == "another writer"
+
+
+@pytest.mark.parametrize("ancestor", [False, True])
+def test_console_parent_swap_during_render_cannot_redirect_into_evidence(
+        nipd_root, tmp_path, monkeypatch, ancestor):
+    source = next(nipd_root.rglob("events.jsonl")).parent
+    run = tmp_path / "evidence"
+    shutil.copytree(source, run)
+    before = {p.relative_to(run): p.read_bytes() for p in run.rglob("*") if p.is_file()}
+    parent = tmp_path / "reports"
+    (parent / "nested").mkdir(parents=True)
+    out = parent / "nested" / "new.html"
+    swapping = parent if ancestor else out.parent
+    displaced = tmp_path / "displaced"
+    original = lab.render_html
+    attempted = []
+
+    def render_and_swap(*args, **kwargs):
+        page = original(*args, **kwargs)
+        attempted.append(True)
+        if os.name == "nt":
+            # This assertion runs on Windows without requiring symlink privileges:
+            # every ancestor must remain locked against rename during the callback.
+            with pytest.raises(PermissionError):
+                swapping.rename(displaced)
+        else:
+            swapping.rename(displaced)
+            swapping.symlink_to(run, target_is_directory=True)
+        return page
+
+    monkeypatch.setattr(lab, "render_html", render_and_swap)
+    write_console(run, out)
+    assert attempted == [True]
+    assert {p.relative_to(run): p.read_bytes() for p in run.rglob("*") if p.is_file()} == before
+    actual = out if os.name == "nt" else displaced / ("nested/new.html" if ancestor else "new.html")
+    assert "<!doctype html>" in actual.read_text(encoding="utf-8")
