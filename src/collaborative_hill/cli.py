@@ -363,12 +363,18 @@ def compare(
     right: Path,
     verify_replay: bool = typer.Option(False, "--verify-replay",
                                        help="Re-execute both ledgers before comparing"),
+    out: Path | None = typer.Option(None, "--out", help="Also create a new standalone HTML view"),
 ) -> None:
-    """Print a read-only, descriptive JSON comparison of two compatible runs."""
+    """Print descriptive JSON for compatible runs; optionally export an offline HTML comparison."""
     from collaborative_hill.reporting.comparison import compare_runs
 
     try:
-        result = compare_runs(left, right, verify_replay=verify_replay)
+        if out is None:
+            result = compare_runs(left, right, verify_replay=verify_replay)
+        else:
+            from collaborative_hill.reporting.comparison_view import write_comparison
+
+            result = write_comparison(left, right, out, verify_replay=verify_replay)
     except (ValueError, OSError) as exc:
         typer.echo(f"error: {exc}", err=True)
         raise typer.Exit(code=2) from exc

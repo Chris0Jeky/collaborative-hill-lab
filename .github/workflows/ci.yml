@@ -80,6 +80,10 @@ jobs:
             artifacts/browser-smoke/*.png
             artifacts/browser-smoke/*.txt
             artifacts/browser-smoke/RESULTS.json
+            artifacts/comparison-browser/*.html
+            artifacts/comparison-browser/*.png
+            artifacts/comparison-browser/*.txt
+            artifacts/comparison-browser/RESULTS.json
           if-no-files-found: error
           retention-days: 14
 
