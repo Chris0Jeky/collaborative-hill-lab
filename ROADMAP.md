@@ -57,7 +57,8 @@ merged. Final implementation and merge evidence belongs in [HANDOFF.md](HANDOFF.
    mechanism versions, study weights and original evidence stay fixed; any new
    behavior needs its own explicit contract.
 3. **Draft pilot decision record ([#118](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/118)).**
-   Prepare source-backed alternatives and leave unresolved choices visible:
+   The [prepared decision aid](docs/research/PILOT_DECISION_RECORD.md) presents
+   source-backed alternatives and leaves unresolved choices visible:
    institutions, weights, outcomes, provider/model, skins, cost ceiling and stopping
    rules. Study 001's current weights fail C2; the incentive atlas offers
    finite-strategy candidates without choosing a default. This document can be

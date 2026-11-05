@@ -9,6 +9,9 @@
 > (`domain/institutions.py`, `domain/world/evidence_commons.py`, `metrics/*`,
 > `experiments/study.py`) and in `METHODOLOGY.md` / `STATISTICAL_ANALYSIS_PLAN.md`.
 
+The [draft pilot decision record](PILOT_DECISION_RECORD.md) organizes the existing
+options and unresolved choices before this template is filled. It selects no defaults.
+
 Study id: `___`  ·  Version: `___`  ·  Date: `___`  ·  Author(s): `___`
 
 ---
@@ -43,7 +46,8 @@ provider(s) + version pin + `sampling` (temperature/top_p) + agent-policy compos
 scenario sampling frame (how replicate seeds are drawn, `seed_root=(study_seed, condition, r)`).
 State N of agents (3–5) and whether the confirmatory population is LLM, stochastic-scripted, or
 both — deterministic scripted cells have `n_effective=1` (SAP §4.5). **[HUMAN-DECISION]** the
-model(s)/version pin, agent-N, and population type.
+model(s)/version pin, agent-N, and population type. A stochastic sample with equal
+observed outcomes retains its actual episode count; it is not relabeled deterministic.
 
 **7. Pilot.** Size and purpose of the pilot (e.g. 5–10 episodes/cell) used **only** to estimate
 the between-episode SD of the primary outcome and to check operational health (parse/refusal
@@ -51,12 +55,17 @@ rates, cost/episode). State that pilot p-values are not read and pilot episodes 
 from the confirmatory corpus. **[HUMAN-DECISION]** pilot size.
 
 **8. Sample-size decision procedure.** The minimum effect size of interest on the primary
-outcome, target power (e.g. 80–90%), α (Holm-adjusted), the variance source (the pilot **paired**
-SD, since the design is CRN-paired), and the formula/simulation yielding N per cell. Record the
-resulting N here before confirmatory collection. **[HUMAN-DECISION]** minimum effect, power, α, N.
+outcome, target power (e.g. 80–90%), α (Holm-adjusted), the variance source appropriate to the
+declared design, and the formula/simulation yielding N per cell. Use a pilot paired-difference
+SD only when pairing is explicitly declared and its relevant randomness is validated;
+otherwise use an independent-design procedure. Record the resulting N here before
+confirmatory collection. **[HUMAN-DECISION]** minimum effect, power, α, N.
 
-**9. Randomisation.** What is randomised and how: replicate→cell pairing via shared seeds (CRN),
-seat/position, prompt option order, and condition **execution order** for LLM runs. Reordering
+**9. Randomisation.** What is randomised and how: any explicitly declared replicate→cell
+pairing, seat/position, prompt option order, and condition **execution order** for LLM runs. The
+original Study 001 uses independent condition streams; matching replicate labels do not
+establish CRN. `paired-policy-v2` shares specified kernel policy streams, not provider
+randomness. The current LLM policy does not consume that kernel RNG. Reordering
 independent deterministic condition executions is distinct from moving agents between seats
 or graph positions, which can change outcomes (METHODOLOGY §4). State the seed policy
 (`derive_seed`, no global RNG). **[HUMAN-DECISION]** the seat/order randomisation scheme for LLM.
@@ -68,7 +77,8 @@ cell, inclusion rate is reported, and differential attrition across cells is tes
 **[HUMAN-DECISION]** the predeclared exclusion set and any invalid-rate exclusion threshold.
 
 **11. Analysis.** The exact estimand/model for each confirmatory hypothesis (Study 001 primary:
-`briefing_quality ~ A*T + C(replicate_block)`, or per-replicate paired differences for E1),
+an independent factorial model, or `briefing_quality ~ A*T + C(replicate_block)` and
+per-replicate paired differences when the declared design justifies pairing),
 the estimator, software, and how intervals are formed (**bootstrap over episodes**, cluster/
 block-aware). Declare the confirmatory family and the multiplicity correction here (Study 001:
 Holm over {E1 accountability, E2 topology, E3 interaction}). Include the degenerate-variance
