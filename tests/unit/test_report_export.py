@@ -180,26 +180,31 @@ def test_unavailable_directory_descriptors_fail_closed(tmp_path, monkeypatch):
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="Win32 directory sharing guard")
-def test_windows_callback_cannot_open_pinned_ancestor_for_write(tmp_path):
+@pytest.mark.parametrize("which", ["ancestor", "evidence"])
+@pytest.mark.parametrize("access", [0x40000000, 0x10000])  # GENERIC_WRITE, DELETE
+def test_windows_callback_cannot_open_pinned_directory_for_mutation(tmp_path, which, access):
     import ctypes
 
     out = tmp_path / "parent" / "nested" / "report.html"
+    evidence = tmp_path / "evidence"
+    evidence.mkdir()
+    protected = evidence if which == "evidence" else out.parent.parent
     api = export._WindowsDirectories()
 
-    def writable_handle():
-        return api.open(str(out.parent.parent), 0x40000000, 7, None, 3, 0x02200000, None)
+    def mutation_handle():
+        return api.open(str(protected), access, 7, None, 3, 0x02200000, None)
 
-    def render_and_try_write():
-        handle = writable_handle()
+    def render_and_try_mutation():
+        handle = mutation_handle()
         if handle != ctypes.c_void_p(-1).value:
             api.close(handle)
-            pytest.fail("pinned ancestors must deny write sharing")
+            pytest.fail("pinned directories must deny write and delete sharing")
         assert ctypes.get_last_error() == 32  # ERROR_SHARING_VIOLATION
         return "report"
 
-    write_new_text(out, [], render_and_try_write)
+    write_new_text(out, [evidence], render_and_try_mutation)
     assert out.read_text(encoding="utf-8") == "report"
-    handle = writable_handle()
+    handle = mutation_handle()
     assert handle != ctypes.c_void_p(-1).value
     api.close(handle)
 

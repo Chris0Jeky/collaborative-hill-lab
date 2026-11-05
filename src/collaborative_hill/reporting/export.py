@@ -125,7 +125,9 @@ if sys.platform == "win32":
         def pin(self, path: Path, stack: ExitStack) -> int:
             # Only the anchor and read-only evidence identity handles use paths.
             # All destination descendants are opened relative to the anchor.
-            handle = self.open(str(path), 0, 0x1, None, 3, 0x02200000, None)
+            # FILE_LIST_DIRECTORY participates in Windows sharing checks;
+            # attribute-only handles do not enforce the requested sharing mode.
+            handle = self.open(str(path), 0x81, 0x1, None, 3, 0x02200000, None)
             if handle == ctypes.c_void_p(-1).value:
                 raise ctypes.WinError(ctypes.get_last_error())
             return self.directory(int(handle), stack)
@@ -156,8 +158,9 @@ if sys.platform == "win32":
                                            ctypes.pointer(string), 0x1040, None, None)
             status = _IoStatusBlock()
             handle = wintypes.HANDLE()
-            # SYNCHRONIZE, FILE_READ_ATTRIBUTES for dirs / GENERIC_WRITE for files.
-            access = 0x100000 | (0x80 if directory else 0x40000000)
+            # SYNCHRONIZE; dirs require FILE_LIST_DIRECTORY | FILE_READ_ATTRIBUTES
+            # so sharing checks enforce the rename/write lock (MS-FSA 2.1.5.1.2.2).
+            access = 0x100000 | (0x81 if directory else 0x40000000)
             # FILE_OPEN_REPARSE_POINT | FILE_SYNCHRONOUS_IO_NONALERT, plus type.
             options = 0x200020 | (0x1 if directory else 0x40)
             # FILE_OPEN_IF for directories; FILE_CREATE exclusively creates a leaf.
