@@ -15,7 +15,9 @@ from typing import Any
 from collaborative_hill.engine.events import ChainError, Event, EventType
 from collaborative_hill.engine.replay import load_run, replay_run
 from collaborative_hill.engine.validation import effective_policy_ids
+from collaborative_hill.reporting.export import write_new_text
 from collaborative_hill.reporting.inspector import render_inspector, round_frames
+from collaborative_hill.reporting.provenance import display_fork_seq
 
 EC_GLYPHS = {
     "inspect_evidence": "i", "share_evidence": "s", "propose_claim": "p",
@@ -78,6 +80,7 @@ def _mark_rejections(strips: dict[str, str], events: list[Event]) -> dict[str, s
 
 def _trace(events: list[Event], manifest: dict[str, Any],
            replay: bool | None, mechanism: str) -> dict[str, Any]:
+    fork = display_fork_seq(events, manifest)
     started = events[0].payload
     agents = list(started["agents"])
     transitions = [event.payload for event in events
@@ -94,11 +97,10 @@ def _trace(events: list[Event], manifest: dict[str, Any],
         "status": manifest["status"], "failure_reason": manifest.get("failure_reason"),
         "policies": {agent: manifest["policies"][agent] for agent in agents},
         "events": len(events), "final_event_hash": terminal.event_hash,
-        "parent_run": manifest.get("parent_run"), "fork_seq": manifest.get("fork_seq"),
-        "fork_round": (events[manifest["fork_seq"] + 1].logical_time
-                       if manifest.get("parent_run") else None),
+        "parent_run": manifest.get("parent_run"), "fork_seq": fork,
+        "fork_round": events[fork + 1].logical_time if fork is not None else None,
         "replay_identical": replay,
-        "frames": round_frames(events, manifest.get("fork_seq")),
+        "frames": round_frames(events, fork),
     }
     if mechanism != "evidence_commons":
         trace["kind"] = "nipd"
@@ -377,19 +379,7 @@ def render_html(traces: list[dict[str, Any]], *, max_detail: int = 4) -> str:
 def write_console(root: Path, out: Path | None, *, verify_replay: bool = False,
                   max_detail: int = 4) -> tuple[str, list[dict[str, Any]]]:
     runs = find_runs(root)
-    if out is not None:
-        out = Path(out)
-        target = out.resolve()
-        if any(target.is_relative_to(run.resolve()) for run in runs):
-            raise ValueError("console output must be outside every run's evidence directory")
-        if out.exists() or out.is_symlink():
-            raise FileExistsError(f"console output already exists: {out}")
     traces = [run_trace(run_dir, verify_replay=verify_replay) for run_dir in runs]
     if out is not None and traces:
-        page = render_html(traces, max_detail=max_detail)
-        out.parent.mkdir(parents=True, exist_ok=True)
-        # Exclusive creation also protects existing files, symlinks and hardlinks
-        # if the output appears between validation and the actual write.
-        with out.open("x", encoding="utf-8", newline="\n") as stream:
-            stream.write(page)
+        write_new_text(out, runs, lambda: render_html(traces, max_detail=max_detail))
     return render_text(traces), traces
