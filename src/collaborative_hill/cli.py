@@ -12,6 +12,7 @@
     chl report <run-or-study-artifacts-dir>
     chl analyze <study-artifacts-dir> [--out FILE]
     chl lab <run-or-artifacts-dir> [--out FILE] [--verify-replay]
+    chl monitor <run-or-artifacts-dir> [--json]
     chl doctor
 """
 
@@ -322,6 +323,29 @@ def lab(
     if out is not None:
         typer.echo(f"wrote {out}")
     if any("broken" in trace or trace.get("replay_identical") is False for trace in traces):
+        raise typer.Exit(code=1)
+
+
+@app.command("monitor")
+def monitor(
+    target: Path,
+    as_json: bool = typer.Option(False, "--json", help="Emit a versioned operational snapshot"),
+) -> None:
+    """Inspect completed, failed, unsealed and broken artifacts without changing them."""
+    from collaborative_hill.reporting.monitor import monitor_runs, render_monitor
+
+    try:
+        snapshot = monitor_runs(target)
+        if not snapshot["runs"]:
+            raise ValueError(f"no run artifacts under {target}")
+    except (ValueError, OSError) as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(code=2) from exc
+    if as_json:
+        typer.echo(json.dumps(snapshot, sort_keys=True, indent=2, ensure_ascii=True))
+    else:
+        typer.echo(render_monitor(snapshot), nl=False)
+    if snapshot["counts"]["broken"] or snapshot["counts"]["failed"]:
         raise typer.Exit(code=1)
 
 
