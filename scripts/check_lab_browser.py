@@ -137,18 +137,13 @@ CHECK_JS = r"""<script>
     }
     check(document.documentElement.scrollWidth <= innerWidth + 1, 'page overflows viewport');
     check(window.browserCheckErrors.length === 0, window.browserCheckErrors.join('; '));
-    // Give layout/paint a task boundary before scrolling and taking the screenshot.
-    setTimeout(() => {
-      const target = location.hash === '#graph-detail'
-        ? el('inspect-outcomes').parentElement : el('run-inspector');
-      window.scrollTo(0, target.getBoundingClientRect().top + scrollY - 16);
-      result.dataset.status = 'passed';
-      result.dataset.assertions = String(assertions);
-      result.textContent = `${assertions} browser assertions passed at ${innerWidth}px`;
-    }, 100);
+    // Capture the unscrolled viewport: Chrome's CLI screenshot can leave blank
+    // regions above a programmatic scroll even when the DOM check succeeds.
+    result.dataset.status = 'passed';
+    result.dataset.assertions = String(assertions);
+    result.textContent = `${assertions} browser assertions passed at ${innerWidth}px`;
   } catch (error) {
     result.textContent = String(error.stack || error);
-    result.scrollIntoView();
   }
 })();
 </script>"""
@@ -239,10 +234,9 @@ def main() -> int:
     version = subprocess.run([args.browser, "--version"], check=True, capture_output=True,
                              text=True, encoding="utf-8", timeout=15).stdout.strip()
     snapshots = [snapshot(args.browser, page, output, *view) for view in (
-        ("desktop-graph", 1440, 1600, "graph"),
-        ("graph-detail", 1440, 1100, "graph-detail"),
-        ("desktop-branch", 1440, 1400, "branch"),
-        ("mobile-audit", 420, 1800, "audit"),
+        ("desktop-graph", 1440, 2400, "graph"),
+        ("desktop-branch", 1440, 2400, "branch"),
+        ("mobile-audit", 420, 2400, "audit"),
     )]
     report = {"schema_version": 1, "browser": version, "runs": len(traces),
               "snapshots": snapshots}
