@@ -28,8 +28,9 @@ console alone does not establish a scientific finding. Follow the
   separately declare an audit cost/timing experiment with exact accounting and
   beneficial, harmful, null, late and unavailable controls.
 - **Owner decision preparation ([#118](https://github.com/Chris0Jeky/collaborative-hill-lab/issues/118)):**
-  draft the live-pilot decision record with unresolved choices and finite-strategy
-  alternatives clearly labeled.
+  use the [prepared draft decision record](docs/research/PILOT_DECISION_RECORD.md)
+  to review unresolved choices and finite-strategy alternatives. Document preparation
+  does not choose a model, weights, budget or confirmatory design.
 
 The acceptance criteria and dependencies live in
 [scripts/issue_seeds.json](scripts/issue_seeds.json). Preview with

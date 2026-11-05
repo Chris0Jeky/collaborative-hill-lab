@@ -21,10 +21,13 @@ unit of analysis is the **episode** (METHODOLOGY §2); `n` = number of independe
 ## 1. Estimands
 
 All estimands are defined on **episode-level scalars** computed by the metrics package over
-the sealed ledger. The scientific hypothesis is Chris's core finding: **attributable
-(targeted) accountability moves the population toward the Collaborative Hill** (accurate,
-verified, cooperative briefings) relative to aggregate (diffuse) accountability, and the
-effect may depend on evidence topology.
+the sealed ledger. The motivating draft hypothesis is that **attributable
+(targeted) accountability improves accurate, verified, cooperative briefings** relative
+to aggregate (diffuse) accountability, with an effect that may depend on evidence topology.
+This is a hypothesis for an owner-declared future design, not an established live-model
+finding. The current Study 001 placeholder weights fail C2, and the separate scripted
+experiments retain beneficial, harmful and null contrasts. Final hypotheses remain
+human-owned; see the [draft pilot decision record](PILOT_DECISION_RECORD.md).
 
 ### 1.1 Primary outcome — briefing quality
 
