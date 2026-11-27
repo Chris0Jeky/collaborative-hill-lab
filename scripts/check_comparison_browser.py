@@ -80,6 +80,23 @@ CHECK_JS = r"""<script>
     check(el('round-50-right-outcomes').textContent.includes('RunCompleted'), 'child seal missing');
     change(round, 10);
     check(document.documentElement.scrollWidth <= innerWidth + 1, 'comparison overflows viewport');
+    const luminance = color => {
+      const [r, g, b] = color.match(/[\d.]+/g).map(channel => {
+        const s = Number(channel) / 255;
+        return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+      });
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    for (const [selector, background] of [
+      ['header a', 'body'], ['#meta-mechanism_hash .match', 'body'],
+    ]) {
+      const foreground = luminance(getComputedStyle(document.querySelector(selector)).color);
+      const backdrop = luminance(
+        getComputedStyle(document.querySelector(background)).backgroundColor);
+      const ratio = (Math.max(foreground, backdrop) + 0.05) /
+        (Math.min(foreground, backdrop) + 0.05);
+      check(ratio >= 4.5, `${selector} text contrast ${ratio.toFixed(2)}:1 is below 4.5:1`);
+    }
     check(window.browserCheckErrors.length === 0, window.browserCheckErrors.join('; '));
     result.dataset.status = 'passed'; result.dataset.assertions = String(assertions);
     result.textContent = `${assertions} comparison assertions passed at ${innerWidth}px`;
