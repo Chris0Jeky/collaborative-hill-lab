@@ -264,7 +264,7 @@ def write_comparison(left: Path, right: Path, out: Path, *,
 
 CSS = """
 :root{color-scheme:light dark;--bg:#f6f5f1;--panel:#fff;--ink:#1d2731;--dim:#647182;
---line:#deddd6;--left:#1b8a7a;--right:#a66c1d;--bad:#b3202c}
+--line:#deddd6;--left:#087063;--right:#a66c1d;--bad:#b3202c}
 @media(prefers-color-scheme:dark){:root{--bg:#14161a;--panel:#1c1f25;--ink:#e8e8e6;
 --dim:#9ba0aa;--line:#30343c;--left:#3cb8a5;--right:#e4b64a;--bad:#f0606b}}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);
